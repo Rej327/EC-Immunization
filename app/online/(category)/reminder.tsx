@@ -211,8 +211,18 @@ export default function Reminder() {
 			fileName=""
 			onDownloadFunction={generatePDF}
 		>
-			{loading ? (
-				<View className="flex items-center justify-center">
+			{selectedBabyId == null ? (
+				<View className="mx-2 mt-2 flex justify-center items-center">
+					<ThemedText type="default">
+						No reminders available.
+					</ThemedText>
+					<ThemedText type="default">
+						Select first your baby in your profile and my baby
+						section.
+					</ThemedText>
+				</View>
+			) : loading ? (
+				<View className="flex mt-[50%] items-center justify-center">
 					<ActivityIndicator size="large" color="#456B72" />
 				</View>
 			) : (
