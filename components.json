@@ -1,0 +1,7 @@
+{
+  "platforms": "native-only",
+  "aliases": {
+    "components": "shadcomponents",
+    "lib": "~/lib"
+  }
+}
