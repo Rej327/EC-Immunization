@@ -357,11 +357,9 @@ const MyBaby = () => {
 			{babies.length > 0 ? (
 				<CustomCard className="my-2">
 					<ThemedText type="cardHeader" className="mb-2">
-						My Baby
+					Your Baby
 					</ThemedText>
-					<ThemedText type="default" className="font-bold">
-						Select Baby:
-					</ThemedText>
+		
 					<TouchableOpacity
 						onPress={() => setShowDropdown(!showDropdown)} // Toggle dropdown
 						style={styles.input}
@@ -374,7 +372,7 @@ const MyBaby = () => {
 									type="default"
 									className="font-bold"
 								>
-									Choose Baby
+									Select your baby
 								</ThemedText>
 							)}
 						</View>

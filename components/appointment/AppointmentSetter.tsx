@@ -262,7 +262,7 @@ const AppointmentSetter = () => {
 			>
 				{/* Select Baby Dropdown */}
 				<ThemedText type="default" className="font-bold">
-					Select Baby
+					Your Baby
 				</ThemedText>
 				<TouchableOpacity
 					onPress={() => setShowDropdown(!showDropdown)}
@@ -272,7 +272,7 @@ const AppointmentSetter = () => {
 						<ThemedText type="default" style={styles.dropdownText}>
 							{selectedBaby
 								? `${selectedBaby.firstName} ${selectedBaby.lastName}`
-								: "Pick your Baby"}
+								: "None"}
 						</ThemedText>
 						<Ionicons
 							name={showDropdown ? "chevron-up" : "chevron-down"}
@@ -283,31 +283,33 @@ const AppointmentSetter = () => {
 				</TouchableOpacity>
 				{/* Dropdown List of Babies */}
 				{showDropdown && (
-					<View style={styles.dropdown}>
-						{babies.map((baby) => (
-							<TouchableOpacity
-								key={baby.id}
-								onPress={() => handleSelectBaby(baby)}
-								style={styles.dropdownItem}
-							>
-								<ThemedText type="default">
-									{baby.firstName} {baby.lastName}
-								</ThemedText>
-								<ThemedText type="default">
-									{baby.birthday.toLocaleDateString("en-US")}
-								</ThemedText>
-							</TouchableOpacity>
-						))}
-						{babies.length === 0 && (
-							<ThemedText
-								type="default"
-								style={styles.noBabiesText}
-							>
-								No babies found. Please add a baby first.
-							</ThemedText>
-						)}
-					</View>
-				)}
+    <View style={styles.dropdown}>
+        {babies.length > 0 ? (
+            babies.map((baby, index) => (
+                <TouchableOpacity
+                    key={baby.id}
+                    onPress={() => handleSelectBaby(baby)}
+                    style={[
+                        styles.dropdownItem,
+                        index === babies.length - 1 && styles.dropdownLastItem, // Correct condition for last item
+                    ]}
+                >
+                    <ThemedText type="default">
+                        {baby.firstName} {baby.lastName}
+                    </ThemedText>
+                    <ThemedText type="default">
+                        {baby.birthday.toLocaleDateString("en-US")}
+                    </ThemedText>
+                </TouchableOpacity>
+            ))
+        ) : (
+            <ThemedText type="default" style={styles.noBabiesText}>
+                No babies found. Please add a baby first.
+            </ThemedText>
+        )}
+    </View>
+)}
+
 				{/* Appointment Date Input */}
 				{/* Update the TouchableOpacity for appointment date selection */}
 				<ThemedText type="default" className="font-bold mt-2">
@@ -447,13 +449,17 @@ const styles = StyleSheet.create({
 		backgroundColor: "#fff",
 		borderRadius: 5,
 		marginBottom: 10,
-		maxHeight: 150,
+		marginTop:5,
+		// maxHeight: 150,
 	},
 	dropdownItem: {
 		padding: 10,
 		borderBottomWidth: 1,
 		borderBottomColor: "#d6d6d6",
 	},
+	dropdownLastItem: {
+		borderBottomWidth: 0, // Remove bottom border for last item
+},
 	noBabiesText: {
 		padding: 10,
 		textAlign: "center",
