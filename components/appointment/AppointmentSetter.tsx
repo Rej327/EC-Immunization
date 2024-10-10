@@ -17,6 +17,7 @@ import { collection, getDocs, query, where, addDoc } from "firebase/firestore";
 import { Ionicons } from "@expo/vector-icons";
 import Toast from "react-native-toast-message"; // Ensure you have this installed
 import DateTimePicker from "@react-native-community/datetimepicker";
+import { events, milestones as miles } from "@/assets/data/data";
 
 // Define interfaces
 interface SelectedBaby {
@@ -39,6 +40,8 @@ interface AppointmentData {
 	vaccine: string;
 	scheduleDate: Date;
 	status: string;
+	createdAt: Date;
+	updatedAt: Date;
 }
 
 const AppointmentSetter = () => {
@@ -58,6 +61,15 @@ const AppointmentSetter = () => {
 	const [selectedMilestoneIndex, setSelectedMilestoneIndex] = useState<
 		number | null
 	>(null);
+	const [appointments, setAppointments] = useState<{
+		upcoming: AppointmentData[];
+		pending: AppointmentData[];
+		history: AppointmentData[];
+	}>({
+		upcoming: [],
+		pending: [],
+		history: [],
+	});
 
 	const handleDateChange = (event: any, selectedDate?: Date) => {
 		const currentDate = selectedDate || appointmentDate;
@@ -170,6 +182,8 @@ const AppointmentSetter = () => {
 				vaccine: vaccineName,
 				scheduleDate: appointmentDate,
 				status: "pending",
+				createdAt: new Date(),
+				updatedAt: new Date(),
 			};
 
 			try {
@@ -217,15 +231,94 @@ const AppointmentSetter = () => {
 		setOpenBottomSheet(type);
 	};
 
+	const getViewAllStyle = (index: number, totalItems: number) => {
+		return {
+			backgroundColor: "white",
+			padding: 16,
+			borderBottomWidth: index === totalItems - 1 ? 0 : 1, // No border for the last item
+			borderTopWidth: index === 0 ? 1 : 0, // Border for the first item
+			borderColor: "#d6d6d6",
+			marginBottom: 8,
+		};
+	};
+
+	// Fetch appointments for the logged-in user
+	const fetchAppointments = useCallback(async () => {
+		const userId = user?.id; // Ensure user is defined
+
+		if (!userId) {
+			console.log("User ID is not available."); // Log if user ID is not available
+			return; // Early return if user ID is not present
+		}
+
+		try {
+			const snapshot = await getDocs(
+				query(
+					collection(db, "appointments"),
+					where("parentId", "==", userId)
+				)
+			);
+
+			const fetchedAppointments: AppointmentData[] = snapshot.docs.map(
+				(doc) => {
+					const data = doc.data();
+					return {
+						parentId: data.parentId,
+						babyFirstName: data.babyFirstName,
+						babyLastName: data.babyLastName,
+						vaccine: data.vaccine,
+						scheduleDate: data.scheduleDate.toDate(), // Convert Firestore timestamp to JS Date
+						status: data.status,
+						createdAt: data.createdAt.toDate(), // Convert Firestore timestamp to JS Date
+					} as AppointmentData;
+				}
+			);
+
+			// Sort appointments by createdAt in descending order
+			const sortedAppointments = fetchedAppointments.sort(
+				(a, b) => b.createdAt.getTime() - a.createdAt.getTime()
+			);
+
+			const now = new Date();
+
+			const categorizedAppointments = {
+				upcoming: sortedAppointments.filter(
+					(appointment) => appointment.status === "upcoming"
+				),
+				pending: sortedAppointments.filter(
+					(appointment) => appointment.status === "pending"
+				),
+				history: sortedAppointments.filter(
+					(appointment) => appointment.status === "history"
+				),
+			};
+
+			// Update state with categorized appointments
+			console.log("Fetched Appointments", categorizedAppointments);
+
+			setAppointments(categorizedAppointments);
+		} catch (error) {
+			console.error("Error fetching appointments:", error);
+			Toast.show({
+				type: "error",
+				text1: "Error",
+				text2: "Failed to fetch appointments.",
+				position: "top",
+			});
+		}
+	}, [user?.id]);
+
 	// Handle refresh
 	const onRefresh = useCallback(() => {
 		setRefreshing(true);
 		fetchBabies().then(() => setRefreshing(false));
+		fetchAppointments().then(() => setRefreshing(false));
 	}, [fetchBabies]);
 
 	useEffect(() => {
 		fetchBabies(); // Fetch babies on component mount
-	}, [fetchBabies]);
+		fetchAppointments();
+	}, [fetchBabies, fetchAppointments]);
 
 	return (
 		<View style={styles.container}>
@@ -249,10 +342,232 @@ const AppointmentSetter = () => {
 						fontSize={14}
 					/>
 				</View>
+
+				{/* PENDING SECTION */}
+				<View>
+					<View style={styles.header}>
+						<ThemedText type="header">Pending</ThemedText>
+						<TouchableOpacity
+							onPress={() => openBottomSheetHandler("pending")}
+						>
+							<ThemedText type="link">View all</ThemedText>
+						</TouchableOpacity>
+					</View>
+					{appointments.pending.length === 0 ? (
+						<View style={styles.card}>
+							<ThemedText type="default" className="text-center">
+								No upcoming schedule
+							</ThemedText>
+						</View>
+					) : (
+						appointments.pending
+							.slice(0, 2)
+							.map((appointment, index) => (
+								<View key={index} style={styles.card}>
+									<ThemedText type="cardHeader">
+										{appointment.babyFirstName}{" "}
+										{appointment.babyLastName}
+									</ThemedText>
+									<ThemedText type="default">
+										Vaccine: {appointment.vaccine}
+									</ThemedText>
+									<ThemedText type="date" style={styles.date}>
+										When:{" "}
+										{appointment.scheduleDate.toLocaleDateString()}{" "}
+										{/* Format the date as needed */}
+									</ThemedText>
+								</View>
+							))
+					)}
+				</View>
+
+				{/* UPCOMING SECTION */}
+				<View>
+					<View style={styles.header}>
+						<ThemedText type="header">Upcoming</ThemedText>
+						<TouchableOpacity
+							onPress={() => openBottomSheetHandler("upcoming")}
+						>
+							<ThemedText type="link">View all</ThemedText>
+						</TouchableOpacity>
+					</View>
+					{appointments.upcoming.length === 0 ? (
+						<View style={styles.card}>
+							<ThemedText type="default" className="text-center">
+								No upcoming schedule
+							</ThemedText>
+						</View>
+					) : (
+						appointments.upcoming
+							.slice(0, 2)
+							.map((appointment, index) => (
+								<View key={index} style={styles.card}>
+									<ThemedText type="cardHeader">
+										{appointment.babyFirstName}{" "}
+										{appointment.babyLastName}
+									</ThemedText>
+									<ThemedText type="default">
+										Vaccine: {appointment.vaccine}
+									</ThemedText>
+									<ThemedText type="date" style={styles.date}>
+										When:{" "}
+										{appointment.scheduleDate.toLocaleDateString()}{" "}
+										{/* Format the date as needed */}
+									</ThemedText>
+								</View>
+							))
+					)}
+				</View>
+
+				{/* HISTORY SECTION */}
+				<View>
+					<View style={styles.header}>
+						<ThemedText type="header">History</ThemedText>
+						<TouchableOpacity
+							onPress={() => openBottomSheetHandler("history")}
+						>
+							<ThemedText type="link">View all</ThemedText>
+						</TouchableOpacity>
+					</View>
+					{appointments.history.length === 0 ? (
+						<View style={styles.card}>
+							<ThemedText type="default" className="text-center">
+								No history
+							</ThemedText>
+						</View>
+					) : (
+						appointments.history
+							.slice(0, 2)
+							.map((appointment, index) => (
+								<View key={index} style={styles.card}>
+									<ThemedText type="cardHeader">
+										{appointment.babyFirstName}{" "}
+										{appointment.babyLastName}
+									</ThemedText>
+									<ThemedText type="default">
+										Vaccine: {appointment.vaccine}
+									</ThemedText>
+									<ThemedText type="date" style={styles.date}>
+										Vaccinated on:{" "}
+										{appointment.scheduleDate.toLocaleDateString()}{" "}
+										{/* Format the date as needed */}
+									</ThemedText>
+								</View>
+							))
+					)}
+				</View>
 			</ScrollView>
 
 			{/* Overlay to prevent interaction with outer components */}
 			{openBottomSheet && <View style={styles.overlay} />}
+
+			{/* CUSTOM BOTTOM SHEET FOR PENDING */}
+			<CustomBottomSheet
+				isOpen={openBottomSheet === "pending"}
+				onClose={closeBottomSheetHandler}
+				title="Pending Appointments"
+			>
+				{appointments.pending.length === 0 ? (
+					<ThemedText type="default" className="text-center">
+						No pending schedule
+					</ThemedText>
+				) : (
+					appointments.pending.map((appointment, index) => (
+						<View
+							key={index}
+							style={getViewAllStyle(
+								index,
+								appointments.pending.length
+							)}
+						>
+							<ThemedText type="cardHeader">
+								{appointment.babyFirstName}{" "}
+								{appointment.babyLastName}
+							</ThemedText>
+							<ThemedText type="default">
+								Vaccine: {appointment.vaccine}
+							</ThemedText>
+							<ThemedText type="date">
+								When:{" "}
+								{appointment.scheduleDate.toLocaleDateString()}{" "}
+								{/* Format the date as needed */}
+							</ThemedText>
+						</View>
+					))
+				)}
+			</CustomBottomSheet>
+
+			{/* CUSTOM BOTTOM SHEET FOR UPCOMING */}
+			<CustomBottomSheet
+				isOpen={openBottomSheet === "upcoming"}
+				onClose={closeBottomSheetHandler}
+				title="Upcoming Appointments"
+			>
+				{appointments.upcoming.length === 0 ? (
+					<ThemedText type="default" className="text-center">
+						No upcoming schedule
+					</ThemedText>
+				) : (
+					appointments.upcoming.map((appointment, index) => (
+						<View
+							key={index}
+							style={getViewAllStyle(
+								index,
+								appointments.upcoming.length
+							)}
+						>
+							<ThemedText type="cardHeader">
+								{appointment.babyFirstName}{" "}
+								{appointment.babyLastName}
+							</ThemedText>
+							<ThemedText type="default">
+								Vaccine: {appointment.vaccine}
+							</ThemedText>
+							<ThemedText type="date">
+								When:{" "}
+								{appointment.scheduleDate.toLocaleDateString()}{" "}
+								{/* Format the date as needed */}
+							</ThemedText>
+						</View>
+					))
+				)}
+			</CustomBottomSheet>
+
+			{/* CUSTOM BOTTOM SHEET FOR HISTORY */}
+			<CustomBottomSheet
+				isOpen={openBottomSheet === "history"}
+				onClose={closeBottomSheetHandler}
+				title="History"
+			>
+				{appointments.history.length === 0 ? (
+					<ThemedText type="default" className="text-center">
+						No history
+					</ThemedText>
+				) : (
+					appointments.history.map((appointment, index) => (
+						<View
+							key={index}
+							style={getViewAllStyle(
+								index,
+								appointments.history.length
+							)}
+						>
+							<ThemedText type="cardHeader">
+								{appointment.babyFirstName}{" "}
+								{appointment.babyLastName}
+							</ThemedText>
+							<ThemedText type="default">
+								Vaccine: {appointment.vaccine}
+							</ThemedText>
+							<ThemedText type="date">
+								Vaccinated on:{" "}
+								{appointment.scheduleDate.toLocaleDateString()}{" "}
+								{/* Format the date as needed */}
+							</ThemedText>
+						</View>
+					))
+				)}
+			</CustomBottomSheet>
 
 			{/* Custom Bottom Sheet for setting appointment */}
 			<CustomBottomSheet
@@ -283,32 +598,38 @@ const AppointmentSetter = () => {
 				</TouchableOpacity>
 				{/* Dropdown List of Babies */}
 				{showDropdown && (
-    <View style={styles.dropdown}>
-        {babies.length > 0 ? (
-            babies.map((baby, index) => (
-                <TouchableOpacity
-                    key={baby.id}
-                    onPress={() => handleSelectBaby(baby)}
-                    style={[
-                        styles.dropdownItem,
-                        index === babies.length - 1 && styles.dropdownLastItem, // Correct condition for last item
-                    ]}
-                >
-                    <ThemedText type="default">
-                        {baby.firstName} {baby.lastName}
-                    </ThemedText>
-                    <ThemedText type="default">
-                        {baby.birthday.toLocaleDateString("en-US")}
-                    </ThemedText>
-                </TouchableOpacity>
-            ))
-        ) : (
-            <ThemedText type="default" style={styles.noBabiesText}>
-                No babies found. Please add a baby first.
-            </ThemedText>
-        )}
-    </View>
-)}
+					<View style={styles.dropdown}>
+						{babies.length > 0 ? (
+							babies.map((baby, index) => (
+								<TouchableOpacity
+									key={baby.id}
+									onPress={() => handleSelectBaby(baby)}
+									style={[
+										styles.dropdownItem,
+										index === babies.length - 1 &&
+											styles.dropdownLastItem, // Correct condition for last item
+									]}
+								>
+									<ThemedText type="default">
+										{baby.firstName} {baby.lastName}
+									</ThemedText>
+									<ThemedText type="default">
+										{baby.birthday.toLocaleDateString(
+											"en-US"
+										)}
+									</ThemedText>
+								</TouchableOpacity>
+							))
+						) : (
+							<ThemedText
+								type="default"
+								style={styles.noBabiesText}
+							>
+								No babies found. Please add a baby first.
+							</ThemedText>
+						)}
+					</View>
+				)}
 
 				{/* Appointment Date Input */}
 				{/* Update the TouchableOpacity for appointment date selection */}
@@ -449,7 +770,7 @@ const styles = StyleSheet.create({
 		backgroundColor: "#fff",
 		borderRadius: 5,
 		marginBottom: 10,
-		marginTop:5,
+		marginTop: 5,
 		// maxHeight: 150,
 	},
 	dropdownItem: {
@@ -459,7 +780,7 @@ const styles = StyleSheet.create({
 	},
 	dropdownLastItem: {
 		borderBottomWidth: 0, // Remove bottom border for last item
-},
+	},
 	noBabiesText: {
 		padding: 10,
 		textAlign: "center",
@@ -521,5 +842,35 @@ const styles = StyleSheet.create({
 		justifyContent: "center",
 		alignItems: "center",
 		zIndex: 1000,
+	},
+
+	header: {
+		flexDirection: "row",
+		justifyContent: "space-between",
+		alignItems: "center",
+	},
+	categoryContainer: {
+		flexDirection: "row",
+		flexWrap: "wrap",
+		justifyContent: "center",
+	},
+	card: {
+		backgroundColor: "white",
+		padding: 16,
+		borderWidth: 1,
+		borderRadius: 10,
+		borderColor: "#d6d6d6",
+		marginBottom: 8,
+	},
+	viewAll: {
+		backgroundColor: "white",
+		padding: 16,
+		borderBottomWidth: 1,
+		borderColor: "#d6d6d6",
+		marginBottom: 8,
+	},
+	date: {
+		color: "#757575",
+		fontSize: 12,
 	},
 });

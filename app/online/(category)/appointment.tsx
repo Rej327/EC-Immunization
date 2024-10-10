@@ -4,6 +4,7 @@ import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { ThemedText } from "@/components/ThemedText";
 import AppointmentSetter from "@/components/appointment/AppointmentSetter";
+import AppointmentStatus from "@/components/appointment/AppointmentStatus";
 
 const Appointment = () => {
 	const router = useRouter();
@@ -27,6 +28,7 @@ const Appointment = () => {
 
 			{/* BODY */}
 			<AppointmentSetter />
+			{/* <AppointmentStatus /> */}
 		</View>
 	);
 };
