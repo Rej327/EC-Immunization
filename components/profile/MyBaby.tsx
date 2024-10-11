@@ -412,10 +412,10 @@ const MyBaby = () => {
 						My Baby
 					</ThemedText>
 					<ThemedText type="header" className="text-center">
-						No babies added yet!
+						No babies registered yet!
 					</ThemedText>
 					<ThemedText type="default" className="text-center mb-2">
-						Please add a baby to use all features of the
+						Please register a baby to use all features of the
 						application.
 					</ThemedText>
 					<StyledButton
@@ -438,7 +438,7 @@ const MyBaby = () => {
 				<View style={styles.modalContainer}>
 					<View style={styles.modalContent}>
 						<ThemedText type="header" style={styles.modalHeader}>
-							Add Baby
+							Register Baby
 						</ThemedText>
 
 						<TextInput

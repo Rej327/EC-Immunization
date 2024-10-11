@@ -217,8 +217,7 @@ export default function Reminder() {
 						No reminders available.
 					</ThemedText>
 					<ThemedText type="default">
-						Select first your baby in your profile and my baby
-						section.
+						Register or select first your baby in your profile.
 					</ThemedText>
 				</View>
 			) : loading ? (
