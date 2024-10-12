@@ -17,6 +17,8 @@ interface UserData {
 
 const TabsPage = () => {
 	const { isSignedIn } = useAuth();
+	const { user } = useUser(); // Get current user data
+	const adminUserId = "user_2mW7YxivRkryvJ3m0kEYqWDLRPb";
 
 	// useEffect(() => {
 	// 	StatusBar.setBarStyle("light-content");
@@ -88,6 +90,29 @@ const TabsPage = () => {
 					redirect={!isSignedIn}
 				/>
 
+				{/* ADMIN */}
+				<Tabs.Screen
+					name="dashboard"
+					options={{
+						href: user?.id === adminUserId ? undefined : null,
+						headerTitle: "Dashboard",
+						tabBarIcon: ({ color, size, focused }) => (
+							<Ionicons
+								name={
+									focused
+										? "file-tray-full-sharp"
+										: "file-tray-full-outline"
+								} // Sharp when selected
+								size={size}
+								color={color}
+							/>
+						),
+
+						// headerRight: () => <Logout />,
+					}}
+					redirect={!isSignedIn}
+				/>
+
 				{/* PROFILE */}
 				<Tabs.Screen
 					name="profile"
@@ -104,8 +129,8 @@ const TabsPage = () => {
 					}}
 					redirect={!isSignedIn}
 				/>
-			</Tabs>
 
+			</Tabs>
 		</>
 	);
 };

@@ -26,6 +26,8 @@ import { ThemedText } from "@/components/ThemedText";
 import CategoryCard from "@/components/CategoryCard";
 import CustomBottomSheet from "@/components/CustomBottomSheet";
 import { events, milestones } from "@/assets/data/data";
+import { doc, getDoc, setDoc } from "firebase/firestore";
+import { db } from "@/db/firebaseConfig";
 
 interface UserData {
 	id: string;
@@ -81,7 +83,34 @@ const Home = () => {
 		}
 	};
 
+	const saveUserToParents = async () => {
+		if (user) {
+			const userId = user.id;
+
+			// Reference to the user's document in the 'parents' collection
+			const userDocRef = doc(db, "parents", userId);
+
+			// Check if the user already exists in the 'parents' collection
+			const userDoc = await getDoc(userDocRef);
+
+			if (!userDoc.exists()) {
+				// User doesn't exist, save the user data
+				await setDoc(userDocRef, {
+					// id: userId,
+					email: user.emailAddresses?.[0]?.emailAddress || "",
+					username: user.username || "",
+					firstName: user.firstName || "",
+					lastName: user.lastName || "",
+				});
+				console.log("User saved to parents collection");
+			} else {
+				console.log("User already exists in parents collection");
+			}
+		}
+	};
+
 	useEffect(() => {
+		saveUserToParents();
 		saveUserDataToLocalStorage();
 		retrieveUserDataFromLocalStorage();
 	}, [user]);
