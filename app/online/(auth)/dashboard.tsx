@@ -7,13 +7,14 @@ import {
 	ActivityIndicator,
 	Modal,
 	TextInput,
-	Button,
 } from "react-native";
 import React, { useEffect, useState } from "react";
 import { db } from "@/db/firebaseConfig"; // Your Firestore config
-import { collection, getDocs, query, where } from "firebase/firestore";
+import { addDoc, collection, getDocs, query, where } from "firebase/firestore";
 import { Ionicons } from "@expo/vector-icons";
 import StyledButton from "@/components/StyledButton";
+import { useRouter } from "expo-router";
+import { ThemedText } from "@/components/ThemedText";
 
 export default function Dashboard() {
 	const [parents, setParents] = useState<any[]>([]); // State to store parents data
@@ -22,11 +23,15 @@ export default function Dashboard() {
 	const [selectedUser, setSelectedUser] = useState<any>(null); // Store selected user for messaging
 	const [subject, setSubject] = useState(""); // State for subject input
 	const [message, setMessage] = useState(""); // State for message input
+	const [searchQuery, setSearchQuery] = useState(""); // State for search input
+	const [babyCount, setBabyCount] = useState(0); // State to store the count of babies
+	const [parentCount, setParentCount] = useState(0); // State to store the count of parents
+
+	const route = useRouter();
 
 	useEffect(() => {
 		const fetchParents = async () => {
 			try {
-				// Create a query to exclude a specific user ID
 				const parentsQuery = query(
 					collection(db, "parents"),
 					where("username", "!=", "admin") // Exclude admin users
@@ -41,6 +46,7 @@ export default function Dashboard() {
 				});
 
 				setParents(parentsData); // Update the state with the fetched data
+				setParentCount(parentsData.length); // Update the parent count
 			} catch (error) {
 				console.error("Error fetching parents data: ", error);
 			} finally {
@@ -48,19 +54,43 @@ export default function Dashboard() {
 			}
 		};
 
+		const fetchBabiesCount = async () => {
+			try {
+				const babiesQuery = query(collection(db, "babies")); // Adjust the collection name if necessary
+				const querySnapshot = await getDocs(babiesQuery);
+				setBabyCount(querySnapshot.size); // Set the count of babies
+			} catch (error) {
+				console.error("Error fetching babies data: ", error);
+			}
+		};
+
 		fetchParents();
+		fetchBabiesCount();
 	}, []);
 
+	// Handle user selection to send message
 	const handleMessageUser = (user: any) => {
 		setSelectedUser(user);
 		setModalVisible(true);
 	};
 
-	const handleSendMessage = () => {
-		// Implement your logic to send the message here
-		console.log("Message sent to:", selectedUser.firstName);
-		console.log("Subject:", subject);
-		console.log("Message:", message);
+	// Handle sending the message
+	const handleSendMessage = async () => {
+		try {
+			// Add the message to the 'messages' collection in Firestore
+			await addDoc(collection(db, "messages"), {
+				receiverId: selectedUser.id, // Add sender ID
+				firstName: selectedUser.firstName,
+				lastName: selectedUser.lastName,
+				subject: subject,
+				message: message,
+				createdAt: new Date(), // Add a timestamp
+			});
+
+			console.log("Message Sent");
+		} catch (error) {
+			console.error("Error sending message: ", error);
+		}
 
 		// Reset the fields and close the modal
 		setSubject("");
@@ -68,51 +98,100 @@ export default function Dashboard() {
 		setModalVisible(false);
 	};
 
-  const handleCancelModal = () => {
-    setSubject("");
+	// Handle cancelling the modal
+	const handleCancelModal = () => {
+		setSubject("");
 		setMessage("");
-    setModalVisible(false);
-  }
+		setModalVisible(false);
+	};
 
+	// Handle routing to the parent by ID screen
+	const handleRoute = (id: any) => {
+		route.push({
+			pathname: "/online/(dashboard)/parentById",
+			params: { parentIdFromdDashboard: id },
+		});
+	};
+
+	// Filter parents based on search query
+	const filteredParents =
+		searchQuery.length >= 1
+			? parents.filter((parent) =>
+					`${parent.firstName} ${parent.lastName}`
+						.toLowerCase()
+						.includes(searchQuery.toLowerCase())
+			  )
+			: parents;
+
+	// If loading, show a loading indicator
 	if (loading) {
 		return (
 			<View className="flex mt-[50%] items-center justify-center">
 				<ActivityIndicator size="large" color="#456B72" />
 			</View>
-		); // Display a loading message while fetching data
+		);
 	}
 
 	return (
 		<View style={styles.container}>
-			<FlatList
-				data={parents}
-				keyExtractor={(item) => item.id}
-				renderItem={({ item }) => (
-					<View style={styles.item}>
-						<Text style={styles.itemText}>
-							{item.firstName} {item.lastName}
-						</Text>
-						<View className="flex flex-row gap-5 items-center">
-							<TouchableOpacity
-								onPress={() => handleMessageUser(item)}
-							>
-								<Ionicons
-									name="chatbox"
-									color="#456B72"
-									size={20}
-								/>
-							</TouchableOpacity>
-							<TouchableOpacity>
-								<Ionicons
-									name="people"
-									color="#456B72"
-									size={20}
-								/>
-							</TouchableOpacity>
-						</View>
-					</View>
-				)}
+			{/* Counts Card */}
+			<View style={styles.countsContainer}>
+				<View style={styles.countCard}>
+					<Text style={styles.countText}>Parents: {parentCount}</Text>
+				</View>
+				<View style={styles.countCard}>
+					<Text style={styles.countText}>Babies: {babyCount}</Text>
+				</View>
+			</View>
+
+			{/* Search Input */}
+			<TextInput
+				style={styles.searchInput}
+				placeholder="🔍 Search "
+				value={searchQuery}
+				onChangeText={setSearchQuery}
 			/>
+
+			{/* FlatList for parents */}
+			<ThemedText type="header">Accounts</ThemedText>
+			{filteredParents.length > 0 ? (
+				<FlatList
+					data={filteredParents}
+					keyExtractor={(item) => item.id}
+					renderItem={({ item }) => (
+						<View style={styles.item}>
+							<Text style={styles.itemText}>
+								{item.firstName} {item.lastName}
+							</Text>
+							<View className="flex flex-row gap-5 items-center">
+								<TouchableOpacity
+									onPress={() => handleMessageUser(item)}
+								>
+									<Ionicons
+										name="chatbox"
+										color="#456B72"
+										size={20}
+									/>
+								</TouchableOpacity>
+								<TouchableOpacity
+									onPress={() => handleRoute(item.id)}
+								>
+									<Ionicons
+										name="people"
+										color="#456B72"
+										size={20}
+									/>
+								</TouchableOpacity>
+							</View>
+						</View>
+					)}
+				/>
+			) : (
+				// Display this when no people match the search query
+				<View style={styles.noResultsContainer}>
+					<Text style={styles.noResultsText}>No people found</Text>
+				</View>
+			)}
 
 			{/* Message Modal */}
 			<Modal
@@ -133,14 +212,13 @@ export default function Dashboard() {
 							onChangeText={setSubject}
 						/>
 						<TextInput
-							style={styles.textarea} // Changed to textarea style
+							style={styles.textarea}
 							placeholder="Message"
 							value={message}
 							onChangeText={setMessage}
 							multiline
-							numberOfLines={4} // Allows multiple lines
+							numberOfLines={4}
 						/>
-
 						<StyledButton
 							title="Send Message"
 							onPress={handleSendMessage}
@@ -171,35 +249,69 @@ const styles = StyleSheet.create({
 		padding: 20,
 		backgroundColor: "#f9f9f9",
 	},
-	item: {
-		display: "flex",
-		justifyContent: "space-between",
+	countsContainer: {
 		flexDirection: "row",
-		backgroundColor: "white",
-		padding: 16,
-		borderWidth: 1,
+		justifyContent: "space-between",
+		marginBottom: 20,
+	},
+	countCard: {
+		flex: 1,
+		backgroundColor: "#fff",
+		padding: 15,
 		borderRadius: 10,
+		borderWidth: 1,
 		borderColor: "#d6d6d6",
-		marginBottom: 8,
+		alignItems: "center",
+	},
+	countText: {
+		fontSize: 18,
+		fontWeight: "bold",
+	},
+	searchInput: {
+		height: 40,
+		borderColor: "#ccc",
+		borderWidth: 1,
+		marginBottom: 10,
+		paddingHorizontal: 10,
+		borderRadius: 10,
+		backgroundColor: "#fff",
+	},
+	item: {
+		flexDirection: "row",
+		justifyContent: "space-between",
+		padding: 10,
+		marginBottom: 10,
+		backgroundColor: "#fff",
+		borderRadius: 10,
+		borderWidth: 1,
+		borderColor: "#d6d6d6",
 	},
 	itemText: {
 		fontSize: 16,
+	},
+	noResultsContainer: {
+		padding: 20,
+		alignItems: "center",
+	},
+	noResultsText: {
+		fontSize: 16,
+		color: "#999",
 	},
 	modalContainer: {
 		flex: 1,
 		justifyContent: "center",
 		alignItems: "center",
-		backgroundColor: "rgba(0, 0, 0, 0.5)",
+		backgroundColor: "rgba(0,0,0,0.5)",
 	},
 	modalContent: {
 		width: "80%",
-		backgroundColor: "white",
 		padding: 20,
+		backgroundColor: "#fff",
 		borderRadius: 10,
-		elevation: 5,
 	},
 	modalTitle: {
-		fontSize: 18,
+		fontSize: 20,
+		fontWeight: "bold",
 		marginBottom: 10,
 	},
 	input: {
@@ -208,14 +320,14 @@ const styles = StyleSheet.create({
 		borderWidth: 1,
 		marginBottom: 10,
 		paddingHorizontal: 10,
-		borderRadius: 5,
+		borderRadius: 10,
 	},
 	textarea: {
-		height: 100, // Set height for textarea
+		height: 80,
 		borderColor: "#ccc",
 		borderWidth: 1,
 		marginBottom: 10,
 		paddingHorizontal: 10,
-		borderRadius: 5,
+		borderRadius: 10,
 	},
 });

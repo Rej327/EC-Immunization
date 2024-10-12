@@ -1,12 +1,13 @@
 import { Tabs } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import { View, Image, Pressable, StatusBar } from "react-native";
+import { View, Image, Pressable } from "react-native";
 import { useAuth, useUser } from "@clerk/clerk-expo"; // Import useUser for Clerk user data
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useEffect, useState } from "react";
 import { babyIcon } from "@/assets";
 import { HomeRightHeader } from "@/components/HomeRightHeader";
 import Logout from "@/app/LogOut";
+import { StatusBar } from "expo-status-bar";
 
 interface UserData {
 	email: string;
@@ -27,7 +28,7 @@ const TabsPage = () => {
 
 	return (
 		<>
-			{/* <StatusBar barStyle="light-content" backgroundColor="#86b3bc" /> */}
+			{/* <StatusBar style="light" backgroundColor="#86b3bc" /> */}
 			<Tabs
 				screenOptions={{
 					headerStyle: {
@@ -129,7 +130,6 @@ const TabsPage = () => {
 					}}
 					redirect={!isSignedIn}
 				/>
-
 			</Tabs>
 		</>
 	);

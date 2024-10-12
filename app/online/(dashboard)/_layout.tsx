@@ -19,13 +19,20 @@ const DashboardLayout = () => {
 					headerStyle: {
 						backgroundColor: "#87b2bd",
 					},
-					headerShown: false,
+					headerShown: true,
 					// headerTintColor: "#456B72", // Set header text color to white
 					// headerBackTitle: "Back",
 					// headerShown: true, // Show the header for navigation
 					headerLeft: () => (
-						<TouchableOpacity onPress={handleBackPress} className="mr-2">
-							<Ionicons name="arrow-back" size={24} color="#456B72"/>
+						<TouchableOpacity
+							onPress={handleBackPress}
+							className="mr-2"
+						>
+							<Ionicons
+								name="arrow-back"
+								size={24}
+								color="#456B72"
+							/>
 						</TouchableOpacity>
 					),
 					statusBarColor: "#87b2bd",
@@ -33,9 +40,10 @@ const DashboardLayout = () => {
 			>
 				<Stack.Screen
 					name="parentById" // Route for the Guide page
-					options={{ title: "Parents" }}
+					options={{
+						title: "Parents",
+					}}
 				/>
-
 			</Stack>
 		</GestureHandlerRootView>
 	);
