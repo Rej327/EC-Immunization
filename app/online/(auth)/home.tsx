@@ -152,7 +152,7 @@ const Home = () => {
 						colors={["#456B72"]}
 					/>
 				}
-				className="px-2"
+				className="px-4"
 				scrollEnabled={!openBottomSheet} // Disable scrolling when bottom sheet is open
 			>
 				{/* HERO IMAGE */}
@@ -347,6 +347,6 @@ const styles = StyleSheet.create({
 		left: 0,
 		right: 0,
 		bottom: 0,
-		backgroundColor: "rgba(0, 0, 0, 0.5)", // Semi-transparent overlay
+		backgroundColor: "rgba(0, 0, 0, 0.8)", // Semi-transparent overlay
 	},
 });

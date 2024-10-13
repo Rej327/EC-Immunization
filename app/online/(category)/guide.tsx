@@ -145,7 +145,7 @@ export default function Guide() {
 					{/* Modal for vaccination details */}
 					<Modal
 						visible={modalVisible}
-						animationType="slide"
+						animationType="fade"
 						transparent={true}
 					>
 						<View className="flex-1 justify-center items-center bg-black/50">
@@ -177,9 +177,11 @@ export default function Guide() {
 													>
 														{vaccine.name}
 													</ThemedText>
-													<ThemedText type="default" className="font-bold italic">
-														When:{" "}
-														{vaccine.details}
+													<ThemedText
+														type="default"
+														className="font-bold italic"
+													>
+														When: {vaccine.details}
 													</ThemedText>
 													<ThemedText type="default">
 														Description:{" "}

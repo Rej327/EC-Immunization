@@ -14,7 +14,15 @@ import CustomCard from "@/components/CustomCard";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import StyledButton from "../StyledButton";
 import { db } from "@/db/firebaseConfig"; // Import Firestore config
-import { collection, addDoc, getDocs, query, where, doc, getDoc } from "firebase/firestore"; // Import Firestore functions
+import {
+	collection,
+	addDoc,
+	getDocs,
+	query,
+	where,
+	doc,
+	getDoc,
+} from "firebase/firestore"; // Import Firestore functions
 import { useUser } from "@clerk/clerk-expo";
 import Toast from "react-native-toast-message"; // Ensure you have this installed
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -88,7 +96,10 @@ const MyBaby = () => {
 					id: babySnapshot.id,
 					firstName: data.firstName,
 					lastName: data.lastName,
-					birthday: data.birthday instanceof Date ? data.birthday : data.birthday.toDate(),
+					birthday:
+						data.birthday instanceof Date
+							? data.birthday
+							: data.birthday.toDate(),
 				});
 			} else {
 				console.log("No such baby!");
@@ -110,18 +121,19 @@ const MyBaby = () => {
 		loadSelectedBabyId();
 	}, [user]); // Add user as a dependency to refetch babies when the user changes
 
-	// Function to add baby to Firestore
+	// Function to Register Baby to Firestore
 	const addBabyToFirestore = async (newBaby: Baby) => {
 		try {
-			// Add baby to Firestore
+			// Register Baby to Firestore
 			const docRef = await addDoc(collection(db, "babies"), {
 				parentId: user?.id,
 				firstName: newBaby.firstName,
 				lastName: newBaby.lastName,
 				birthday: newBaby.birthday,
+				createdAt: new Date() as Date,
 			});
 
-			console.log("Baby added to Firestore!");
+			console.log("Baby register to Firestore!");
 			loadBabies();
 			// Generate the vaccination milestones for the baby
 			await addMilestoneToFirestore(docRef.id, newBaby);
@@ -129,7 +141,7 @@ const MyBaby = () => {
 			Toast.show({
 				type: "success",
 				text1: "Success",
-				text2: "Baby and milestones added successfully! 👶",
+				text2: "Baby and milestones register successfully! 👶",
 				position: "top",
 			});
 		} catch (error) {
@@ -137,7 +149,7 @@ const MyBaby = () => {
 			Toast.show({
 				type: "error",
 				text1: "Error",
-				text2: "Failed to add baby! ❌",
+				text2: "Failed to Register Baby! ❌",
 				position: "top",
 			});
 		}
@@ -265,7 +277,9 @@ const MyBaby = () => {
 		// Calculate the expected date of each vaccination based on baby's birthday
 		const milestones = vaccineSchedule.map((vaccine) => {
 			const expectedDate = new Date(babyBirthday);
-			expectedDate.setMonth(babyBirthday.getMonth() + vaccine.ageInMonths); // Handles month overflow
+			expectedDate.setMonth(
+				babyBirthday.getMonth() + vaccine.ageInMonths
+			); // Handles month overflow
 
 			return {
 				vaccine: vaccine.vaccine,
@@ -273,6 +287,7 @@ const MyBaby = () => {
 				expectedDate: expectedDate, // Store as a date string
 				received: vaccine.received,
 				description: vaccine.description,
+				updatedAt: new Date() as Date,
 			};
 		});
 
@@ -283,8 +298,9 @@ const MyBaby = () => {
 				firstName: newBaby.firstName,
 				lastName: newBaby.lastName,
 				milestone: milestones,
+				createdAt: new Date() as Date,
 			});
-			console.log("Milestones added to Firestore!");
+			console.log("Milestones register to Firestore!");
 		} catch (error) {
 			console.error("Error adding milestones to Firestore: ", error);
 		}
@@ -301,14 +317,14 @@ const MyBaby = () => {
 				text2: "Please fill out all fields before adding a baby!",
 				position: "top",
 			});
-			console.log("Failed to add baby in Firestore!");
+			console.log("Failed to Register Baby in Firestore!");
 			setIsModalVisible(false);
 			return; // Stop the function here if any field is empty
 		}
 
 		const newBaby: Baby = { firstName, lastName, birthday }; // Use the Date object for birthday
 
-		// Add baby to Firestore
+		// Register Baby to Firestore
 		addBabyToFirestore(newBaby);
 
 		// Reset form fields
@@ -334,7 +350,10 @@ const MyBaby = () => {
 			await AsyncStorage.setItem("selectedBabyId", baby.id);
 			console.log(`Saved selected baby ID: ${baby.id}`);
 		} catch (error) {
-			console.error("Error saving selected baby ID to local storage: ", error);
+			console.error(
+				"Error saving selected baby ID to local storage: ",
+				error
+			);
 		}
 	};
 
@@ -357,9 +376,9 @@ const MyBaby = () => {
 			{babies.length > 0 ? (
 				<CustomCard className="my-2">
 					<ThemedText type="cardHeader" className="mb-2">
-					Your Baby
+						Your Baby
 					</ThemedText>
-		
+
 					<TouchableOpacity
 						onPress={() => setShowDropdown(!showDropdown)} // Toggle dropdown
 						style={styles.input}
@@ -398,7 +417,7 @@ const MyBaby = () => {
 						</View>
 					)}
 					<StyledButton
-						title="Add Baby"
+						title="Register Baby"
 						onPress={() => setIsModalVisible(true)}
 						paddingVertical={10}
 						fontSize={14}
@@ -419,7 +438,7 @@ const MyBaby = () => {
 						application.
 					</ThemedText>
 					<StyledButton
-						title="Add Baby"
+						title="Register Baby"
 						onPress={() => setIsModalVisible(true)}
 						paddingVertical={10}
 						fontSize={14}
@@ -431,7 +450,7 @@ const MyBaby = () => {
 
 			<Modal
 				visible={isModalVisible}
-				animationType="slide"
+				animationType="fade"
 				transparent={true}
 				onRequestClose={() => setIsModalVisible(false)}
 			>
@@ -479,16 +498,16 @@ const MyBaby = () => {
 								title="Submit"
 								onPress={handleAddBaby}
 								customWeight="500"
-								fontSize={12}
-								borderRadius={5}
+								fontSize={14}
+								borderRadius={12}
 							/>
 							<StyledButton
 								title="Cancel"
 								onPress={() => setIsModalVisible(false)}
 								bgColor="#d6d6d6"
 								customWeight="500"
-								fontSize={12}
-								borderRadius={5}
+								fontSize={14}
+								borderRadius={12}
 								textColor="#456B72"
 							/>
 						</View>
@@ -506,7 +525,7 @@ const styles = StyleSheet.create({
 		flex: 1,
 		justifyContent: "center",
 		alignItems: "center",
-		backgroundColor: "rgba(0, 0, 0, 0.5)",
+		backgroundColor: "rgba(0, 0, 0, 0.8)",
 	},
 	modalContent: {
 		width: "80%",

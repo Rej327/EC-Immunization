@@ -9,8 +9,8 @@ import { ThemedText } from "./ThemedText";
 import { Link } from "expo-router";
 
 const { width, height } = Dimensions.get("window");
-const cardWidthSize = width * 0.45;
-const cardHeightSize = height * 0.17;
+const cardWidthSize = width * 0.43;
+const cardHeightSize = height * 0.16;
 
 interface CategoryCardProps {
 	icon: ImageSourcePropType; // Type for the icon prop
@@ -61,11 +61,11 @@ const styles = StyleSheet.create({
 	card: {
 		width: cardWidthSize,
 		height: cardHeightSize,
-		borderRadius: 10,
+		borderRadius: 14,
 		justifyContent: "center",
 		alignItems: "center",
 		padding: 10,
-		margin: 5,
+		margin: 3,
 	},
 	innerContainer: {
 		position: "relative",

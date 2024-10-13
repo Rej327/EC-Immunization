@@ -36,11 +36,13 @@ const Profile = () => {
 					className="relative mx-auto border-2 -mt-6 mb-4 w-12 h-12 rounded-full"
 				/>
 			)}
-			<ProfileInformation />
-			<MyBaby />
-			<Notification />
-			<Milestones />
-			<Logout />
+			<View className="px-4">
+				<ProfileInformation />
+				<MyBaby />
+				<Notification />
+				<Milestones />
+				<Logout />
+			</View>
 		</ScrollView>
 	);
 };

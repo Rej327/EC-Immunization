@@ -171,7 +171,7 @@ export default function Miles() {
 
 			{/* Modal for Vaccine Details */}
 			<Modal
-				animationType="slide"
+				animationType="fade"
 				transparent={true}
 				visible={modalVisible}
 				onRequestClose={closeModal}
@@ -224,7 +224,7 @@ const styles = StyleSheet.create({
 		flex: 1,
 		justifyContent: "center",
 		alignItems: "center",
-		backgroundColor: "rgba(0, 0, 0, 0.5)",
+		backgroundColor: "rgba(0, 0, 0, 0.8)",
 	},
 	modalContent: {
 		width: "80%",

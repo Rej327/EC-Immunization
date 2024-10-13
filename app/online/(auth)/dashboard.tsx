@@ -7,6 +7,7 @@ import {
 	ActivityIndicator,
 	Modal,
 	TextInput,
+	Image,
 } from "react-native";
 import React, { useEffect, useState } from "react";
 import { db } from "@/db/firebaseConfig"; // Your Firestore config
@@ -15,6 +16,7 @@ import { Ionicons } from "@expo/vector-icons";
 import StyledButton from "@/components/StyledButton";
 import { useRouter } from "expo-router";
 import { ThemedText } from "@/components/ThemedText";
+import { countBaby, countParent } from "@/assets";
 
 export default function Dashboard() {
 	const [parents, setParents] = useState<any[]>([]); // State to store parents data
@@ -137,9 +139,11 @@ export default function Dashboard() {
 			{/* Counts Card */}
 			<View style={styles.countsContainer}>
 				<View style={styles.countCard}>
-					<Text style={styles.countText}>Parents: {parentCount}</Text>
+					<Image source={countParent} className="w-28 h-24" />
+					<Text style={styles.countText}>Users: {parentCount}</Text>
 				</View>
 				<View style={styles.countCard}>
+				<Image source={countBaby} className="w-24 h-24" />
 					<Text style={styles.countText}>Babies: {babyCount}</Text>
 				</View>
 			</View>
@@ -222,7 +226,7 @@ export default function Dashboard() {
 						<StyledButton
 							title="Send Message"
 							onPress={handleSendMessage}
-							borderRadius={5}
+							borderRadius={12}
 							paddingVertical={8}
 							fontSize={14}
 						/>
@@ -233,7 +237,7 @@ export default function Dashboard() {
 							customWeight="500"
 							fontSize={14}
 							paddingVertical={8}
-							borderRadius={5}
+							borderRadius={12}
 							textColor="#456B72"
 						/>
 					</View>
@@ -262,24 +266,27 @@ const styles = StyleSheet.create({
 		borderWidth: 1,
 		borderColor: "#d6d6d6",
 		alignItems: "center",
+		marginHorizontal: 4
 	},
 	countText: {
 		fontSize: 18,
 		fontWeight: "bold",
 	},
 	searchInput: {
-		height: 40,
+		height: 46,
 		borderColor: "#ccc",
 		borderWidth: 1,
 		marginBottom: 10,
 		paddingHorizontal: 10,
+		paddingVertical: 10,
 		borderRadius: 10,
 		backgroundColor: "#fff",
 	},
 	item: {
 		flexDirection: "row",
 		justifyContent: "space-between",
-		padding: 10,
+		paddingHorizontal: 10,
+		paddingVertical: 14,
 		marginBottom: 10,
 		backgroundColor: "#fff",
 		borderRadius: 10,
@@ -301,7 +308,7 @@ const styles = StyleSheet.create({
 		flex: 1,
 		justifyContent: "center",
 		alignItems: "center",
-		backgroundColor: "rgba(0,0,0,0.5)",
+		backgroundColor: "rgba(0, 0, 0, 0.8)",
 	},
 	modalContent: {
 		width: "80%",

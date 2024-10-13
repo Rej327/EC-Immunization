@@ -34,3 +34,5 @@ export { default as vaccine } from "./images/vaccine.png";
 export { default as healthTips } from "./images/healthTips.png";
 export { default as guide } from "./images/guide.png";
 export { default as reminder } from "./images/reminder.png";
+export { default as countBaby } from "./images/countBaby.png";
+export { default as countParent } from "./images/countParent.png";

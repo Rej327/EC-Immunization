@@ -16,7 +16,7 @@ const CustomCard: React.FC<CustomCardProps> = ({ children, className }) => {
 
 const styles = StyleSheet.create({
 	content: {
-		paddingHorizontal: 8,
+		// paddingHorizontal: 16,
 		marginVertical: 2
 	},
 	card: {

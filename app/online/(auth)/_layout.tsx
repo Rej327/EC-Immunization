@@ -56,7 +56,7 @@ const TabsPage = () => {
 								style={{
 									width: 30,
 									height: 30,
-									marginLeft: 10,
+									marginLeft: 14,
 								}}
 							/>
 						),
@@ -96,7 +96,7 @@ const TabsPage = () => {
 					name="dashboard"
 					options={{
 						href: user?.id === adminUserId ? undefined : null,
-						headerTitle: "Dashboard",
+						headerTitle: "VacApp Dashboard",
 						tabBarIcon: ({ color, size, focused }) => (
 							<Ionicons
 								name={

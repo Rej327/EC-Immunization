@@ -5,13 +5,24 @@ import {
 	ActivityIndicator,
 	TouchableOpacity,
 	ScrollView,
+	Modal, // Import Modal
+	Button, // Import Button (optional for closing)
 } from "react-native";
 import React, { useEffect, useState } from "react";
 import { db } from "@/db/firebaseConfig"; // Your Firestore config
-import { collection, getDocs, query, where } from "firebase/firestore";
+import {
+	collection,
+	getDocs,
+	query,
+	where,
+	updateDoc,
+} from "firebase/firestore";
 import { useLocalSearchParams } from "expo-router"; // To get route params
 import { Timestamp } from "firebase/firestore"; // Import Timestamp
 import { ThemedText } from "@/components/ThemedText";
+import { Ionicons } from "@expo/vector-icons";
+import StyledButton from "@/components/StyledButton";
+import Toast from "react-native-toast-message";
 
 // Define BabyData and Milestone interfaces
 interface BabyData {
@@ -37,6 +48,9 @@ export default function ParentById() {
 	const [babyData, setBabyData] = useState<BabyData[]>([]); // Baby data state
 	const [selectedBaby, setSelectedBaby] = useState<BabyData | null>(null); // State for selected baby
 	const [milestones, setMilestones] = useState<MilestoneData[]>([]); // Milestones data state
+	const [selectedMilestone, setSelectedMilestone] =
+		useState<MilestoneData | null>(null); // State for selected milestone
+	const [modalVisible, setModalVisible] = useState(false); // State for modal visibility
 
 	// Fetching the parentId from route params
 	const { parentIdFromdDashboard } = useLocalSearchParams() as {
@@ -113,6 +127,96 @@ export default function ParentById() {
 		fetchMilestones(baby.id);
 	};
 
+	// Handle toggling the milestone status
+	const handleToggleStatus = async () => {
+		if (!selectedMilestone || !selectedBaby) return;
+
+		const updatedMilestone = {
+			...selectedMilestone,
+			received: !selectedMilestone.received,
+			updatedAt: Timestamp.now(),
+		};
+
+		const milestonesQuery = query(
+			collection(db, "milestones"),
+			where("babyId", "==", selectedBaby.id)
+		);
+
+		try {
+			const querySnapshot = await getDocs(milestonesQuery);
+			if (!querySnapshot.empty) {
+				const docRef = querySnapshot.docs[0];
+
+				// Log current milestones before updating
+				const currentMilestones = docRef.data().milestone;
+
+				// Check if currentMilestones is an array
+				if (Array.isArray(currentMilestones)) {
+					// Update the specific milestone in the array
+					const updatedMilestones = currentMilestones.map(
+						(milestone: MilestoneData) =>
+							milestone.vaccine === selectedMilestone.vaccine
+								? updatedMilestone
+								: milestone
+					);
+
+					// Update Firestore with the modified milestone array
+					await updateDoc(docRef.ref, {
+						milestone: updatedMilestones, // Only update the milestone array
+					});
+
+					console.log(
+						"Milestone updated successfully:",
+						updatedMilestone
+					);
+
+					// Show toast message on success
+					Toast.show({
+						text1: "Success",
+						text2: `Milestone for ${updatedMilestone.vaccine} has been updated.`,
+						type: "success",
+						position: "top",
+					});
+
+					// Update the local state to reflect the change
+					setMilestones((prev) =>
+						prev.map((milestone) =>
+							milestone.vaccine === selectedMilestone.vaccine
+								? updatedMilestone
+								: milestone
+						)
+					);
+				} else {
+					console.error("Current milestones is not an array.");
+				}
+			}
+		} catch (error) {
+			console.error("Error updating milestone status:", error);
+
+			// Show toast message on error
+			Toast.show({
+				text1: "Error",
+				text2: "Failed to update milestone. Please try again.",
+				type: "error",
+				position: "top",
+			});
+		} finally {
+			handleCloseModal(); // Close modal after update
+		}
+	};
+
+	// Handle opening modal
+	const handleOpenModal = (milestone: MilestoneData) => {
+		setSelectedMilestone(milestone);
+		setModalVisible(true);
+	};
+
+	// Handle closing modal
+	const handleCloseModal = () => {
+		setModalVisible(false);
+		setSelectedMilestone(null); // Reset selected milestone
+	};
+
 	// Render loading state
 	if (loading) {
 		return (
@@ -134,7 +238,7 @@ export default function ParentById() {
 	// Render baby data and milestones
 	return (
 		<ScrollView style={styles.container}>
-			<ThemedText type="header">Parent's Baby Data</ThemedText>
+			<ThemedText type="header">Parent's Children Data</ThemedText>
 			{babyData.length > 0 ? (
 				babyData.map((baby, i) => (
 					<TouchableOpacity
@@ -162,7 +266,11 @@ export default function ParentById() {
 						Milestones for {selectedBaby.firstName}
 					</ThemedText>
 					{milestones.map((milestone, index) => (
-						<View key={index} style={styles.milestoneItem}>
+						<TouchableOpacity
+							key={index}
+							style={styles.milestoneItem}
+							onPress={() => handleOpenModal(milestone)}
+						>
 							<ThemedText>
 								Vaccine: {milestone.vaccine}
 							</ThemedText>
@@ -175,13 +283,68 @@ export default function ParentById() {
 							<ThemedText>
 								Status:{" "}
 								{milestone.received
-									? "Received"
-									: "Not Received"}
+									? "Received ✅"
+									: "Not Received ❌"}
 							</ThemedText>
-						</View>
+							<TouchableOpacity>
+								<ThemedText className="absolute bottom-1 right-1">
+									<Ionicons
+										name="create-outline"
+										size={24}
+										color="#456B72"
+									/>
+								</ThemedText>
+							</TouchableOpacity>
+						</TouchableOpacity>
 					))}
 				</View>
 			)}
+
+			{/* Modal for editing milestone status */}
+			<Modal
+				transparent={true}
+				visible={modalVisible}
+				onRequestClose={handleCloseModal}
+			>
+				<View style={styles.modalContainer}>
+					<View style={styles.modalContent}>
+						<ThemedText type="header">
+							Update vaccine status
+						</ThemedText>
+						<ThemedText type="default" className="font-bold">
+							Vaccine: {selectedMilestone?.vaccine}
+						</ThemedText>
+						<ThemedText type="default" className="font-bold">
+							Current Status:{" "}
+							{selectedMilestone?.received
+								? "Received ✅"
+								: "Not Received ❌"}
+						</ThemedText>
+						<View className="flex gap-1 pt-2">
+							<StyledButton
+								title={
+									!selectedMilestone?.received
+										? "Mark as received"
+										: "Mark as not received"
+								}
+								paddingVertical={10}
+								fontSize={14}
+								borderRadius={12}
+								onPress={handleToggleStatus} // Toggle status on button press
+							/>
+							<StyledButton
+								title="Cancel"
+								paddingVertical={10}
+								fontSize={14}
+								borderRadius={12}
+								bgColor="#d6d6d6"
+								textColor="#456B72"
+								onPress={handleCloseModal} // Close modal on cancel
+							/>
+						</View>
+					</View>
+				</View>
+			</Modal>
 		</ScrollView>
 	);
 }
@@ -189,12 +352,12 @@ export default function ParentById() {
 const styles = StyleSheet.create({
 	container: {
 		flex: 1,
-		padding: 20,
+		padding: 14,
 		backgroundColor: "#f9f9f9",
 	},
 
 	babyItem: {
-		marginVertical: 10,
+		marginVertical: 5,
 		padding: 10,
 		backgroundColor: "#fff",
 		borderRadius: 5,
@@ -206,23 +369,17 @@ const styles = StyleSheet.create({
 		marginVertical: 5,
 	},
 	milestoneContainer: {
-		marginTop: 20,
-	},
-	milestoneTitle: {
-		fontSize: 22,
-		fontWeight: "bold",
-		marginBottom: 10,
+		marginTop: 5,
+		marginBottom: 20,
 	},
 	milestoneItem: {
-		marginVertical: 10,
+		marginVertical: 5,
 		padding: 10,
 		backgroundColor: "#fff",
 		borderRadius: 5,
 		borderWidth: 1,
 		borderColor: "#ccc",
-	},
-	milestoneText: {
-		fontSize: 16,
+		position: "relative", // Set position relative for absolute positioning
 	},
 	loadingContainer: {
 		flex: 1,
@@ -234,8 +391,17 @@ const styles = StyleSheet.create({
 		justifyContent: "center",
 		alignItems: "center",
 	},
-	errorText: {
-		fontSize: 18,
-		color: "red",
+	modalContainer: {
+		flex: 1,
+		justifyContent: "center",
+		alignItems: "center",
+		backgroundColor: "rgba(0, 0, 0, 0.8)", // Semi-transparent background
+	},
+	modalContent: {
+		width: "80%",
+		padding: 20,
+		backgroundColor: "#fff",
+		borderRadius: 10,
+		// alignItems: "center",
 	},
 });
