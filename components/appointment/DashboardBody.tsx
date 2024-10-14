@@ -6,6 +6,7 @@ import {
 	TouchableOpacity,
 	StyleSheet,
 	ActivityIndicator,
+	Image,
 } from "react-native";
 import React, { useCallback, useEffect, useState } from "react";
 import { useUser } from "@clerk/clerk-expo";
@@ -18,6 +19,7 @@ import { Ionicons } from "@expo/vector-icons";
 import Toast from "react-native-toast-message"; // Ensure you have this installed
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { events, milestones as miles } from "@/assets/data/data";
+import { noData } from "@/assets";
 
 // Define interfaces
 interface SelectedBaby {
@@ -35,6 +37,7 @@ interface VaccineSelection {
 
 interface AppointmentData {
 	parentId: string;
+	parentName: string;
 	babyFirstName: string;
 	babyLastName: string;
 	vaccine: string;
@@ -44,7 +47,7 @@ interface AppointmentData {
 	updatedAt: Date;
 }
 
-const AppointmentSetter = () => {
+const DashboardBody = () => {
 	const { user } = useUser(); // Get logged-in user from Clerk
 	const [refreshing, setRefreshing] = useState(false);
 	const [vaccineName, setVaccineName] = useState("");
@@ -177,6 +180,7 @@ const AppointmentSetter = () => {
 		if (selectedBaby && appointmentDate && vaccineName) {
 			const appointmentData: AppointmentData = {
 				parentId: user?.id || "",
+				parentName: user?.firstName + " " + user?.lastName,
 				babyFirstName: selectedBaby.firstName,
 				babyLastName: selectedBaby.lastName,
 				vaccine: vaccineName,
@@ -355,8 +359,12 @@ const AppointmentSetter = () => {
 					</View>
 					{appointments.pending.length === 0 ? (
 						<View style={styles.card}>
+							<Image
+								source={noData}
+								className="w-12 mx-auto h-16 mb-2 opacity-40"
+							/>
 							<ThemedText type="default" className="text-center">
-								No upcoming schedule
+								No pending schedule
 							</ThemedText>
 						</View>
 					) : (
@@ -393,6 +401,10 @@ const AppointmentSetter = () => {
 					</View>
 					{appointments.upcoming.length === 0 ? (
 						<View style={styles.card}>
+							<Image
+								source={noData}
+								className="w-12 mx-auto h-16 mb-2 opacity-40"
+							/>
 							<ThemedText type="default" className="text-center">
 								No upcoming schedule
 							</ThemedText>
@@ -431,6 +443,10 @@ const AppointmentSetter = () => {
 					</View>
 					{appointments.history.length === 0 ? (
 						<View style={styles.card}>
+							<Image
+								source={noData}
+								className="w-12 mx-auto h-16 mb-2 opacity-40"
+							/>
 							<ThemedText type="default" className="text-center">
 								No history
 							</ThemedText>
@@ -727,7 +743,7 @@ const AppointmentSetter = () => {
 	);
 };
 
-export default AppointmentSetter;
+export default DashboardBody;
 
 const styles = StyleSheet.create({
 	container: {

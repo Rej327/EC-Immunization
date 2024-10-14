@@ -8,6 +8,7 @@ import {
 	Modal,
 	TextInput,
 	Image,
+	ScrollView,
 } from "react-native";
 import React, { useEffect, useState } from "react";
 import { db } from "@/db/firebaseConfig"; // Your Firestore config
@@ -16,7 +17,8 @@ import { Ionicons } from "@expo/vector-icons";
 import StyledButton from "@/components/StyledButton";
 import { useRouter } from "expo-router";
 import { ThemedText } from "@/components/ThemedText";
-import { countBaby, countParent } from "@/assets";
+import { countBaby, countParent, noData } from "@/assets";
+import ScheduleList from "@/components/dashboard/ScheduleList";
 
 export default function Dashboard() {
 	const [parents, setParents] = useState<any[]>([]); // State to store parents data
@@ -111,7 +113,7 @@ export default function Dashboard() {
 	const handleRoute = (id: any) => {
 		route.push({
 			pathname: "/online/(dashboard)/parentById",
-			params: { parentIdFromdDashboard: id },
+			params: { parentIdFromDashboard: id },
 		});
 	};
 
@@ -128,42 +130,75 @@ export default function Dashboard() {
 	// If loading, show a loading indicator
 	if (loading) {
 		return (
-			<View className="flex mt-[50%] items-center justify-center">
+			<View style={styles.loadingContainer}>
 				<ActivityIndicator size="large" color="#456B72" />
 			</View>
 		);
 	}
 
 	return (
-		<View style={styles.container}>
+		<ScrollView style={styles.container} stickyHeaderIndices={[0]}>
+			{/* Search Input (sticky at the top) */}
+			<View style={styles.searchInputContainer}>
+				{/* Sticky container */}
+				<TextInput
+					style={styles.searchInput}
+					placeholder="🔍 Search"
+					value={searchQuery}
+					onChangeText={setSearchQuery}
+				/>
+			</View>
 			{/* Counts Card */}
 			<View style={styles.countsContainer}>
-				<View style={styles.countCard}>
-					<Image source={countParent} className="w-28 h-24" />
-					<Text style={styles.countText}>Users: {parentCount}</Text>
+				<View style={styles.countCard} className="relative">
+					<ThemedText
+						className="absolute top-1 left-[5%] text-sm font-bold"
+						type="default"
+					>
+						Users
+					</ThemedText>
+					<View style={styles.countLabelImageContainer}>
+						<Image source={countParent} style={styles.countImage} />
+						<ThemedText
+							className="ml-[17%] text-2xl font-semibold -mt-1"
+							type="cardTitle"
+						>
+							{parentCount}
+						</ThemedText>
+					</View>
 				</View>
-				<View style={styles.countCard}>
-				<Image source={countBaby} className="w-24 h-24" />
-					<Text style={styles.countText}>Babies: {babyCount}</Text>
+				<View style={styles.countCard} className="relative">
+					<ThemedText
+						className="absolute top-1 left-[5%] text-sm font-bold"
+						type="default"
+					>
+						Babies
+					</ThemedText>
+					<View style={styles.countLabelImageContainer}>
+						<Image source={countBaby} style={styles.countImage} />
+						<ThemedText
+							className="ml-[17%] text-2xl font-semibold -mt-1"
+							type="cardTitle"
+						>
+							{babyCount}
+						</ThemedText>
+					</View>
 				</View>
 			</View>
 
-			{/* Search Input */}
-			<TextInput
-				style={styles.searchInput}
-				placeholder="🔍 Search "
-				value={searchQuery}
-				onChangeText={setSearchQuery}
-			/>
+			{/* Schedule section */}
+			<ScheduleList />
 
-			{/* FlatList for parents */}
-			<ThemedText type="header">Accounts</ThemedText>
-			{filteredParents.length > 0 ? (
-				<FlatList
-					data={filteredParents}
-					keyExtractor={(item) => item.id}
-					renderItem={({ item }) => (
-						<View style={styles.item}>
+			{/* List for accounts */}
+			<View className="mx-[20px]">
+				<View className="flex flex-row gap-2 justify-between mb-4">
+					<View className="border-b-[1px] border-[#d6d6d6] shadow-xl w-[32%] mb-2"></View>
+					<ThemedText type="cardHeader">Accounts</ThemedText>
+					<View className="border-b-[1px] border-[#d6d6d6] shadow-xl w-[32%] mb-2"></View>
+				</View>
+				{filteredParents.length > 0 ? (
+					filteredParents.map((item) => (
+						<View style={styles.item} key={item.id}>
 							<Text style={styles.itemText}>
 								{item.firstName} {item.lastName}
 							</Text>
@@ -188,15 +223,20 @@ export default function Dashboard() {
 								</TouchableOpacity>
 							</View>
 						</View>
-					)}
-				/>
-			) : (
-				// Display this when no people match the search query
-				<View style={styles.noResultsContainer}>
-					<Text style={styles.noResultsText}>No people found</Text>
-				</View>
-			)}
-
+					))
+				) : (
+					// Display this when no people match the search query
+					<View style={styles.noResultsContainer}>
+						<Image
+							source={noData}
+							className="w-20 mx-auto h-24 opacity-40"
+						/>
+						<Text style={styles.noResultsText}>
+							Users not found
+						</Text>
+					</View>
+				)}
+			</View>
 			{/* Message Modal */}
 			<Modal
 				animationType="fade"
@@ -243,38 +283,53 @@ export default function Dashboard() {
 					</View>
 				</View>
 			</Modal>
-		</View>
+		</ScrollView>
 	);
 }
 
 const styles = StyleSheet.create({
 	container: {
 		flex: 1,
-		padding: 20,
 		backgroundColor: "#f9f9f9",
 	},
 	countsContainer: {
+		paddingHorizontal: 20,
 		flexDirection: "row",
 		justifyContent: "space-between",
 		marginBottom: 20,
 	},
 	countCard: {
+		position: "relative",
 		flex: 1,
 		backgroundColor: "#fff",
-		padding: 15,
-		borderRadius: 10,
+		overflow: "hidden",
+		borderRadius: 14,
 		borderWidth: 1,
 		borderColor: "#d6d6d6",
 		alignItems: "center",
-		marginHorizontal: 4
+		marginHorizontal: 4,
 	},
-	countText: {
-		fontSize: 18,
-		fontWeight: "bold",
+	countLabelImageContainer: {
+		display: "flex",
+		flexDirection: "row-reverse",
+		justifyContent: "space-between",
+		alignItems: "center",
+		width: "100%",
+		marginTop: 30,
+	},
+	countImage: {
+		width: 110,
+		height: 90,
+		objectFit: "contain",
+	},
+	searchInputContainer: {
+		backgroundColor: "#f9f9f9",
+		paddingHorizontal: 20,
+		paddingTop: 10,
 	},
 	searchInput: {
 		height: 46,
-		borderColor: "#ccc",
+		borderColor: "#d6d6d6",
 		borderWidth: 1,
 		marginBottom: 10,
 		paddingHorizontal: 10,
@@ -301,10 +356,12 @@ const styles = StyleSheet.create({
 		alignItems: "center",
 	},
 	noResultsText: {
-		fontSize: 16,
+		fontSize: 14,
+		marginTop: 10,
 		color: "#999",
 	},
 	modalContainer: {
+		paddingHorizontal: 20,
 		flex: 1,
 		justifyContent: "center",
 		alignItems: "center",
@@ -336,5 +393,10 @@ const styles = StyleSheet.create({
 		marginBottom: 10,
 		paddingHorizontal: 10,
 		borderRadius: 10,
+	},
+	loadingContainer: {
+		flex: 1,
+		justifyContent: "center",
+		alignItems: "center",
 	},
 });

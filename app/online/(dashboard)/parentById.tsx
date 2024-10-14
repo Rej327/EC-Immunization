@@ -53,8 +53,8 @@ export default function ParentById() {
 	const [modalVisible, setModalVisible] = useState(false); // State for modal visibility
 
 	// Fetching the parentId from route params
-	const { parentIdFromdDashboard } = useLocalSearchParams() as {
-		parentIdFromdDashboard: string;
+	const { parentIdFromDashboard } = useLocalSearchParams() as {
+		parentIdFromDashboard: string;
 	};
 
 	// Fetch baby data by parentId
@@ -64,7 +64,7 @@ export default function ParentById() {
 				// Firebase query to get babies by parentId
 				const babyQuery = query(
 					collection(db, "babies"),
-					where("parentId", "==", parentIdFromdDashboard)
+					where("parentId", "==", parentIdFromDashboard)
 				);
 
 				const querySnapshot = await getDocs(babyQuery);
@@ -88,10 +88,10 @@ export default function ParentById() {
 		};
 
 		// Only fetch if parentId is available
-		if (parentIdFromdDashboard) {
+		if (parentIdFromDashboard) {
 			fetchBabies();
 		}
-	}, [parentIdFromdDashboard]);
+	}, [parentIdFromDashboard]);
 
 	// Fetch milestones when a baby is selected
 	const fetchMilestones = async (babyId: string) => {
@@ -286,7 +286,7 @@ export default function ParentById() {
 									? "Received ✅"
 									: "Not Received ❌"}
 							</ThemedText>
-							<TouchableOpacity>
+							<View>
 								<ThemedText className="absolute bottom-1 right-1">
 									<Ionicons
 										name="create-outline"
@@ -294,7 +294,7 @@ export default function ParentById() {
 										color="#456B72"
 									/>
 								</ThemedText>
-							</TouchableOpacity>
+							</View>
 						</TouchableOpacity>
 					))}
 				</View>

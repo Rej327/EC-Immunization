@@ -4,7 +4,8 @@ import {
 	Modal,
 	TouchableOpacity,
 	ActivityIndicator,
-	ScrollView, // Add ScrollView for the modal
+	ScrollView,
+	Image, // Add ScrollView for the modal
 } from "react-native";
 import React, { useEffect, useState } from "react";
 import CustomCard from "../CustomCard";
@@ -13,6 +14,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { db } from "@/db/firebaseConfig";
 import { collection, query, where, getDocs } from "firebase/firestore";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { noData } from "@/assets";
 
 type Milestone = {
 	ageInMonths: number;
@@ -164,14 +166,30 @@ export default function Milestones() {
 								)
 							)
 						) : (
-							<ThemedText type="default" className="text-center">
-								No milestones available. Select first your baby.
-							</ThemedText>
+							<View>
+								<Image
+									source={noData}
+									className="mx-auto w-16 h-20 mb-2 opacity-40"
+								/>
+								<ThemedText
+									type="default"
+									className="text-center left-[2%] z-10 absolute top-6"
+								>
+									No milestones available. Register or select first your
+									baby.
+								</ThemedText>
+							</View>
 						)
 					) : (
-						<ThemedText type="default" className="text-center">
-							No milestones available. Select first your baby.
-						</ThemedText>
+						<View>
+							<Image
+								source={noData}
+								className="mx-auto w-16 h-20 mb-2 opacity-50"
+							/>
+							<ThemedText type="default" className="text-center left-[2%] z-10 absolute top-6">
+								No milestones available. Register or select first your baby.
+							</ThemedText>
+						</View>
 					)}
 				</View>
 			</CustomCard>

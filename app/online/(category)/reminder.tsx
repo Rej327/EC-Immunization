@@ -1,8 +1,8 @@
-import { View, ActivityIndicator } from "react-native";
+import { View, ActivityIndicator, Image } from "react-native";
 import React, { useEffect, useState } from "react";
 import { ThemedText } from "@/components/ThemedText";
 import CustomBody from "@/components/body/CustomBody";
-import { reminder } from "@/assets";
+import { noData, reminder } from "@/assets";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { collection, getDocs, query, where } from "firebase/firestore";
 import { db } from "@/db/firebaseConfig";
@@ -11,7 +11,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { Timestamp } from "firebase/firestore"; // Import Timestamp if using Firestore dates
 import * as Print from "expo-print";
 import * as Sharing from "expo-sharing";
-
+import { Link } from "expo-router";
 type MilestoneList = {
 	ageInMonths: number;
 	expectedDate: Timestamp | Date; // Allow Firestore Timestamp or JS Date
@@ -212,12 +212,19 @@ export default function Reminder() {
 			onDownloadFunction={generatePDF}
 		>
 			{selectedBabyId == null ? (
-				<View className="mx-2 mt-2 flex justify-center items-center">
-					<ThemedText type="default">
+				<View className="mx-2 mt-[20%] flex justify-center items-center">
+					<Image source={noData} className="w-36 h-44 mb-2" />
+					<ThemedText type="default" className="text-base">
 						No reminders available.
 					</ThemedText>
-					<ThemedText type="default">
-						Register or select first your baby in your profile.
+
+					<ThemedText type="default" className="text-base">
+						<ThemedText type="link" className="text-base underline">
+							<Link href={"/online/(auth)/profile"}>
+								Register or set{" "}
+							</Link>{" "}
+						</ThemedText>
+						first your baby in your account.
 					</ThemedText>
 				</View>
 			) : loading ? (

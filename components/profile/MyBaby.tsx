@@ -8,6 +8,7 @@ import {
 	StyleSheet,
 	TouchableOpacity,
 	Platform,
+	Image,
 } from "react-native";
 import { ThemedText } from "@/components/ThemedText";
 import CustomCard from "@/components/CustomCard";
@@ -26,6 +27,7 @@ import {
 import { useUser } from "@clerk/clerk-expo";
 import Toast from "react-native-toast-message"; // Ensure you have this installed
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { noData } from "@/assets";
 
 // Define the interface for Baby
 interface Baby {
@@ -430,6 +432,12 @@ const MyBaby = () => {
 					<ThemedText type="cardHeader" className="mb-2">
 						My Baby
 					</ThemedText>
+					<View className="mx-auto flex items-center justify-center">
+						<Image
+							source={noData}
+							className="w-16 h-20 mb-2 opacity-40 absolute -top-1"
+						/>
+					</View>
 					<ThemedText type="header" className="text-center">
 						No babies registered yet!
 					</ThemedText>

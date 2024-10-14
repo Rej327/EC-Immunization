@@ -19,12 +19,18 @@ export { default as safety } from "./icon/safety.png";
 export { default as sleep } from "./icon/sleep.png";
 export { default as vaccineIcon } from "./icon/vaccine.png";
 
+export { default as pending } from "./icon/pending.png";
+export { default as upcoming } from "./icon/upcoming.png";
+export { default as history } from "./icon/history.png";
+
 
 // OBJECTS
 export { default as mainTop } from "./objects/mainTop.png";
 export { default as mainBottom } from "./objects/mainBottom.png";
 export { default as topField } from "./objects/topField.png";
 export { default as botField } from "./objects/botField.png";
+
+export { default as noData } from "./objects/noData.png";
 
 export { default as circleBg } from "./objects/circle.png";
 
