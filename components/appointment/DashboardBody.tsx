@@ -7,6 +7,8 @@ import {
 	StyleSheet,
 	ActivityIndicator,
 	Image,
+	Modal,
+	Pressable,
 } from "react-native";
 import React, { useCallback, useEffect, useState } from "react";
 import { useUser } from "@clerk/clerk-expo";
@@ -14,7 +16,15 @@ import { ThemedText } from "@/components/ThemedText";
 import CustomBottomSheet from "@/components/CustomBottomSheet";
 import StyledButton from "../StyledButton";
 import { db } from "@/db/firebaseConfig"; // Import Firestore config
-import { collection, getDocs, query, where, addDoc } from "firebase/firestore";
+import {
+	collection,
+	getDocs,
+	query,
+	where,
+	addDoc,
+	deleteDoc,
+	doc,
+} from "firebase/firestore";
 import { Ionicons } from "@expo/vector-icons";
 import Toast from "react-native-toast-message"; // Ensure you have this installed
 import DateTimePicker from "@react-native-community/datetimepicker";
@@ -36,6 +46,7 @@ interface VaccineSelection {
 }
 
 interface AppointmentData {
+	id?: string;
 	parentId: string;
 	parentName: string;
 	babyFirstName: string;
@@ -61,7 +72,11 @@ const DashboardBody = () => {
 		undefined
 	);
 	const [loading, setLoading] = useState(false); // Add loading state
+	const [componentLoad, setComponentLoad] = useState(false); // Add loading state
 	const [showDatePicker, setShowDatePicker] = useState(false);
+	const [isModalVisible, setIsModalVisible] = useState(false);
+	const [appointmentToDelete, setAppointmentToDelete] = useState(null);
+
 	const [selectedMilestoneIndex, setSelectedMilestoneIndex] = useState<
 		number | null
 	>(null);
@@ -120,7 +135,7 @@ const DashboardBody = () => {
 
 	// Fetch milestones for selected baby
 	const fetchMilestones = useCallback(async (babyId: string) => {
-		setLoading(true); // Start loading spinner
+		setComponentLoad(true); // Start loading spinner
 		try {
 			const milestonesCollection = collection(db, "milestones");
 			const q = query(
@@ -251,7 +266,7 @@ const DashboardBody = () => {
 
 	// Fetch appointments for the logged-in user
 	const fetchAppointments = useCallback(async () => {
-		setLoading(true);
+		setComponentLoad(true);
 		const userId = user?.id; // Ensure user is defined
 		if (!userId) {
 			console.log("User ID is not available."); // Log if user ID is not available
@@ -269,7 +284,9 @@ const DashboardBody = () => {
 			const fetchedAppointments: AppointmentData[] = snapshot.docs.map(
 				(doc) => {
 					const data = doc.data();
+					const dataId = doc.id;
 					return {
+						id: dataId,
 						parentId: data.parentId,
 						babyFirstName: data.babyFirstName,
 						babyLastName: data.babyLastName,
@@ -313,7 +330,7 @@ const DashboardBody = () => {
 				position: "top",
 			});
 		} finally {
-			setLoading(false);
+			setComponentLoad(false);
 		}
 	}, [user?.id]);
 
@@ -324,10 +341,71 @@ const DashboardBody = () => {
 		fetchAppointments().then(() => setRefreshing(false));
 	}, [fetchBabies]);
 
+	const handleDeleteAppointment = async (appointmentId: string) => {
+		setComponentLoad(true);
+		try {
+			await deleteDoc(doc(db, "appointments", appointmentId)); // Delete the appointment document
+			Toast.show({
+				type: "success",
+				text1: "Appointment Deleted",
+				text2: "The appointment has been successfully deleted.",
+				position: "top",
+			});
+			// Optionally refresh the appointments here or update state
+		} catch (error) {
+			console.error("Error deleting appointment:", error);
+			Toast.show({
+				type: "error",
+				text1: "Error",
+				text2: "Failed to delete appointment.",
+				position: "top",
+			});
+		} finally {
+			fetchAppointments();
+			setComponentLoad(false);
+		}
+	};
+
+	const handleDeletePress = (appointmentId: any) => {
+		setAppointmentToDelete(appointmentId); // Store the ID of the appointment to delete
+		setIsModalVisible(true); // Show the confirmation modal
+	};
+
+	const confirmDeleteAppointment = () => {
+		if (appointmentToDelete) {
+			handleDeleteAppointment(appointmentToDelete);
+		}
+		setIsModalVisible(false); // Hide modal after confirmation
+	};
+
+	const cancelDeleteAppointment = () => {
+		setIsModalVisible(false); // Hide modal if the user cancels
+	};
+
 	useEffect(() => {
 		fetchBabies(); // Fetch babies on component mount
 		fetchAppointments();
 	}, [fetchBabies, fetchAppointments]);
+
+	// if (loading) {
+	// 	return (
+	// 		<View style={styles.loadingOverlay}>
+	// 			<ActivityIndicator size="large" color="#456B72" />
+	// 		</View>
+	// 	);
+	// }
+
+	if (
+		appointments.pending.length === 0 &&
+		appointments.upcoming.length === 0 &&
+		appointments.history.length === 0
+	) {
+		return (
+			<View style={styles.loadingComponentOverlay}>
+				<ActivityIndicator size="large" color="#456B72" />
+			</View>
+		);
+	}
 
 	return (
 		<View style={styles.container}>
@@ -510,9 +588,22 @@ const DashboardBody = () => {
 							</ThemedText>
 							<ThemedText type="date">
 								When:{" "}
-								{appointment.scheduleDate.toLocaleDateString()}{" "}
-								{/* Format the date as needed */}
+								{appointment.scheduleDate.toLocaleDateString()}
 							</ThemedText>
+
+							{/* Add delete button */}
+							<TouchableOpacity
+								onPress={() =>
+									handleDeletePress(appointment.id)
+								} // Trigger delete confirmation
+								style={styles.deleteButton}
+							>
+								<Ionicons
+									name="trash"
+									color={"#fff"}
+									size={14}
+								/>
+							</TouchableOpacity>
 						</View>
 					))
 				)}
@@ -731,12 +822,49 @@ const DashboardBody = () => {
 					</ThemedText>
 				)}
 			</CustomBottomSheet>
-			{/* Loading Indicator */}
-			{loading && (
-				<View style={styles.loadingOverlay}>
-					<ActivityIndicator size="large" color="#456B72" />
+
+			<Modal
+				animationType="fade"
+				transparent={true}
+				visible={isModalVisible}
+				onRequestClose={cancelDeleteAppointment} // Handle back button press
+			>
+				<View className="flex-1 justify-center items-center bg-black/80">
+					<View className="bg-white rounded-lg p-4 w-80">
+						<View className="flex items-center justify-center mb-2">
+							<Ionicons
+								name="alert-circle-outline"
+								color={"#aa0202"}
+								size={40}
+							/>
+						</View>
+						<ThemedText className="text-xl font-bold mb-2 text-center">
+							Confirm delete?
+						</ThemedText>
+						<ThemedText className="text-gray-700 mb-4 text-center">
+							Are you sure you want to delete this appointment?
+						</ThemedText>
+						<View className="flex-row justify-between">
+							<Pressable
+								onPress={confirmDeleteAppointment}
+								className="bg-[#aa0202] p-2 rounded-lg flex-1 mr-2"
+							>
+								<ThemedText className="text-white text-center">
+									Yes, Delete
+								</ThemedText>
+							</Pressable>
+							<Pressable
+								onPress={cancelDeleteAppointment} // Close modal without action
+								className="bg-gray-300 p-2 rounded-lg flex-1 ml-2"
+							>
+								<ThemedText className="text-black text-center">
+									Cancel
+								</ThemedText>
+							</Pressable>
+						</View>
+					</View>
 				</View>
-			)}
+			</Modal>
 		</View>
 	);
 };
@@ -848,7 +976,18 @@ const styles = StyleSheet.create({
 	},
 	loadingOverlay: {
 		position: "absolute",
-		top: 26,
+		top: 30,
+		left: 0,
+		right: 0,
+		bottom: 0,
+		backgroundColor: "#f5f4f7",
+		justifyContent: "center",
+		alignItems: "center",
+		zIndex: 1000,
+	},
+	loadingComponentOverlay: {
+		position: "absolute",
+		top: 58,
 		left: 0,
 		right: 0,
 		bottom: 0,
@@ -886,5 +1025,14 @@ const styles = StyleSheet.create({
 	date: {
 		color: "#757575",
 		fontSize: 12,
+	},
+	deleteButton: {
+		position: "absolute",
+		right: 0,
+		bottom: 15,
+		backgroundColor: "#c00202", // Red background for delete
+		padding: 10,
+		borderRadius: 5,
+		alignItems: "center",
 	},
 });
