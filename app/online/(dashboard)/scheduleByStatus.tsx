@@ -201,6 +201,7 @@ export default function ScheduleByStatus() {
 			style={styles.mainContainer}
 			stickyHeaderIndices={[1]}
 			stickyHeaderHiddenOnScroll
+			keyboardDismissMode="on-drag"
 			refreshControl={
 				<RefreshControl
 					refreshing={refreshing}

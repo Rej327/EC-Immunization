@@ -137,7 +137,7 @@ export default function Dashboard() {
 	}
 
 	return (
-		<ScrollView style={styles.container} stickyHeaderIndices={[0]}>
+		<ScrollView style={styles.container} keyboardDismissMode="on-drag" stickyHeaderIndices={[0]}>
 			{/* Search Input (sticky at the top) */}
 			<View style={styles.searchInputContainer}>
 				{/* Sticky container */}
