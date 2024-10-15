@@ -38,7 +38,6 @@ export default function Milestones() {
 	>(null); // Update to hold a group of milestones
 	const [milestones, setMilestones] = useState<Milestone[]>([]);
 	const [selectedBabyId, setSelectedBabyId] = useState<string | null>(null);
-	const [loading, setLoading] = useState(false); // Add loading state
 
 	const fetchBabyId = async () => {
 		try {
@@ -59,7 +58,6 @@ export default function Milestones() {
 	}, [selectedBabyId]);
 
 	const fetchMilestones = async (babyId: string) => {
-		setLoading(true); // Start loading spinner
 		const milestonesRef = query(
 			collection(db, "milestones"),
 			where("babyId", "==", babyId)
@@ -80,9 +78,7 @@ export default function Milestones() {
 			console.log("Fetched Milestones Success ");
 		} catch (error) {
 			console.error("Error fetching milestones: ", error);
-		} finally {
-			setLoading(false); // Stop loading spinner after data is fetched
-		}
+		} 
 	};
 
 	const handlePress = (milestoneGroup: Milestone[]) => {
@@ -194,12 +190,7 @@ export default function Milestones() {
 				</View>
 			</CustomCard>
 
-			{/* Loading Overlay */}
-			{loading && (
-				<View style={styles.loadingOverlay}>
-					<ActivityIndicator size="large" color="#456B72" />
-				</View>
-			)}
+
 
 			{/* Modal for Vaccine Details */}
 			<Modal
@@ -284,16 +275,5 @@ const styles = StyleSheet.create({
 	},
 	closeButtonText: {
 		color: "#fff",
-	},
-	loadingOverlay: {
-		position: "absolute",
-		top: 0,
-		left: 0,
-		right: 0,
-		bottom: 0,
-		backgroundColor: "#00000068",
-		justifyContent: "center",
-		alignItems: "center",
-		zIndex: 1000, // Ensure it overlays on top
 	},
 });

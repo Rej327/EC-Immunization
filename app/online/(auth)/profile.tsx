@@ -13,19 +13,11 @@ const Profile = () => {
 
 	const onRefresh = async () => {
 		setRefreshing(true);
-
 		setRefreshing(false);
 	};
 
 	return (
 		<ScrollView
-			refreshControl={
-				<RefreshControl
-					refreshing={refreshing}
-					onRefresh={onRefresh}
-					colors={["#456B72"]}
-				/>
-			}
 			keyboardDismissMode="on-drag"
 			className="bg-[#f5f4f7]"
 		>
