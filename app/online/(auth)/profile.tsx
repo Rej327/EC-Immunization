@@ -27,6 +27,7 @@ const Profile = () => {
 				/>
 			}
 			keyboardDismissMode="on-drag"
+			className="bg-[#f5f4f7]"
 		>
 			<View className="bg-[#86b3bc] w-auto h-10" />
 

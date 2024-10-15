@@ -378,7 +378,7 @@ const MyBaby = () => {
 			{babies.length > 0 ? (
 				<CustomCard className="my-2">
 					<ThemedText type="cardHeader" className="mb-2">
-						Your Baby
+						Your Children
 					</ThemedText>
 
 					<TouchableOpacity
@@ -393,7 +393,7 @@ const MyBaby = () => {
 									type="default"
 									className="font-bold"
 								>
-									Select your baby
+									Select your children
 								</ThemedText>
 							)}
 						</View>
@@ -430,7 +430,7 @@ const MyBaby = () => {
 			) : (
 				<CustomCard>
 					<ThemedText type="cardHeader" className="mb-2">
-						My Baby
+						My Children
 					</ThemedText>
 					<View className="mx-auto flex items-center justify-center">
 						<Image

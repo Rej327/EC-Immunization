@@ -211,6 +211,7 @@ export default function Reminder() {
 			fileName=""
 			onDownloadFunction={generatePDF}
 		>
+			<View className="px-5 pb-5">
 			{selectedBabyId == null ? (
 				<View className="mx-2 mt-[20%] flex justify-center items-center">
 					<Image source={noData} className="w-36 h-44 mb-2" />
@@ -224,7 +225,7 @@ export default function Reminder() {
 								Register or set{" "}
 							</Link>{" "}
 						</ThemedText>
-						first your baby in your account.
+						first your children in your account.
 					</ThemedText>
 				</View>
 			) : loading ? (
@@ -295,6 +296,7 @@ export default function Reminder() {
 					)}
 				</>
 			)}
+			</View>
 		</CustomBody>
 	);
 }

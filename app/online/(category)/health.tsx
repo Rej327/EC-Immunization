@@ -48,7 +48,7 @@ export default function Health() {
 				</View>
 			) : (
 				<>
-					<ScrollView className="rounded-t-2xl p-4">
+					<ScrollView className="rounded-t-2xl p-5">
 						<View className="rounded-xl overflow-hidden">
 							{data.map((item, index) => (
 								<Collapsible

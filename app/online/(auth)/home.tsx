@@ -143,7 +143,7 @@ const Home = () => {
 	};
 
 	return (
-		<View style={{ flex: 1 }}>
+		<View style={{ flex: 1, backgroundColor: '#f5f4f7' }}>
 			<ScrollView
 				refreshControl={
 					<RefreshControl
