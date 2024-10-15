@@ -52,6 +52,7 @@ const DashboardBody = () => {
 	const [refreshing, setRefreshing] = useState(false);
 	const [vaccineName, setVaccineName] = useState("");
 	const [openBottomSheet, setOpenBottomSheet] = useState<string | null>(null);
+	const [isBottomSheetOpen, setBottomSheetOpen] = useState(false);
 	const [showDropdown, setShowDropdown] = useState(false);
 	const [selectedBaby, setSelectedBaby] = useState<SelectedBaby | null>(null);
 	const [babies, setBabies] = useState<SelectedBaby[]>([]);
@@ -198,11 +199,6 @@ const DashboardBody = () => {
 					text2: `Vaccine ${vaccineName} scheduled for ${appointmentDate}.`,
 					position: "top",
 				});
-
-				// Reset form fields
-				// setAppointmentDate();
-				setVaccineName("");
-				// closeBottomSheet();
 			} catch (error) {
 				console.error("Error setting appointment:", error);
 				Toast.show({
@@ -221,14 +217,21 @@ const DashboardBody = () => {
 			});
 			console.warn("Please fill in all fields.");
 		}
-
+		setVaccineName("");
 		setSelectedBaby(null);
 		setAppointmentDate(undefined);
 		setSelectedMilestoneIndex(null);
+		setMilestones([]);
+		fetchAppointments();
 	};
 
 	const closeBottomSheetHandler = useCallback(() => {
 		setOpenBottomSheet(null);
+		setVaccineName("");
+		setSelectedBaby(null);
+		setAppointmentDate(undefined);
+		setSelectedMilestoneIndex(null);
+		setMilestones([]);
 	}, []);
 
 	const openBottomSheetHandler = (type: string) => {
@@ -248,8 +251,8 @@ const DashboardBody = () => {
 
 	// Fetch appointments for the logged-in user
 	const fetchAppointments = useCallback(async () => {
+		setLoading(true);
 		const userId = user?.id; // Ensure user is defined
-
 		if (!userId) {
 			console.log("User ID is not available."); // Log if user ID is not available
 			return; // Early return if user ID is not present
@@ -309,6 +312,8 @@ const DashboardBody = () => {
 				text2: "Failed to fetch appointments.",
 				position: "top",
 			});
+		} finally {
+			setLoading(false);
 		}
 	}, [user?.id]);
 
@@ -590,10 +595,11 @@ const DashboardBody = () => {
 				isOpen={openBottomSheet === "setup"}
 				onClose={closeBottomSheetHandler}
 				title="Set Vaccine Appointment"
+				onCloseSubmit={handleSetAppointment}
 			>
 				{/* Select Baby Dropdown */}
 				<ThemedText type="default" className="font-bold">
-					Your Baby
+					Your Children
 				</ThemedText>
 				<TouchableOpacity
 					onPress={() => setShowDropdown(!showDropdown)}
@@ -641,7 +647,8 @@ const DashboardBody = () => {
 								type="default"
 								style={styles.noBabiesText}
 							>
-								No babies found. Please add a baby first.
+								No babies found. Please register your children
+								first.
 							</ThemedText>
 						)}
 					</View>
@@ -720,19 +727,10 @@ const DashboardBody = () => {
 					))
 				) : (
 					<ThemedText type="default" style={styles.noMilestonesText}>
-						No available vaccines. Select your baby first
+						No available vaccines. Select your children first
 					</ThemedText>
 				)}
-
-				{/* Set Appointment Button */}
-				<TouchableOpacity
-					style={styles.button}
-					onPress={handleSetAppointment}
-				>
-					<Text style={styles.buttonText}>Set Appointment</Text>
-				</TouchableOpacity>
 			</CustomBottomSheet>
-
 			{/* Loading Indicator */}
 			{loading && (
 				<View style={styles.loadingOverlay}>
@@ -850,11 +848,11 @@ const styles = StyleSheet.create({
 	},
 	loadingOverlay: {
 		position: "absolute",
-		top: 0,
+		top: 26,
 		left: 0,
 		right: 0,
 		bottom: 0,
-		backgroundColor: "rgba(0, 0, 0, 0.8)",
+		backgroundColor: "#f5f4f7",
 		justifyContent: "center",
 		alignItems: "center",
 		zIndex: 1000,

@@ -290,7 +290,7 @@ export default function Dashboard() {
 const styles = StyleSheet.create({
 	container: {
 		flex: 1,
-		backgroundColor: "#f9f9f9",
+		backgroundColor: "#f5f4f7",
 	},
 	countsContainer: {
 		paddingHorizontal: 20,

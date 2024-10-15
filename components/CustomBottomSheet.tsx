@@ -1,5 +1,10 @@
-import React, { useCallback, useMemo, useRef } from "react";
-import { View, TouchableOpacity, StyleSheet } from "react-native";
+import React, { useCallback, useMemo, useRef, useState } from "react";
+import {
+	View,
+	TouchableOpacity,
+	StyleSheet,
+	ActivityIndicator,
+} from "react-native";
 import BottomSheet, { BottomSheetScrollView } from "@gorhom/bottom-sheet";
 import { ThemedText } from "@/components/ThemedText";
 
@@ -8,6 +13,8 @@ interface CustomBottomSheetProps {
 	onClose: () => void;
 	title: string;
 	children: React.ReactNode;
+	download?: () => void | undefined;
+	onCloseSubmit?: () => Promise<void> | void;
 }
 
 const CustomBottomSheet: React.FC<CustomBottomSheetProps> = ({
@@ -15,9 +22,12 @@ const CustomBottomSheet: React.FC<CustomBottomSheetProps> = ({
 	onClose,
 	title,
 	children,
+	download,
+	onCloseSubmit,
 }) => {
 	const bottomSheetRef = useRef<BottomSheet>(null);
 	const snapPoints = useMemo(() => ["50%", "80%"], []);
+	const [loading, setLoading] = useState(false); // Loading state
 
 	const handleClose = useCallback(() => {
 		if (bottomSheetRef.current) {
@@ -25,6 +35,21 @@ const CustomBottomSheet: React.FC<CustomBottomSheetProps> = ({
 		}
 		onClose();
 	}, [onClose]);
+
+	const handleDownload = useCallback(() => {
+		if (download) {
+			download();
+		}
+	}, [download]);
+
+	const handleSubmit = useCallback(async () => {
+		if (onCloseSubmit) {
+			setLoading(true); // Start loading
+			await onCloseSubmit(); // Wait for form submission to complete
+			setLoading(false); // End loading
+		}
+		handleClose(); // Close the sheet after submission
+	}, [onCloseSubmit, handleClose]);
 
 	return (
 		<BottomSheet
@@ -34,17 +59,40 @@ const CustomBottomSheet: React.FC<CustomBottomSheetProps> = ({
 			onClose={handleClose}
 			handleIndicatorStyle={{ backgroundColor: "#456B72" }}
 		>
-			<BottomSheetScrollView style={styles.contentContainer}>
-				<TouchableOpacity onPress={handleClose}>
-					<ThemedText type="link">Close</ThemedText>
-				</TouchableOpacity>
-				<View style={styles.header}>
-					<ThemedText type="header">{title}</ThemedText>
-					<TouchableOpacity onPress={handleClose}>
-						<ThemedText type="link">Download</ThemedText>
+			<BottomSheetScrollView
+				style={styles.contentContainer}
+				stickyHeaderIndices={[0]}
+				stickyHeaderHiddenOnScroll
+			>
+				<View className="bg-white pb-4">
+					<TouchableOpacity onPress={handleClose} className="w-10">
+						<ThemedText type="link">Close</ThemedText>
 					</TouchableOpacity>
 				</View>
+				<View style={styles.header}>
+					<ThemedText type="header">{title}</ThemedText>
+					{download && (
+						<TouchableOpacity onPress={handleDownload}>
+							<ThemedText type="link">Download</ThemedText>
+						</TouchableOpacity>
+					)}
+				</View>
 				{children}
+				{onCloseSubmit && (
+					<TouchableOpacity
+						style={styles.button}
+						onPress={handleSubmit}
+						disabled={loading} // Disable button while loading
+					>
+						{loading ? (
+							<ActivityIndicator color="#fff" />
+						) : (
+							<ThemedText style={styles.buttonText}>
+								Set Appointment
+							</ThemedText>
+						)}
+					</TouchableOpacity>
+				)}
 			</BottomSheetScrollView>
 		</BottomSheet>
 	);
@@ -55,12 +103,24 @@ export default CustomBottomSheet;
 const styles = StyleSheet.create({
 	contentContainer: {
 		paddingHorizontal: 16,
-    paddingBottom: 16,
+		paddingBottom: 16,
 	},
 	header: {
 		flexDirection: "row",
 		justifyContent: "space-between",
 		alignItems: "center",
-		marginBottom: 1, // Add margin for spacing
+		marginBottom: 1,
+	},
+	button: {
+		backgroundColor: "#456B72",
+		padding: 12,
+		borderRadius: 5,
+		alignItems: "center",
+		marginBottom: 10,
+		marginTop: 5,
+	},
+	buttonText: {
+		color: "#fff",
+		fontWeight: "bold",
 	},
 });
