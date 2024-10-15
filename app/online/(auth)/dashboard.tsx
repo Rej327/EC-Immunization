@@ -172,7 +172,7 @@ export default function Dashboard() {
 						className="absolute top-1 left-[5%] text-sm font-bold"
 						type="default"
 					>
-						Babies
+						Childrens
 					</ThemedText>
 					<View style={styles.countLabelImageContainer}>
 						<Image source={countBaby} style={styles.countImage} />
