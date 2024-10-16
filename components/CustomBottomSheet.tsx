@@ -7,6 +7,7 @@ import {
 } from "react-native";
 import BottomSheet, { BottomSheetScrollView } from "@gorhom/bottom-sheet";
 import { ThemedText } from "@/components/ThemedText";
+import { Ionicons } from "@expo/vector-icons";
 
 interface CustomBottomSheetProps {
 	isOpen: boolean;
@@ -66,7 +67,16 @@ const CustomBottomSheet: React.FC<CustomBottomSheetProps> = ({
 			>
 				<View className="bg-white pb-4">
 					<TouchableOpacity onPress={handleClose} className="w-10">
-						<ThemedText type="link">Close</ThemedText>
+					<Ionicons
+							name="return-down-back-outline"
+							size={24}
+							color={"#456B72"}
+						/>
+							{/* <Ionicons
+							name="chevron-down-outline"
+							size={24}
+							color={"#456B72"}
+						/> */}
 					</TouchableOpacity>
 				</View>
 				<View style={styles.header}>
