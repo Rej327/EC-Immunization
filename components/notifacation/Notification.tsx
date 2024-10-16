@@ -7,10 +7,13 @@ import {
 	Modal,
 	Animated,
 	Pressable,
+	Image,
 } from "react-native";
 import { ThemedText } from "../ThemedText";
 import { NotificationType } from "../HomeRightHeader";
 import { formatDistanceToNow, format } from "date-fns";
+import { Ionicons } from "@expo/vector-icons";
+import { noNotif } from "@/assets";
 
 interface NotificationProps {
 	notifications: NotificationType[];
@@ -66,51 +69,93 @@ const Notification: React.FC<NotificationProps> = ({
 						{ transform: [{ translateX: slideAnim }] },
 					]}
 				>
-					<ThemedText type="subtitle" className="mb-4">
+					<ThemedText
+						type="cardHeader"
+						className="text-center shadow-xl bg-[#86b3bc] py-4 text-lg"
+					>
 						Notifications
 					</ThemedText>
-					<ScrollView>
-						{notifications.map((notification) => (
-							<Pressable
-								key={notification.id}
-								onPress={() =>
-									handleNotificationPress(notification)
-								}
-								style={[
-									styles.notificationCard,
-									{
-										backgroundColor: notification.isRead
-											? "#f5f5f5"
-											: "white",
-									},
-								]}
-							>
-								<View style={styles.notificationContainer}>
-									{/* Show dot for unread notifications */}
+					<ScrollView className="px-4 mt-2">
+						{notifications.length > 0 ? (
+							<>
+								{notifications.map((notification) => (
+									<Pressable
+										key={notification.id}
+										onPress={() =>
+											handleNotificationPress(
+												notification
+											)
+										}
+										style={[
+											styles.notificationCard,
+											{
+												backgroundColor:
+													notification.isRead
+														? "white"
+														: "#d2e3e7e6",
+											},
+										]}
+									>
+										<View
+											style={styles.notificationContainer}
+										>
+											{/* Show dot for unread notifications */}
 
-									<View style={styles.notificationContent}>
-										<Text style={styles.notificationTitle}>
-											{notification.subject}
-										</Text>
-										<Text>{notification.message}</Text>
-										<Text style={styles.notificationDate}>
-											{formatNotificationDate(
-												notification.createdAt.toDate()
+											<View
+												style={
+													styles.notificationContent
+												}
+											>
+												<Text
+													style={
+														styles.notificationTitle
+													}
+													numberOfLines={1}
+													ellipsizeMode="tail"
+												>
+													{notification.subject}
+												</Text>
+												<Text
+													numberOfLines={1}
+													ellipsizeMode="tail"
+												>
+													{notification.message}
+												</Text>
+												<Text
+													style={
+														styles.notificationDate
+													}
+												>
+													{formatNotificationDate(
+														notification.createdAt.toDate()
+													)}
+												</Text>
+											</View>
+											{!notification.isRead && (
+												<View
+													style={styles.unreadDot}
+												/>
 											)}
-										</Text>
-									</View>
-									{!notification.isRead && (
-										<View style={styles.unreadDot} />
-									)}
-								</View>
-							</Pressable>
-						))}
+										</View>
+									</Pressable>
+								))}
+							</>
+						) : (
+						<View className="flex mt-[70%] items-center justify-center">
+							<Image source={noNotif} className="w-52 h-52 object-cover" />
+							<ThemedText type="cardHeader" className="text-[#456b7288] -mt-2">No notifications</ThemedText>
+						</View>
+						)}
 					</ScrollView>
 					<Pressable
-						style={styles.closeButton}
+						style={styles.closeNotificationButton}
 						onPress={toggleDrawer}
 					>
-						<ThemedText type="close">Close</ThemedText>
+						<Ionicons
+							name="return-up-forward-outline"
+							size={24}
+							color={"#456B72"}
+						/>
 					</Pressable>
 				</Animated.View>
 			</Animated.View>
@@ -129,13 +174,13 @@ const Notification: React.FC<NotificationProps> = ({
 							onPress={() => setSelectedNotification(null)}
 						/>
 						<View style={styles.detailsContent}>
-							<ThemedText type="title">
-								{selectedNotification.subject}
+							<ThemedText style={styles.notificationTitle}>
+								Subject: {selectedNotification.subject}
 							</ThemedText>
-							<Text style={styles.detailsMessage}>
-								{selectedNotification.message}
-							</Text>
-							<Text style={styles.detailsDate}>
+							<ThemedText style={styles.detailsMessage}>
+								Message: {selectedNotification.message}
+							</ThemedText>
+							<Text style={styles.notificationDate}>
 								{formatNotificationDate(
 									selectedNotification.createdAt.toDate()
 								)}
@@ -144,7 +189,11 @@ const Notification: React.FC<NotificationProps> = ({
 								style={styles.closeButton}
 								onPress={() => setSelectedNotification(null)}
 							>
-								<ThemedText type="close">Close</ThemedText>
+								<Ionicons
+									name="close-circle-sharp"
+									size={22}
+									color={"#456B72"}
+								/>
 							</Pressable>
 						</View>
 					</Animated.View>
@@ -165,7 +214,6 @@ const styles = StyleSheet.create({
 		width: "90%",
 		height: "100%",
 		backgroundColor: "#f5f4f7",
-		padding: 20,
 		borderTopLeftRadius: 12,
 		borderBottomLeftRadius: 12,
 		position: "absolute",
@@ -174,9 +222,7 @@ const styles = StyleSheet.create({
 	notificationCard: {
 		padding: 15,
 		borderRadius: 10,
-		marginBottom: 5,
-		borderWidth: 1,
-		borderColor: "#d6d6d6",
+		marginBottom: 10,
 	},
 	notificationContainer: {
 		flexDirection: "row",
@@ -191,6 +237,7 @@ const styles = StyleSheet.create({
 	},
 	notificationContent: {
 		flex: 1,
+		paddingRight: 10,
 	},
 	notificationTitle: {
 		fontSize: 16,
@@ -204,10 +251,15 @@ const styles = StyleSheet.create({
 	},
 	closeButton: {
 		position: "absolute",
-		top: 5,
-		right: 10,
-		padding: 10,
-		borderRadius: 20,
+		top: 0,
+		right: 0,
+		padding: 5,
+	},
+	closeNotificationButton: {
+		position: "absolute",
+		top: 14,
+		right: 20,
+		padding: 5,
 	},
 	detailsOverlay: {
 		flex: 1,
@@ -219,14 +271,14 @@ const styles = StyleSheet.create({
 		position: "absolute",
 		width: "80%",
 		backgroundColor: "white",
-		padding: 20,
+		paddingHorizontal: 20,
+		paddingBottom: 20,
+		paddingTop: 25,
 		borderRadius: 10,
-		alignItems: "center",
 	},
 	detailsMessage: {
 		marginVertical: 10,
-		fontSize: 16,
-		textAlign: "center",
+		fontSize: 14,
 	},
 	detailsDate: {
 		fontSize: 12,

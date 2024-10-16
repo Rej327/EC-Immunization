@@ -12,7 +12,6 @@ import { db } from "@/db/firebaseConfig"; // Your Firestore configuration
 import {
 	collection,
 	onSnapshot,
-	writeBatch,
 	doc,
 	Timestamp,
 	query,
@@ -20,6 +19,7 @@ import {
 	updateDoc,
 } from "firebase/firestore";
 import Notification from "./notifacation/Notification";
+import { ThemedText } from "./ThemedText";
 
 // Define the Notification type
 export interface NotificationType {
@@ -137,8 +137,14 @@ export const HomeRightHeader = () => {
 						size={24}
 						color={"#f7d721"}
 					/>
-					{/* Show red dot if there are unread notifications */}
-					{unreadCount > 0 && <View style={styles.redDot} />}
+					{/* Show red dot with unread count if there are unread notifications */}
+					{unreadCount > 0 && (
+						<View style={styles.redDot}>
+							<ThemedText type="cardTitle" style={styles.unreadCountText}>
+								{unreadCount}
+							</ThemedText>
+						</View>
+					)}
 				</View>
 			</TouchableOpacity>
 
@@ -170,11 +176,20 @@ const styles = StyleSheet.create({
 	},
 	redDot: {
 		position: "absolute",
-		top: 0,
-		right: 0,
-		width: 8,
-		height: 8,
-		borderRadius: 4,
+		top: -4,
+		right: -7,
+		minWidth: 18,
+		height: 18,
+		borderRadius: 9,
 		backgroundColor: "red",
+		alignItems: "center",
+		justifyContent: "center",
+	},
+	unreadCountText: {
+		lineHeight: 27,
+		marginTop: -3,
+		color: "white",
+		fontSize: 12,
+		fontWeight: "bold",
 	},
 });

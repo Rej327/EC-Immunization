@@ -23,6 +23,7 @@ export { default as pending } from "./icon/pending.png";
 export { default as upcoming } from "./icon/upcoming.png";
 export { default as history } from "./icon/history.png";
 
+export { default as noNotif } from "./icon/noNotif.png";
 
 // OBJECTS
 export { default as mainTop } from "./objects/mainTop.png";
