@@ -38,8 +38,10 @@ export default function Milestones() {
 	>(null); // Update to hold a group of milestones
 	const [milestones, setMilestones] = useState<Milestone[]>([]);
 	const [selectedBabyId, setSelectedBabyId] = useState<string | null>(null);
+	const [loading, setLoading] = useState(false);
 
 	const fetchBabyId = async () => {
+		setLoading(true);
 		try {
 			const babyId = await AsyncStorage.getItem("selectedBabyId");
 			// console.log("Fetched baby ID: ", babyId);
@@ -49,6 +51,8 @@ export default function Milestones() {
 			}
 		} catch (error) {
 			console.error("Error fetching baby ID from storage: ", error);
+		} finally {
+			setLoading(false);
 		}
 	};
 
@@ -78,7 +82,7 @@ export default function Milestones() {
 			console.log("Fetched Milestones Success ");
 		} catch (error) {
 			console.error("Error fetching milestones: ", error);
-		} 
+		}
 	};
 
 	const handlePress = (milestoneGroup: Milestone[]) => {
@@ -135,62 +139,82 @@ export default function Milestones() {
 					</TouchableOpacity>
 				</View>
 				<View>
-					{selectedBabyId ? (
-						aggregatedMilestones.length > 0 ? (
-							aggregatedMilestones.map(
-								(milestoneGroup, index) => (
-									<TouchableOpacity
-										key={index}
-										onPress={() =>
-											handlePress(milestoneGroup.vaccines)
-										}
-										className={`flex flex-row justify-between py-4 ${
-											index ===
-											aggregatedMilestones.length - 1
-												? ""
-												: "border-b-[1px] border-[#d6d6d6]"
-										}`}
-									>
+					{!loading ? (
+						<>
+							{selectedBabyId ? (
+								aggregatedMilestones.length > 0 ? (
+									aggregatedMilestones.map(
+										(milestoneGroup, index) => (
+											<TouchableOpacity
+												key={index}
+												onPress={() =>
+													handlePress(
+														milestoneGroup.vaccines
+													)
+												}
+												className={`flex flex-row justify-between py-4 ${
+													index ===
+													aggregatedMilestones.length -
+														1
+														? ""
+														: "border-b-[1px] border-[#d6d6d6]"
+												}`}
+											>
+												<ThemedText
+													type="default"
+													className="font-bold"
+												>
+													{milestoneGroup.age} months
+												</ThemedText>
+												<ThemedText>{`${milestoneGroup.receivedCount}/${milestoneGroup.total}`}</ThemedText>
+											</TouchableOpacity>
+										)
+									)
+								) : (
+									<View>
+										<Image
+											source={noData}
+											className="mx-auto w-16 h-20 mb-2 opacity-40"
+										/>
 										<ThemedText
 											type="default"
-											className="font-bold"
+											className="text-center left-[2%] z-10 absolute top-6"
 										>
-											{milestoneGroup.age} months
+											No milestones available. Register or
+											select first your baby.
 										</ThemedText>
-										<ThemedText>{`${milestoneGroup.receivedCount}/${milestoneGroup.total}`}</ThemedText>
-									</TouchableOpacity>
+									</View>
 								)
-							)
-						) : (
-							<View>
-								<Image
-									source={noData}
-									className="mx-auto w-16 h-20 mb-2 opacity-40"
-								/>
-								<ThemedText
-									type="default"
-									className="text-center left-[2%] z-10 absolute top-6"
-								>
-									No milestones available. Register or select first your
-									baby.
-								</ThemedText>
-							</View>
-						)
+							) : (
+								<View>
+									<Image
+										source={noData}
+										className="mx-auto w-16 h-20 mb-2 opacity-50"
+									/>
+									<ThemedText
+										type="default"
+										className="text-center left-[2%] z-10 absolute top-6"
+									>
+										No milestones available. Register or
+										select first your baby.
+									</ThemedText>
+								</View>
+							)}
+						</>
 					) : (
-						<View>
-							<Image
-								source={noData}
-								className="mx-auto w-16 h-20 mb-2 opacity-50"
-							/>
-							<ThemedText type="default" className="text-center left-[2%] z-10 absolute top-6">
-								No milestones available. Register or select first your baby.
-							</ThemedText>
+						<View
+							style={{
+								flex: 1,
+								justifyContent: "center",
+								alignItems: "center",
+								height: 88
+							}}
+						>
+							<ActivityIndicator size="large" color="#456B72" />
 						</View>
 					)}
 				</View>
 			</CustomCard>
-
-
 
 			{/* Modal for Vaccine Details */}
 			<Modal
