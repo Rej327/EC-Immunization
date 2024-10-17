@@ -11,9 +11,12 @@ export default function ProfileInformation() {
 	const [firstName, setFirstName] = useState(user?.firstName ?? "");
 	const [lastName, setLastName] = useState(user?.lastName ?? "");
 	const [username, setUsername] = useState(user?.username ?? "");
+	const [loading, setLoading] = useState(false);
 
 	const onSaveUser = async () => {
 		try {
+			setLoading(true);
+
 			const result = await user?.update({
 				firstName: firstName,
 				lastName: lastName,
@@ -40,6 +43,8 @@ export default function ProfileInformation() {
 				"🚀 ~ file: profile.tsx:18 ~ onSaveUser ~ e",
 				JSON.stringify(e)
 			);
+		} finally {
+			setLoading(false); // Stop loading
 		}
 	};
 	return (
@@ -71,7 +76,7 @@ export default function ProfileInformation() {
 						First name:
 					</ThemedText>
 					<TextInput
-						onChangeText={setFirstName}
+						// onChangeText={setFirstName}
 						value={firstName}
 						placeholder="First name"
 						className=" border-[#d6d6d6] my-1 h-10 w-auto  p-2 rounded-xl bg-[#ebebeb]"
@@ -84,7 +89,7 @@ export default function ProfileInformation() {
 					<TextInput
 						placeholder="Last Name"
 						value={lastName}
-						onChangeText={setLastName}
+						// onChangeText={setLastName}
 						className=" border-[#d6d6d6] my-1 h-10 w-auto p-2 rounded-xl bg-[#ebebeb] mb-2"
 					/>
 				</View>
@@ -96,6 +101,7 @@ export default function ProfileInformation() {
 				fontSize={14}
 				borderRadius={12}
 				customWeight="500"
+				loading={loading}
 			/>
 		</CustomCard>
 	);
