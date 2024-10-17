@@ -12,7 +12,7 @@ import {
 	Image,
 	RefreshControl,
 } from "react-native";
-import { useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import {
 	collection,
 	query,
@@ -20,6 +20,7 @@ import {
 	getDocs,
 	updateDoc,
 	doc,
+	addDoc,
 } from "firebase/firestore";
 import { db } from "@/db/firebaseConfig"; // Firestore instance
 import { Timestamp } from "firebase/firestore";
@@ -28,9 +29,11 @@ import { Ionicons } from "@expo/vector-icons";
 import Toast from "react-native-toast-message";
 import { noData } from "@/assets";
 import StyledButton from "@/components/StyledButton";
+import { useUser } from "@clerk/clerk-expo";
 
 interface AppointmentData {
 	id: string;
+	parentId: string;
 	babyFirstName: string;
 	babyLastName: string;
 	parentName: string;
@@ -41,9 +44,6 @@ interface AppointmentData {
 }
 
 export default function ScheduleByStatus() {
-	const { scheduleByStats } = useLocalSearchParams() as {
-		scheduleByStats: string;
-	};
 	const [appointments, setAppointments] = useState<AppointmentData[]>([]);
 	const [filteredAppointments, setFilteredAppointments] = useState<
 		AppointmentData[]
@@ -55,6 +55,12 @@ export default function ScheduleByStatus() {
 	const [loading, setLoading] = useState(true);
 	const [selectedStatus, setSelectedStatus] = useState<string>("");
 	const [refreshing, setRefreshing] = useState(false);
+
+	const { scheduleByStats } = useLocalSearchParams() as {
+		scheduleByStats: string;
+	};
+
+	const route = useRouter();
 
 	// Fetch appointments based on status
 	const fetchAppointments = async () => {
@@ -104,23 +110,51 @@ export default function ScheduleByStatus() {
 		}
 	}, [searchQuery, appointments]);
 
+	const { isLoaded, user } = useUser();
 	// Handle updating status and updating the 'updatedAt' field
 	const handleUpdateStatus = async () => {
 		if (!selectedAppointment) return;
 
+		// Ensure that the user data is loaded
+		if (!isLoaded || !user) {
+			Toast.show({
+				type: "error",
+				text1: "User data not loaded. Please try again later.",
+			});
+			return;
+		}
+
 		try {
+			// Reference to the appointment document in Firestore
 			const appointmentDocRef = doc(
 				db,
 				"appointments",
 				selectedAppointment.id
 			);
 
+			// Update the appointment status in Firestore
 			await updateDoc(appointmentDocRef, {
-				status: selectedStatus, // Update the status
-				updatedAt: Timestamp.now(), // Update the 'updatedAt' field
+				status: selectedStatus,
+				updatedAt: Timestamp.now(),
 			});
 
-			// Update the local state to reflect the change
+			// Check if user data is complete before adding to notifications
+			const userId = user.id || "";
+			const firstName = user.firstName || "Unknown";
+			const lastName = user.lastName || "Unknown";
+
+			// Add a notification entry to Firestore
+			await addDoc(collection(db, "notifications"), {
+				receiverId: selectedAppointment.parentId,
+				firstName: firstName,
+				lastName: lastName,
+				isRead: false, // Notification is initially unread
+				subject: "Appointment Status Update",
+				message: `Your appointment for ${selectedAppointment.vaccine} is now marked as ${selectedStatus}.`,
+				createdAt: Timestamp.now(),
+			});
+
+			// Update the local state to reflect the appointment status change
 			setAppointments((prev) =>
 				prev.map((appt) =>
 					appt.id === selectedAppointment.id
@@ -133,24 +167,28 @@ export default function ScheduleByStatus() {
 				)
 			);
 
-			// Show success toaster
+			// Show success notification
 			Toast.show({
 				type: "success",
 				text1: "Status updated successfully!",
 				text2: `${selectedAppointment.vaccine} status set to ${selectedStatus}`,
 			});
 		} catch (error) {
-			console.error("Error updating status:", error);
-
-			// Show error toaster
+			// Log and show error toast
+			console.error(
+				"Error updating status or sending notification:",
+				error
+			);
 			Toast.show({
 				type: "error",
-				text1: "Error updating status.",
+				text1: "Error updating status or sending notification.",
+				text2: "Please try again.",
 			});
 		} finally {
-			handleRefresh()
-			setModalVisible(false); // Close the modal after update
-			setSelectedAppointment(null); // Clear the selected appointment
+			// Ensure modal is closed and data is refreshed even if an error occurs
+			handleRefresh();
+			setModalVisible(false);
+			setSelectedAppointment(null);
 		}
 	};
 
@@ -159,6 +197,14 @@ export default function ScheduleByStatus() {
 		await fetchAppointments(); // Re-fetch appointments
 		setRefreshing(false);
 	};
+
+		// Route handler for parentById
+		const handleRoute = (id: string) => {
+			route.push({
+				pathname: "/online/(dashboard)/parentById",
+				params: { parentIdFromDashboard: id },
+			});
+		};
 
 	if (loading) {
 		return (
@@ -170,13 +216,19 @@ export default function ScheduleByStatus() {
 
 	// Render each appointment item
 	const renderAppointment = ({ item }: { item: AppointmentData }) => (
-		<TouchableOpacity
+<TouchableOpacity
 			style={styles.appointmentContainer}
 			key={item.id}
 			onPress={() => {
-				setSelectedAppointment(item);
-				setSelectedStatus(item.status); // Set the current status in the modal
-				setModalVisible(true); // Open the modal
+				if (scheduleByStats === "history") {
+					// If status is 'history', navigate to parentById screen
+					handleRoute(item.parentId);
+				} else {
+					// For other statuses, open the modal
+					setSelectedAppointment(item);
+					setSelectedStatus(item.status); // Set the current status in the modal
+					setModalVisible(true); // Open the modal
+				}
 			}}
 		>
 			<ThemedText type="default">

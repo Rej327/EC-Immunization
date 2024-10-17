@@ -203,27 +203,6 @@ const Home = () => {
 					</View>
 				</View>
 
-				{/* MILESTONE SECTION */}
-				<View>
-					<View style={styles.header}>
-						<ThemedText type="header">Milestone</ThemedText>
-						<TouchableOpacity
-							onPress={() => openBottomSheetHandler("milestone")}
-						>
-							<ThemedText type="link">View all</ThemedText>
-						</TouchableOpacity>
-					</View>
-					<View style={styles.card}>
-						<ThemedText type="cardHeader">Lorem, ipsum.</ThemedText>
-						<ThemedText type="default">
-							Lorem ipsum dolor sit amet consectetur adipisicing
-							elit. Perspiciatis, commodi.
-						</ThemedText>
-						<ThemedText type="date" style={styles.date}>
-							01/25/2024
-						</ThemedText>
-					</View>
-				</View>
 
 				{/* EVENTS SECTION */}
 				<View>
@@ -250,28 +229,6 @@ const Home = () => {
 
 			{/* Overlay to prevent interaction with outer components */}
 			{openBottomSheet && <View style={styles.overlay} />}
-
-			{/* CUSTOM BOTTOM SHEET FOR MILESTONES */}
-			<CustomBottomSheet
-				isOpen={openBottomSheet === "milestone"}
-				onClose={closeBottomSheet}
-				title="Milestones"
-			>
-				{milestones.map((milestone, index) => (
-					<View
-						key={index}
-						style={getViewAllStyle(index, milestones.length)}
-					>
-						<ThemedText type="cardHeader">
-							{milestone.header}
-						</ThemedText>
-						<ThemedText type="default">
-							{milestone.description}
-						</ThemedText>
-						<ThemedText type="date">{milestone.date}</ThemedText>
-					</View>
-				))}
-			</CustomBottomSheet>
 
 			{/* CUSTOM BOTTOM SHEET FOR EVENTS */}
 			<CustomBottomSheet

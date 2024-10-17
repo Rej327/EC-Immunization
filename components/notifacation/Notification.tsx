@@ -141,10 +141,18 @@ const Notification: React.FC<NotificationProps> = ({
 								))}
 							</>
 						) : (
-						<View className="flex mt-[70%] items-center justify-center">
-							<Image source={noNotif} className="w-52 h-52 object-cover" />
-							<ThemedText type="cardHeader" className="text-[#456b7288] -mt-2">No notifications</ThemedText>
-						</View>
+							<View className="flex mt-[70%] items-center justify-center">
+								<Image
+									source={noNotif}
+									className="w-52 h-52 object-cover"
+								/>
+								<ThemedText
+									type="cardHeader"
+									className="text-[#456b7288] -mt-2"
+								>
+									No notifications
+								</ThemedText>
+							</View>
 						)}
 					</ScrollView>
 					<Pressable
@@ -175,10 +183,10 @@ const Notification: React.FC<NotificationProps> = ({
 						/>
 						<View style={styles.detailsContent}>
 							<ThemedText style={styles.notificationTitle}>
-								Subject: {selectedNotification.subject}
+								{selectedNotification.subject}
 							</ThemedText>
 							<ThemedText style={styles.detailsMessage}>
-								Message: {selectedNotification.message}
+								{selectedNotification.message}
 							</ThemedText>
 							<Text style={styles.notificationDate}>
 								{formatNotificationDate(
