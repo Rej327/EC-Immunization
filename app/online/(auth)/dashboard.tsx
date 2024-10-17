@@ -81,42 +81,42 @@ export default function Dashboard() {
 
 	// Handle sending the message
 	const handleSendMessage = async () => {
-    try {
-        // Add the message to the 'messages' collection in Firestore
-        await addDoc(collection(db, "notifications"), {
-            receiverId: selectedUser.id, // Add receiver ID
-            firstName: selectedUser.firstName,
-            lastName: selectedUser.lastName,
-            subject: subject,
-            message: message,
-						isRead: false,
-            createdAt: new Date(), // Add a timestamp
-        });
+		try {
+			// Add the message to the 'messages' collection in Firestore
+			await addDoc(collection(db, "notifications"), {
+				receiverId: selectedUser.id, // Add receiver ID
+				firstName: selectedUser.firstName,
+				lastName: selectedUser.lastName,
+				subject: subject,
+				message: message,
+				isRead: false,
+				createdAt: new Date(), // Add a timestamp
+			});
 
-        console.log("Message Sent");
+			console.log("Message Sent");
 
-        // Show success toast
-        Toast.show({
-            type: 'success',
-            text1: 'Message Sent',
-            text2: 'Your message has been sent successfully.',
-        });
-    } catch (error) {
-        console.error("Error sending message: ", error);
+			// Show success toast
+			Toast.show({
+				type: "success",
+				text1: "Message Sent",
+				text2: "Your message has been sent successfully.",
+			});
+		} catch (error) {
+			console.error("Error sending message: ", error);
 
-        // Show error toast
-        Toast.show({
-            type: 'error',
-            text1: 'Error Sending Message',
-            text2: 'An error occurred while sending your message. Please try again.',
-        });
-    }
+			// Show error toast
+			Toast.show({
+				type: "error",
+				text1: "Error Sending Message",
+				text2: "An error occurred while sending your message. Please try again.",
+			});
+		}
 
-    // Reset the fields and close the modal
-    setSubject("");
-    setMessage("");
-    setModalVisible(false);
-};
+		// Reset the fields and close the modal
+		setSubject("");
+		setMessage("");
+		setModalVisible(false);
+	};
 
 	// Handle cancelling the modal
 	const handleCancelModal = () => {
@@ -153,7 +153,11 @@ export default function Dashboard() {
 	}
 
 	return (
-		<ScrollView style={styles.container} keyboardDismissMode="on-drag" stickyHeaderIndices={[0]}>
+		<ScrollView
+			style={styles.container}
+			keyboardDismissMode="on-drag"
+			stickyHeaderIndices={[0]}
+		>
 			{/* Search Input (sticky at the top) */}
 			<View style={styles.searchInputContainer}>
 				{/* Sticky container */}
