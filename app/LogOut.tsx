@@ -5,6 +5,7 @@ import { useAuth } from "@clerk/clerk-expo"; // Import Clerk's useAuth hook
 import { useRouter } from "expo-router"; // Import router for navigation
 import { Ionicons } from "@expo/vector-icons";
 import { ThemedText } from "@/components/ThemedText";
+import { clearLocalStorage } from "@/middleware/clearLocalStorage";
 
 export default function Logout() {
 	const { signOut } = useAuth(); // Get the signOut method from Clerk
@@ -17,10 +18,7 @@ export default function Logout() {
 			// Sign out the user via Clerk
 			await signOut();
 			// Optionally clear local storage if needed
-			await AsyncStorage.removeItem("userData");
-			await AsyncStorage.removeItem("babies");
-			await AsyncStorage.removeItem("userPassword");
-			await AsyncStorage.removeItem("selectedBabyId");
+			clearLocalStorage();
 
 			console.log("User signed out and all data was cleared");
 

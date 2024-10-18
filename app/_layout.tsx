@@ -6,6 +6,9 @@ import * as SplashScreen from "expo-splash-screen"; // Import SplashScreen
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import Toast from "react-native-toast-message";
 import { Toaster } from "./Toaster";
+import CheckLocalData from "./CheckLocalData";
+import { View } from "react-native";
+import ClearData from "./ClearData";
 
 const RootLayout = () => {
 	const [isOffline, setIsOffline] = useState(false);
@@ -64,7 +67,7 @@ const RootLayout = () => {
 			const isConnected = state.isConnected;
 			setIsOffline(!isConnected);
 
-			if (isConnected) {
+			if (!isConnected) {
 				router.replace("/online");
 			} else {
 				router.replace("/offline");
@@ -79,6 +82,10 @@ const RootLayout = () => {
 		<GestureHandlerRootView style={{ flex: 1 }}>
 			<Slot />
 			<Toaster />
+			<View className="flex flex-row justify-around">
+				<CheckLocalData />
+				<ClearData />
+			</View>
 		</GestureHandlerRootView> // Slot will render the appropriate layout from online or offline folders
 	);
 };

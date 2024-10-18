@@ -28,6 +28,9 @@ import CustomBottomSheet from "@/components/CustomBottomSheet";
 import { events, milestones } from "@/assets/data/data";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { db } from "@/db/firebaseConfig";
+import { saveForOffline } from "@/middleware/saveForOffline";
+import { clearLocalStorage } from "@/middleware/clearLocalStorage";
+import CheckLocalData from "@/app/CheckLocalData";
 
 interface UserData {
 	id: string;
@@ -57,7 +60,7 @@ const Home = () => {
 				};
 
 				await AsyncStorage.setItem(
-					"userData",
+					"users",
 					JSON.stringify(userData)
 				);
 			} catch (error) {
@@ -69,19 +72,19 @@ const Home = () => {
 		}
 	};
 
-	const retrieveUserDataFromLocalStorage = async () => {
-		try {
-			const retrievedData = await AsyncStorage.getItem("userData");
-			if (retrievedData !== null) {
-				setStoredUserData(JSON.parse(retrievedData) as UserData);
-			}
-		} catch (error) {
-			console.error(
-				"Failed to retrieve user data from local storage:",
-				error
-			);
-		}
-	};
+	// const retrieveUserDataFromLocalStorage = async () => {
+	// 	try {
+	// 		const retrievedData = await AsyncStorage.getItem("userData");
+	// 		if (retrievedData !== null) {
+	// 			setStoredUserData(JSON.parse(retrievedData) as UserData);
+	// 		}
+	// 	} catch (error) {
+	// 		console.error(
+	// 			"Failed to retrieve user data from local storage:",
+	// 			error
+	// 		);
+	// 	}
+	// };
 
 	const saveUserToParents = async () => {
 		if (user) {
@@ -109,17 +112,27 @@ const Home = () => {
 		}
 	};
 
+	const fetchData = async () => {
+		await saveForOffline(user?.id);
+	};
+
+	// Handler for button press
+
 	useEffect(() => {
+		clearLocalStorage()
+		fetchData();
 		saveUserToParents();
-		saveUserDataToLocalStorage();
-		retrieveUserDataFromLocalStorage();
+		// saveUserDataToLocalStorage();
+		// retrieveUserDataFromLocalStorage();
 	}, [user]);
 
 	const onRefresh = async () => {
 		setRefreshing(true);
-		await AsyncStorage.removeItem("userData");
-		await saveUserDataToLocalStorage();
-		await retrieveUserDataFromLocalStorage();
+		clearLocalStorage()
+		fetchData();
+		// await AsyncStorage.removeItem("userData");
+		// await saveUserDataToLocalStorage();
+		// await retrieveUserDataFromLocalStorage();
 		setRefreshing(false);
 	};
 
@@ -143,7 +156,7 @@ const Home = () => {
 	};
 
 	return (
-		<View style={{ flex: 1, backgroundColor: '#f5f4f7' }}>
+		<View style={{ flex: 1, backgroundColor: "#f5f4f7" }}>
 			<ScrollView
 				refreshControl={
 					<RefreshControl
@@ -156,6 +169,7 @@ const Home = () => {
 				scrollEnabled={!openBottomSheet} // Disable scrolling when bottom sheet is open
 			>
 				{/* HERO IMAGE */}
+		
 				<View style={styles.imageContainer}>
 					<Image
 						source={vaccine}
@@ -202,7 +216,6 @@ const Home = () => {
 						/>
 					</View>
 				</View>
-
 
 				{/* EVENTS SECTION */}
 				<View>

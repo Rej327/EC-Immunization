@@ -3,10 +3,23 @@ import React from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import StyledButton from "@/components/StyledButton";
 
+// await AsyncStorage.removeItem("userData");
+
+// await AsyncStorage.removeItem("user");
+// await AsyncStorage.removeItem("babies");
+// await AsyncStorage.removeItem("milestones");
+// await AsyncStorage.removeItem("appointments");
+// await AsyncStorage.removeItem("notifications");
+
+// await AsyncStorage.removeItem("userPassword");
+// await AsyncStorage.removeItem("selectedBabyId");
+// await AsyncStorage.removeItem("reminders");
+// await AsyncStorage.removeItem("babyDetails");
+
 export default function CheckLocalData() {
 	const checkUserData = async () => {
 		try {
-			const userDataJson = await AsyncStorage.getItem("userData");
+			const userDataJson = await AsyncStorage.getItem("users");
 
 			if (userDataJson !== null) {
 				// Parse userData and log it

@@ -1,16 +1,27 @@
 import { View, Text, Pressable } from "react-native";
 import React, { useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import StyledButton from "@/components/StyledButton";
 
 export default function ClearData() {
 	const [storedUserData, setStoredUserData] = useState(null);
 
 	const clearUserData = async () => {
 		try {
-			await AsyncStorage.removeItem("userData");
+			AsyncStorage.removeItem("userData");
+
+			AsyncStorage.removeItem("users");
+			AsyncStorage.removeItem("babies");
+			AsyncStorage.removeItem("milestones");
+			AsyncStorage.removeItem("appointments");
+			AsyncStorage.removeItem("notifications");
+
+			AsyncStorage.removeItem("userPassword");
+			AsyncStorage.removeItem("selectedBabyId");
+			AsyncStorage.removeItem("reminders");
+			AsyncStorage.removeItem("babyDetails");
 			setStoredUserData(null);
-      console.log('Clear Data');
-      
+			console.log("Clear Data");
 		} catch (error) {
 			console.error(
 				"Failed to clear user data from local storage:",
@@ -19,8 +30,11 @@ export default function ClearData() {
 		}
 	};
 	return (
-		<Pressable className="w-auto flex items-center justify-center bg-red-700 p-2" onPress={clearUserData}>
-			<Text className="text-white">Clear</Text>
-		</Pressable>
+		<StyledButton
+			onPress={clearUserData}
+			title="Clear Data"
+			borderRadius={12}
+			bgColor="red"
+		/>
 	);
 }
