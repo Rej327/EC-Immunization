@@ -5,6 +5,8 @@ import { ThemedText } from "../ThemedText";
 import { useUser } from "@clerk/clerk-expo";
 import StyledButton from "../StyledButton";
 import Toast from "react-native-toast-message";
+import { doc, Timestamp, updateDoc } from "firebase/firestore";
+import { db } from "@/db/firebaseConfig";
 
 export default function ProfileInformation() {
 	const { user } = useUser();
@@ -17,11 +19,20 @@ export default function ProfileInformation() {
 		try {
 			setLoading(true);
 
+			if (!user?.id) {
+				throw new Error("User ID is missing");
+			}
+
 			const result = await user?.update({
-				firstName: firstName,
-				lastName: lastName,
 				username: username,
 			});
+
+			const parentRef = doc(db, "parents", user?.id);
+			await updateDoc(parentRef, {
+				username: username,
+				updatedAt: new Date()
+			});
+
 			Toast.show({
 				type: "success",
 				text1: "Success",

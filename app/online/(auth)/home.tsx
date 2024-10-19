@@ -47,45 +47,6 @@ const Home = () => {
 	const [refreshing, setRefreshing] = useState(false);
 	const [openBottomSheet, setOpenBottomSheet] = useState<string | null>(null);
 
-	const saveUserDataToLocalStorage = async () => {
-		if (user) {
-			try {
-				const userData: UserData = {
-					id: user.id,
-					email: user.emailAddresses?.[0]?.emailAddress || "",
-					username: user.username || "",
-					firstName: user.firstName || "",
-					lastName: user.lastName || "",
-					isActive: false,
-				};
-
-				await AsyncStorage.setItem(
-					"users",
-					JSON.stringify(userData)
-				);
-			} catch (error) {
-				console.error(
-					"Failed to save user data to local storage:",
-					error
-				);
-			}
-		}
-	};
-
-	// const retrieveUserDataFromLocalStorage = async () => {
-	// 	try {
-	// 		const retrievedData = await AsyncStorage.getItem("userData");
-	// 		if (retrievedData !== null) {
-	// 			setStoredUserData(JSON.parse(retrievedData) as UserData);
-	// 		}
-	// 	} catch (error) {
-	// 		console.error(
-	// 			"Failed to retrieve user data from local storage:",
-	// 			error
-	// 		);
-	// 	}
-	// };
-
 	const saveUserToParents = async () => {
 		if (user) {
 			const userId = user.id;
@@ -116,23 +77,16 @@ const Home = () => {
 		await saveForOffline(user?.id);
 	};
 
-	// Handler for button press
-
 	useEffect(() => {
-		clearLocalStorage()
+		clearLocalStorage();
 		fetchData();
 		saveUserToParents();
-		// saveUserDataToLocalStorage();
-		// retrieveUserDataFromLocalStorage();
 	}, [user]);
 
 	const onRefresh = async () => {
 		setRefreshing(true);
-		clearLocalStorage()
+		clearLocalStorage();
 		fetchData();
-		// await AsyncStorage.removeItem("userData");
-		// await saveUserDataToLocalStorage();
-		// await retrieveUserDataFromLocalStorage();
 		setRefreshing(false);
 	};
 
@@ -169,7 +123,7 @@ const Home = () => {
 				scrollEnabled={!openBottomSheet} // Disable scrolling when bottom sheet is open
 			>
 				{/* HERO IMAGE */}
-		
+
 				<View style={styles.imageContainer}>
 					<Image
 						source={vaccine}
