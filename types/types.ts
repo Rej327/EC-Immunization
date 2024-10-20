@@ -22,7 +22,6 @@ export interface UserData {
 	lastName: string;
 	username: string;
 	email: string;
-	// password: string;
 	isActive: boolean;
 }
 
@@ -56,5 +55,6 @@ export interface Notification {
 	subject: string;
 	message: string;
 	isRead: boolean;
-	createdAt: any;
+	createdAt: Date;
+	formattedCreatedAt: string;
 }

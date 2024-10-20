@@ -1,5 +1,11 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Appointment, Baby, Milestone, Notification } from "@/types/types";
+import {
+	Appointment,
+	Baby,
+	Milestone,
+	Notification,
+	UserData,
+} from "@/types/types";
 
 // 1. Fetch Milestones
 export const getMilestonesDAta = async (): Promise<Milestone[]> => {
@@ -45,5 +51,19 @@ export const getNotificationsData = async (): Promise<Notification[]> => {
 			error
 		);
 		return [];
+	}
+};
+
+// 5. Get Users
+export const getUserData = async (): Promise<UserData | null> => {
+	try {
+		const userData = await AsyncStorage.getItem("users");
+		return userData ? JSON.parse(userData) : null;
+	} catch (error) {
+		console.error(
+			"Error fetching notifications from AsyncStorage: ",
+			error
+		);
+		return null;
 	}
 };

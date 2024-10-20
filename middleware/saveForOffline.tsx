@@ -1,4 +1,5 @@
 import { db } from "@/db/firebaseConfig";
+import { formatNotificationDate } from "@/helper/helper";
 import {
 	Appointment,
 	Baby,
@@ -64,7 +65,7 @@ export const saveForOffline = async (userId: any) => {
 				username: userDoc.data().username || "",
 				firstName: userDoc.data().firstName || "",
 				lastName: userDoc.data().lastName || "",
-				isActive: false,
+				isActive: true,
 			};
 
 			await AsyncStorage.setItem("users", JSON.stringify(userData));
@@ -120,21 +121,6 @@ export const saveForOffline = async (userId: any) => {
 		await AsyncStorage.setItem("babies", JSON.stringify(babies));
 
 		// 5 Fetch notifications based on userId
-		const formatNotificationDate = (date: Date) => {
-			if (!date) return "Unknown Date";
-			const now = new Date();
-			const secondsDiff = Math.floor(
-				(now.getTime() - date.getTime()) / 1000
-			);
-
-			// If less than a week ago, show relative time
-			if (secondsDiff < 604800) {
-				return formatDistanceToNow(date, { addSuffix: true });
-			}
-
-			// If older than a week, show the actual date
-			return format(date, "PPPP");
-		};
 
 		const notificationsRef = query(
 			collection(db, "notifications"),
@@ -145,6 +131,12 @@ export const saveForOffline = async (userId: any) => {
 		const notifications = notificationsSnapshot.docs.map((doc) => {
 			const data = doc.data();
 
+			const createdAt = data.createdAt?.toDate
+				? data.createdAt.toDate() // Firestore Timestamp to Date
+				: new Date(data.createdAt); // Handle string/other date formats
+
+			const formattedCreatedAt = formatNotificationDate(createdAt);
+
 			return {
 				id: doc.id,
 				receiverId: data.receiverId,
@@ -153,13 +145,23 @@ export const saveForOffline = async (userId: any) => {
 				subject: data.subject,
 				message: data.message,
 				isRead: data.isRead,
-				createdAt: formatNotificationDate(data.createdAt.toDate()),
+				createdAt: createdAt,
+				formattedCreatedAt: formattedCreatedAt,
 			} as Notification;
 		});
 
+		notifications.sort(
+			(a, b) => b.createdAt.getTime() - a.createdAt.getTime()
+		);
+
 		await AsyncStorage.setItem(
 			"notifications",
-			JSON.stringify(notifications)
+			JSON.stringify(
+				notifications.map((notif) => ({
+					...notif,
+					createdAt: notif.createdAt.toISOString(),
+				}))
+			)
 		);
 
 		console.log("Data fetched and saved to AsyncStorage successfully!");
