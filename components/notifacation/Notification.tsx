@@ -8,6 +8,7 @@ import {
 	Animated,
 	Pressable,
 	Image,
+	TouchableOpacity,
 } from "react-native";
 import { ThemedText } from "../ThemedText";
 import { NotificationType } from "../HomeRightHeader";
@@ -79,9 +80,9 @@ const Notification: React.FC<NotificationProps> = ({
 						{notifications.length > 0 ? (
 							<>
 								{notifications.map((notification) => (
-									<Pressable
+									<TouchableOpacity
 										key={notification.id}
-										onPress={() =>
+										onLongPress={() =>
 											handleNotificationPress(
 												notification
 											)
@@ -137,7 +138,7 @@ const Notification: React.FC<NotificationProps> = ({
 												/>
 											)}
 										</View>
-									</Pressable>
+									</TouchableOpacity>
 								))}
 							</>
 						) : (

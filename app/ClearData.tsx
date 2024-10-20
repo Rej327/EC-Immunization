@@ -8,7 +8,6 @@ export default function ClearData() {
 
 	const clearUserData = async () => {
 		try {
-			AsyncStorage.removeItem("userData");
 
 			AsyncStorage.removeItem("users");
 			AsyncStorage.removeItem("babies");
@@ -19,7 +18,6 @@ export default function ClearData() {
 			AsyncStorage.removeItem("userPassword");
 			AsyncStorage.removeItem("selectedBabyId");
 			AsyncStorage.removeItem("reminders");
-			AsyncStorage.removeItem("babyDetails");
 			setStoredUserData(null);
 			console.log("Clear Data");
 		} catch (error) {

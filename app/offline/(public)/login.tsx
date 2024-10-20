@@ -44,7 +44,7 @@ const Login = () => {
 
 					// Save the updated userData back to AsyncStorage
 					await AsyncStorage.setItem(
-						"userData",
+						"users",
 						JSON.stringify(updatedUserData)
 					);
 

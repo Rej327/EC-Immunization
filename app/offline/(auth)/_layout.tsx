@@ -5,6 +5,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useEffect, useState } from "react";
 import { babyIcon } from "@/assets";
 import { HomeRightHeader } from "@/components/HomeRightHeader";
+import { OfflineHomeRightHeader } from "@/components/OfflineHomeRightHeader";
 
 const TabsPage = () => {
     const [isActive, setIsActive] = useState<boolean | null>(null); // State to hold the isActive value
@@ -12,7 +13,7 @@ const TabsPage = () => {
     useEffect(() => {
         const checkUserData = async () => {
             try {
-                const userDataJson = await AsyncStorage.getItem("userData");
+                const userDataJson = await AsyncStorage.getItem("users");
 
                 if (userDataJson !== null) {
                     const userData = JSON.parse(userDataJson);
@@ -56,13 +57,14 @@ const TabsPage = () => {
                         marginLeft: -10,
                     },
                     headerShadowVisible: false,
+                    headerRight: () => <OfflineHomeRightHeader />, 
                     headerLeft: () => (
                         <Image
                             source={babyIcon} // Replace with your logo URL
                             style={{
                                 width: 30,
                                 height: 30,
-                                marginLeft: 10,
+                                marginLeft: 14,
                             }}
                         />
                     ),

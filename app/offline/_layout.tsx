@@ -1,7 +1,9 @@
 import { Slot, useRouter } from "expo-router";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Toaster } from "../Toaster";
+import { ActivityIndicator, View } from "react-native";
+import StartPage from "..";
 
 interface UserData {
 	email: string;
@@ -13,37 +15,47 @@ interface UserData {
 
 const InitialLayout = () => {
 	const router = useRouter();
+	const [loading, setLoading] = useState(true);
+	const [isActive, setIsActive] = useState<boolean | null>(null); // Manage user activity state
 
 	useEffect(() => {
 		const checkUserStatus = async () => {
 			try {
-				// Retrieve user data from AsyncStorage
-				const userDataJson = await AsyncStorage.getItem("userData");
+				const userDataJson = await AsyncStorage.getItem("users");
 
-				// Parse user data (if exists)
 				if (userDataJson) {
 					const userData: UserData = JSON.parse(userDataJson);
-
-					// Check if the user is active (signed in)
-					if (userData.isActive) {
-						router.replace("/offline/(auth)/home"); // Redirect to authenticated home
-					} else {
-						router.replace("/offline/(public)/main"); // Redirect to public main
-					}
+					console.log("Route", userData.isActive);
+					setIsActive(userData.isActive); // Set user active state
 				} else {
-					// If no user data, redirect to public main
-					router.replace("/offline/(public)/main");
+					setIsActive(false); // No user data found
 				}
 			} catch (error) {
 				console.error("Error checking user status:", error);
-				router.replace("/offline/(public)/main"); // Fallback in case of error
+				setIsActive(false); // Fallback in case of error
+			} finally {
+				setLoading(false); // End loading state
 			}
 		};
 
-		checkUserStatus(); // Call the function to check user status
-	}, [router]); // Add router to the dependency array
+		checkUserStatus();
+	}, []);
 
-	return <Slot />; // Render child routes
+	useEffect(() => {
+		if (!loading) {
+			if (isActive === true) {
+				router.replace("/offline/(auth)/home");
+			} else {
+				router.replace("/offline/(public)/main");
+			}
+		}
+	}, [loading, isActive]); // Only run when loading is false or isActive changes
+
+	if (loading) {
+		return <StartPage />
+	}
+
+	return <Slot />;
 };
 
 const RootLayout = () => {
@@ -54,4 +66,5 @@ const RootLayout = () => {
 		</>
 	);
 };
+
 export default RootLayout;

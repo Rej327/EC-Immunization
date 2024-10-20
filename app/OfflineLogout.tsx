@@ -12,7 +12,7 @@ export default function OfflineLogout() {
 	const handleLogout = async () => {
 		try {
 			// Retrieve userData from AsyncStorage
-			const userDataJson = await AsyncStorage.getItem("userData");
+			const userDataJson = await AsyncStorage.getItem("users");
 
 			if (userDataJson) {
 				// Parse the userData
@@ -25,7 +25,7 @@ export default function OfflineLogout() {
 				};
 
 				// Save the updated userData back to AsyncStorage
-				await AsyncStorage.setItem("userData", JSON.stringify(updatedUserData));
+				await AsyncStorage.setItem("users", JSON.stringify(updatedUserData));
 				router.replace("/offline/(public)/main");
 				// Alert.alert("Logout successful", "User is now inactive.");
 			} else {
