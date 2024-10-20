@@ -1,3 +1,4 @@
+import { format, formatDistanceToNow } from "date-fns";
 import { Timestamp } from "firebase/firestore";
 
 // Helper function to format date
@@ -22,4 +23,31 @@ export const isTodayOrTomorrow = (expectedDate: Timestamp | Date) => {
 		jsDate.toDateString() === today.toDateString() ||
 		jsDate.toDateString() === tomorrow.toDateString()
 	);
+};
+
+export const formatNotificationDate = (date: Date) => {
+	if (!date) return "Unknown Date";
+	const now = new Date();
+	const secondsDiff = Math.floor(
+		(now.getTime() - date.getTime()) / 1000
+	);
+
+	// If less than a week ago, show relative time
+	if (secondsDiff < 604800) {
+		return formatDistanceToNow(date, { addSuffix: true });
+	}
+
+	// If older than a week, show the actual date
+	return format(date, "PPPP");
+};
+
+// Helper function to format age
+export const formatAge = (ageInMonths: number): string => {
+	if (ageInMonths === 0) {
+		return "At Birth";
+	} else if (ageInMonths % 1 === 0.5) {
+		return `${Math.floor(ageInMonths)} ½ month's`;
+	} else {
+		return `${ageInMonths} month's`;
+	}
 };

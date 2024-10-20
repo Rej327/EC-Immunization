@@ -168,109 +168,102 @@ const MyBaby = () => {
 					"Bacillus Calmette-Guérin (BCG) vaccine protects against tuberculosis (TB), particularly severe forms in children like TB meningitis.",
 			},
 			{
-				vaccine: "Hepatitis B (1st dose)",
+				vaccine: "Hepatitis B",
 				ageInMonths: 0,
 				received: false,
 				description:
 					"Prevents Hepatitis B virus (HBV) infection, which can cause chronic liver disease and liver cancer.",
 			},
 			{
-				vaccine: "Hepatitis B (2nd dose)",
-				ageInMonths: 1,
+				vaccine: "Pentavalent Vaccine (1st dose)",
+				ageInMonths: 1.5,
 				received: false,
 				description:
-					"Second dose to strengthen immunity against Hepatitis B infection.",
+					"Combines protection against 5 diseases: diphtheria (D), pertussis (P), tetanus (T), hepatitis B (HB), and Haemophilus influenzae type B (Hib).",
 			},
 			{
-				vaccine: "Pentavalent Vaccine (1st dose)",
-				ageInMonths: 2,
+				vaccine: "Pentavalent Vaccine (2nd dose)",
+				ageInMonths: 2.5,
+				received: false,
+				description:
+					"Combines protection against 5 diseases: diphtheria (D), pertussis (P), tetanus (T), hepatitis B (HB), and Haemophilus influenzae type B (Hib).",
+			},
+			{
+				vaccine: "Pentavalent Vaccine (3rd dose)",
+				ageInMonths: 3.5,
 				received: false,
 				description:
 					"Combines protection against 5 diseases: diphtheria (D), pertussis (P), tetanus (T), hepatitis B (HB), and Haemophilus influenzae type B (Hib).",
 			},
 			{
 				vaccine: "Oral Polio Vaccine (1st dose)",
-				ageInMonths: 2,
+				ageInMonths: 1.5,
 				received: false,
 				description:
 					"Oral Polio Vaccine (OPV) protects against poliovirus, which can lead to paralysis.",
 			},
 			{
-				vaccine: "Pneumococcal Conjugate Vaccine (1st dose)",
-				ageInMonths: 2,
-				received: false,
-				description:
-					"PCV protects against infections caused by Streptococcus pneumoniae, such as pneumonia, meningitis, and sepsis.",
-			},
-			{
-				vaccine: "Pentavalent Vaccine (2nd dose)",
-				ageInMonths: 4,
-				received: false,
-				description:
-					"Second dose of DPT-HepB-Hib combination vaccine to maintain immunity.",
-			},
-			{
 				vaccine: "Oral Polio Vaccine (2nd dose)",
-				ageInMonths: 4,
+				ageInMonths: 2.5,
 				received: false,
 				description:
-					"Second dose of OPV to reinforce protection against polio.",
-			},
-			{
-				vaccine: "Pneumococcal Conjugate Vaccine (2nd dose)",
-				ageInMonths: 4,
-				received: false,
-				description:
-					"Second dose of PCV for additional protection against pneumococcal diseases.",
-			},
-			{
-				vaccine: "Pentavalent Vaccine (3rd dose)",
-				ageInMonths: 6,
-				received: false,
-				description:
-					"Third and final dose of DPT-HepB-Hib for complete protection.",
+					"Oral Polio Vaccine (OPV) protects against poliovirus, which can lead to paralysis.",
 			},
 			{
 				vaccine: "Oral Polio Vaccine (3rd dose)",
-				ageInMonths: 6,
+				ageInMonths: 3.5,
 				received: false,
 				description:
-					"Third and final OPV dose for full immunity against poliovirus.",
+					"Oral Polio Vaccine (OPV) protects against poliovirus, which can lead to paralysis.",
 			},
 			{
 				vaccine: "Inactivated Polio Vaccine (IPV)",
-				ageInMonths: 6,
+				ageInMonths: 3.5,
 				received: false,
 				description:
 					"IPV is an injected polio vaccine that boosts immunity against poliovirus, complementing the oral vaccine.",
 			},
 			{
-				vaccine: "Pneumococcal Conjugate Vaccine (3rd dose)",
-				ageInMonths: 6,
+				vaccine: "Pneumococcal Conjugate Vaccine (1st dose)",
+				ageInMonths: 1.5,
 				received: false,
 				description:
-					"Third and final dose of PCV for complete protection against pneumococcal diseases.",
+					"First dose of PCV for complete protection against pneumococcal diseases.",
+			},
+			{
+				vaccine: "Pneumococcal Conjugate Vaccine (2nd dose)",
+				ageInMonths: 2.5,
+				received: false,
+				description:
+					"Second dose of PCV for complete protection against pneumococcal diseases.",
+			},
+			{
+				vaccine: "Pneumococcal Conjugate Vaccine (3rd dose)",
+				ageInMonths: 3.5,
+				received: false,
+				description:
+					"Third and last dose of PCV for complete protection against pneumococcal diseases.",
 			},
 			{
 				vaccine: "Measles-Rubella (1st dose)",
 				ageInMonths: 9,
 				received: false,
 				description:
-					"MR vaccine protects against measles and rubella, two viral infections that can lead to serious complications.",
+					"First dose of MR vaccine ensures long-lasting protection against measles and rubella.",
 			},
 			{
-				vaccine: "Japanese Encephalitis (1st dose)",
+				vaccine: "Measles-Rubella (2nd dose)",
 				ageInMonths: 9,
 				received: false,
 				description:
-					"JE vaccine prevents Japanese Encephalitis, a viral brain infection transmitted by mosquitoes.",
+					"Second and last dose of MR vaccine ensures long-lasting protection against measles and rubella.",
 			},
 			{
 				vaccine: "Measles-Rubella (2nd dose)",
 				ageInMonths: 12,
 				received: false,
 				description:
-					"Second dose of MR vaccine ensures long-lasting protection against measles and rubella.",
+					"Second and last dose of MR vaccine ensures long-lasting protection against measles and rubella.",
 			},
 		];
 
@@ -279,9 +272,20 @@ const MyBaby = () => {
 		// Calculate the expected date of each vaccination based on baby's birthday
 		const milestones = vaccineSchedule.map((vaccine) => {
 			const expectedDate = new Date(babyBirthday);
-			expectedDate.setMonth(
-				babyBirthday.getMonth() + vaccine.ageInMonths
-			); // Handles month overflow
+
+			// Split the ageInMonths into whole months and fractional months
+			const wholeMonths = Math.floor(vaccine.ageInMonths); // Get the integer part of the age in months
+			const fractionalMonths = vaccine.ageInMonths - wholeMonths; // Get the fractional part (e.g., 0.5 for 1.5 months)
+
+			// Add the whole months first
+			expectedDate.setMonth(babyBirthday.getMonth() + wholeMonths);
+
+			// Convert the fractional months to days (approximate)
+			const daysInMonth = 30; // Use an average month length (you can refine this if needed)
+			const extraDays = Math.round(fractionalMonths * daysInMonth);
+
+			// Add the extra days to account for the fractional part
+			expectedDate.setDate(expectedDate.getDate() + extraDays);
 
 			return {
 				vaccine: vaccine.vaccine,

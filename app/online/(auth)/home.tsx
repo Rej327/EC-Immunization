@@ -78,7 +78,7 @@ const Home = () => {
 	};
 
 	useEffect(() => {
-		clearLocalStorage();
+		// clearLocalStorage();
 		fetchData();
 		saveUserToParents();
 	}, [user]);

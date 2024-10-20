@@ -5,22 +5,37 @@ import {
 	TouchableOpacity,
 	ActivityIndicator,
 	ScrollView,
-	Image, // Add ScrollView for the modal
+	Image,
 } from "react-native";
 import React, { useEffect, useState } from "react";
 import CustomCard from "../CustomCard";
 import { ThemedText } from "../ThemedText";
 import { Ionicons } from "@expo/vector-icons";
 import { db } from "@/db/firebaseConfig";
-import { collection, query, where, getDocs } from "firebase/firestore";
+import {
+	collection,
+	query,
+	where,
+	getDocs,
+	Timestamp,
+} from "firebase/firestore";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { noData } from "@/assets";
+import { formatAge } from "@/helper/helper";
 
 type Milestone = {
 	ageInMonths: number;
 	expectedDate: string;
 	received: boolean;
 	vaccine: string;
+};
+
+type MilestoneList = {
+	ageInMonths: number;
+	expectedDate: Timestamp | Date;
+	vaccine: string;
+	description: string;
+	received: boolean;
 };
 
 type BabyMilestone = {
@@ -35,7 +50,7 @@ export default function Milestones() {
 	const [modalVisible, setModalVisible] = useState(false);
 	const [selectedMilestoneGroup, setSelectedMilestoneGroup] = useState<
 		Milestone[] | null
-	>(null); // Update to hold a group of milestones
+	>(null);
 	const [milestones, setMilestones] = useState<Milestone[]>([]);
 	const [selectedBabyId, setSelectedBabyId] = useState<string | null>(null);
 	const [loading, setLoading] = useState(false);
@@ -44,10 +59,9 @@ export default function Milestones() {
 		setLoading(true);
 		try {
 			const babyId = await AsyncStorage.getItem("selectedBabyId");
-			// console.log("Fetched baby ID: ", babyId);
 			if (babyId) {
 				setSelectedBabyId(babyId);
-				fetchMilestones(babyId);
+				await fetchMilestones(babyId);
 			}
 		} catch (error) {
 			console.error("Error fetching baby ID from storage: ", error);
@@ -58,7 +72,6 @@ export default function Milestones() {
 
 	useEffect(() => {
 		fetchBabyId();
-		// console.log("Fetching milestone", fetchBabyId);
 	}, [selectedBabyId]);
 
 	const fetchMilestones = async (babyId: string) => {
@@ -79,14 +92,13 @@ export default function Milestones() {
 			});
 
 			setMilestones(fetchedMilestones);
-			console.log("Fetched Milestones Success ");
 		} catch (error) {
 			console.error("Error fetching milestones: ", error);
 		}
 	};
 
 	const handlePress = (milestoneGroup: Milestone[]) => {
-		setSelectedMilestoneGroup(milestoneGroup); // Pass the whole group
+		setSelectedMilestoneGroup(milestoneGroup);
 		setModalVisible(true);
 	};
 
@@ -95,32 +107,20 @@ export default function Milestones() {
 		setSelectedMilestoneGroup(null);
 	};
 
-	const aggregateMilestones = (milestones: Milestone[]) => {
-		const aggregated: { [key: number]: Milestone[] } = {};
-
-		milestones.forEach((milestone) => {
-			if (!aggregated[milestone.ageInMonths]) {
-				aggregated[milestone.ageInMonths] = [];
+	// Group milestones by ageInMonths
+	const groupedMilestones = Object.entries(
+		milestones.reduce((acc, milestone) => {
+			const age = milestone.ageInMonths;
+			if (!acc[age]) {
+				acc[age] = [];
 			}
-			aggregated[milestone.ageInMonths].push(milestone);
-		});
-
-		return Object.entries(aggregated).map(([age, milestones]) => {
-			const receivedCount = milestones.filter((m) => m.received).length;
-			return {
-				age: parseInt(age),
-				total: milestones.length,
-				receivedCount,
-				vaccines: milestones,
-			};
-		});
-	};
-
-	const aggregatedMilestones = aggregateMilestones(milestones);
+			acc[age].push(milestone);
+			return acc;
+		}, {} as Record<number, Milestone[]>)
+	).sort(([ageA], [ageB]) => Number(ageA) - Number(ageB)); // Sort by ageInMonths
 
 	const handleReload = () => {
 		fetchBabyId();
-		console.log("Refetching milestone", fetchBabyId);
 	};
 
 	return (
@@ -142,20 +142,17 @@ export default function Milestones() {
 					{!loading ? (
 						<>
 							{selectedBabyId ? (
-								aggregatedMilestones.length > 0 ? (
-									aggregatedMilestones.map(
-										(milestoneGroup, index) => (
+								groupedMilestones.length > 0 ? (
+									groupedMilestones.map(
+										([age, milestoneGroup], index) => (
 											<TouchableOpacity
 												key={index}
 												onPress={() =>
-													handlePress(
-														milestoneGroup.vaccines
-													)
+													handlePress(milestoneGroup)
 												}
 												className={`flex flex-row justify-between py-4 ${
 													index ===
-													aggregatedMilestones.length -
-														1
+													groupedMilestones.length - 1
 														? ""
 														: "border-b-[1px] border-[#d6d6d6]"
 												}`}
@@ -164,9 +161,15 @@ export default function Milestones() {
 													type="default"
 													className="font-bold"
 												>
-													{milestoneGroup.age} months
+													{formatAge(Number(age))}
 												</ThemedText>
-												<ThemedText>{`${milestoneGroup.receivedCount}/${milestoneGroup.total}`}</ThemedText>
+												<ThemedText>{`${
+													milestoneGroup.filter(
+														(m) => m.received
+													).length
+												}/${
+													milestoneGroup.length
+												}`}</ThemedText>
 											</TouchableOpacity>
 										)
 									)
@@ -178,10 +181,10 @@ export default function Milestones() {
 										/>
 										<ThemedText
 											type="default"
-											className="text-center left-[2%] z-10 absolute top-6"
+											className="text-center"
 										>
 											No milestones available. Register or
-											select first your baby.
+											select your baby.
 										</ThemedText>
 									</View>
 								)
@@ -193,23 +196,16 @@ export default function Milestones() {
 									/>
 									<ThemedText
 										type="default"
-										className="text-center left-[2%] z-10 absolute top-6"
+										className="text-center"
 									>
 										No milestones available. Register or
-										select first your baby.
+										select your baby.
 									</ThemedText>
 								</View>
 							)}
 						</>
 					) : (
-						<View
-							style={{
-								flex: 1,
-								justifyContent: "center",
-								alignItems: "center",
-								height: 88
-							}}
-						>
+						<View style={styles.loadingContainer}>
 							<ActivityIndicator size="large" color="#456B72" />
 						</View>
 					)}
@@ -299,5 +295,11 @@ const styles = StyleSheet.create({
 	},
 	closeButtonText: {
 		color: "#fff",
+	},
+	loadingContainer: {
+		flex: 1,
+		justifyContent: "center",
+		alignItems: "center",
+		height: 88,
 	},
 });

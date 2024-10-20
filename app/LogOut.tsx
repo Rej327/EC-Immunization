@@ -18,7 +18,16 @@ export default function Logout() {
 			// Sign out the user via Clerk
 			await signOut();
 			// Optionally clear local storage if needed
-			clearLocalStorage();
+			await AsyncStorage.removeItem("user");
+			await AsyncStorage.removeItem("babies");
+			await AsyncStorage.removeItem("milestones");
+			await AsyncStorage.removeItem("appointments");
+			await AsyncStorage.removeItem("notifications");
+
+			await AsyncStorage.removeItem("userPassword");
+			await AsyncStorage.removeItem("selectedBabyId");
+			await AsyncStorage.removeItem("reminders");
+			await AsyncStorage.removeItem("babyDetails");
 
 			console.log("User signed out and all data was cleared");
 

@@ -21,7 +21,7 @@ import { Timestamp } from "firebase/firestore"; // Import Timestamp if using Fir
 import * as Print from "expo-print";
 import * as Sharing from "expo-sharing";
 import { Link } from "expo-router";
-import { formatDate, isTodayOrTomorrow } from "@/helper/helper";
+import { formatAge, formatDate, isTodayOrTomorrow } from "@/helper/helper";
 
 type MilestoneList = {
 	ageInMonths: number;
@@ -141,14 +141,17 @@ export default function Reminder() {
 	}, []);
 
 	// Group milestones by ageInMonths
-	const groupedMilestones = milestones.reduce((acc, milestone) => {
-		const age = milestone.ageInMonths;
-		if (!acc[age]) {
-			acc[age] = [];
-		}
-		acc[age].push(milestone);
-		return acc;
-	}, {} as Record<number, MilestoneList[]>);
+	const groupedMilestones = Object.entries(
+		milestones.reduce((acc, milestone) => {
+			const age = milestone.ageInMonths;
+			if (!acc[age]) {
+				acc[age] = [];
+			}
+			acc[age].push(milestone);
+
+			return acc;
+		}, {} as Record<number, MilestoneList[]>)
+	).sort(([ageA], [ageB]) => Number(ageA) - Number(ageB));
 
 	// Generate PDF
 	const generatePDF = async (): Promise<void> => {
@@ -194,12 +197,14 @@ export default function Reminder() {
           <h1>Baby Vaccination Reminders</h1>
 					<h3>Name: ${babyDetails?.firstName} ${babyDetails?.lastName}</h3>
           
-          ${Object.entries(groupedMilestones)
+          ${groupedMilestones
 				.map(
 					([age, vaccines]) => `
                 <div class="card">
                     <div class="header">${
-						age === "0" ? "At Birth" : `${age} month's`
+						age === "0"
+							? "At Birth"
+							: `${formatAge(Number(age))} month's`
 					}</div>
                     ${vaccines
 						.map(
@@ -301,66 +306,62 @@ export default function Reminder() {
 					</View>
 				) : (
 					<>
-						{Object.entries(groupedMilestones).map(
-							([age, vaccines]) => (
-								<CustomCard key={age}>
-									<ThemedText
-										type="cardHeader"
-										className="border-b-[1px] pb-3 border-[#d6d6d6]"
+						{groupedMilestones.map(([age, vaccines]) => (
+							<CustomCard key={age}>
+								<ThemedText
+									type="cardHeader"
+									className="border-b-[1px] pb-3 border-[#d6d6d6]"
+								>
+									{formatAge(Number(age))}
+								</ThemedText>
+								{vaccines.map((vaccine, index) => (
+									<View
+										key={index}
+										className={`mx-2 mt-2 ${
+											index !== vaccines.length - 1
+												? "border-b-[1px] border-[#d6d6d6] pb-2"
+												: ""
+										}`}
 									>
-										{age === "0"
-											? "At Birth"
-											: `${age} month's`}
-									</ThemedText>
-									{vaccines.map((vaccine, index) => (
-										<View
-											key={index}
-											className={`mx-2 mt-2 ${
-												index !== vaccines.length - 1
-													? "border-b-[1px] border-[#d6d6d6] pb-2"
-													: ""
-											}`}
-										>
+										<ThemedText type="default">
+											<ThemedText
+												type="default"
+												className="font-bold"
+											>
+												Vaccine:{" "}
+											</ThemedText>
+											{vaccine.vaccine}
+										</ThemedText>
+										<View className="flex flex-row justify-between">
 											<ThemedText type="default">
 												<ThemedText
 													type="default"
 													className="font-bold"
 												>
-													Vaccine:{" "}
+													Expected Date:{" "}
 												</ThemedText>
-												{vaccine.vaccine}
-											</ThemedText>
-											<View className="flex flex-row justify-between">
-												<ThemedText type="default">
-													<ThemedText
-														type="default"
-														className="font-bold"
-													>
-														Expected Date:{" "}
-													</ThemedText>
-													{formatDate(
-														vaccine.expectedDate
-													)}
-												</ThemedText>
-												{vaccine.received ? (
-													<Ionicons
-														name="checkmark-circle"
-														size={20}
-														color="#4CAF50"
-													/>
-												) : (
-													<Ionicons
-														name="close-circle"
-														size={20}
-														color="#F44336"
-													/>
+												{formatDate(
+													vaccine.expectedDate
 												)}
-											</View>
+											</ThemedText>
+											{vaccine.received ? (
+												<Ionicons
+													name="checkmark-circle"
+													size={20}
+													color="#4CAF50"
+												/>
+											) : (
+												<Ionicons
+													name="close-circle"
+													size={20}
+													color="#F44336"
+												/>
+											)}
 										</View>
-									))}
-								</CustomCard>
-							)
-						)}
+									</View>
+								))}
+							</CustomCard>
+						))}
 					</>
 				)}
 			</View>
