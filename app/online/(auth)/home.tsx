@@ -188,7 +188,7 @@ const Home = () => {
 
 	const handleRouteRegister = () => {
 		route.navigate("/online/(auth)/profile");
-		setShowBabySelectionModal(false)
+		setShowBabySelectionModal(false);
 	};
 
 	const getViewAllStyle = (index: number, totalItems: number) => {
