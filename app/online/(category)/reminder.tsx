@@ -42,8 +42,8 @@ export default function Reminder() {
 	const [selectedBabyId, setSelectedBabyId] = useState<string | null>(null);
 	const [loading, setLoading] = useState(false);
 	const [babyDetails, setBabyDetails] = useState<BabyDetails | null>(null);
-	const [showModal, setShowModal] = useState(false); // Modal visibility state
-	const [reminderMessage, setReminderMessage] = useState<string | null>(null); // Store reminder message
+	const [showModal, setShowModal] = useState(false); 
+	const [reminderMessage, setReminderMessage] = useState<string | null>(null); 
 
 	const fetchBabyId = async () => {
 		try {

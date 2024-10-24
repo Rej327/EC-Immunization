@@ -443,10 +443,10 @@ const MyBaby = () => {
 						/>
 					</View>
 					<ThemedText type="header" className="text-center">
-						No babies registered yet!
+						No children registered yet!
 					</ThemedText>
 					<ThemedText type="default" className="text-center mb-2">
-						Please register a baby to use all features of the
+						Please register your children to use all features of the
 						application.
 					</ThemedText>
 					<StyledButton

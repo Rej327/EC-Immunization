@@ -184,7 +184,7 @@ export default function Milestones() {
 											className="text-center"
 										>
 											No milestones available. Register or
-											select your baby.
+											select your children.
 										</ThemedText>
 									</View>
 								)
@@ -199,7 +199,7 @@ export default function Milestones() {
 										className="text-center"
 									>
 										No milestones available. Register or
-										select your baby.
+										select your children.
 									</ThemedText>
 								</View>
 							)}

@@ -7,6 +7,8 @@ import {
 	Image,
 	StyleSheet,
 	TouchableOpacity,
+	Modal,
+	Pressable,
 } from "react-native";
 import React, { useCallback, useEffect, useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -17,6 +19,7 @@ import {
 	guideIcon,
 	healthIcon,
 	hearthIcon,
+	noData,
 	nonagonIcon,
 	reminderIcon,
 	starIcon,
@@ -26,11 +29,22 @@ import { ThemedText } from "@/components/ThemedText";
 import CategoryCard from "@/components/CategoryCard";
 import CustomBottomSheet from "@/components/CustomBottomSheet";
 import { events, milestones } from "@/assets/data/data";
-import { doc, getDoc, setDoc } from "firebase/firestore";
+import {
+	collection,
+	doc,
+	getDoc,
+	getDocs,
+	query,
+	setDoc,
+	where,
+} from "firebase/firestore";
 import { db } from "@/db/firebaseConfig";
 import { saveForOffline } from "@/middleware/saveForOffline";
 import { clearLocalStorage } from "@/middleware/clearLocalStorage";
 import CheckLocalData from "@/app/CheckLocalData";
+import StyledButton from "@/components/StyledButton";
+import { useRouter } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
 
 interface UserData {
 	id: string;
@@ -41,11 +55,80 @@ interface UserData {
 	isActive: boolean;
 }
 
+interface BabyData {
+	id: string;
+	parentId: string;
+	firstName: string;
+	lastName: string;
+	birthday: string;
+	createdAt: Date;
+}
+
 const Home = () => {
-	const { user } = useUser();
 	const [storedUserData, setStoredUserData] = useState<UserData | null>(null);
 	const [refreshing, setRefreshing] = useState(false);
 	const [openBottomSheet, setOpenBottomSheet] = useState<string | null>(null);
+	const [babies, setBabies] = useState<BabyData[]>([]);
+	const [selectedBabyId, setSelectedBabyId] = useState<string | null>(null);
+	const [showBabySelectionModal, setShowBabySelectionModal] = useState(false);
+	const { user } = useUser();
+	const route = useRouter();
+
+	const checkOrFetchBabies = async () => {
+		try {
+			const storedBabyId = await AsyncStorage.getItem("selectedBabyId");
+			console.log("Stored Baby ID:", storedBabyId);
+
+			// Fetch babies data first
+			const babyList = await fetchBabies();
+
+			// Check the baby list length and set selection accordingly
+			if (!storedBabyId) {
+				if (babyList.length === 0) {
+					// No babies found, show registration modal
+					console.log("No babies found.");
+					setShowBabySelectionModal(true); // Show modal to register a new baby
+				} else if (babyList.length === 1) {
+					// Auto-select the baby if there's only one
+					console.log("Auto-selecting baby:", babyList[0].id);
+					setSelectedBabyId(babyList[0].id);
+					await AsyncStorage.setItem(
+						"selectedBabyId",
+						babyList[0].id
+					);
+				} else if (babyList.length > 1) {
+					// If there are multiple babies, show the selection modal
+					setShowBabySelectionModal(true);
+				}
+			} else {
+				// Use the stored selected baby ID
+				setSelectedBabyId(storedBabyId);
+			}
+		} catch (error) {
+			console.error("Error fetching or setting baby data:", error);
+		}
+	};
+
+	const fetchBabies = async (): Promise<BabyData[]> => {
+		if (user?.id) {
+			const babyQuery = query(
+				collection(db, "babies"),
+				where("parentId", "==", user.id)
+			);
+			const querySnapshot = await getDocs(babyQuery);
+			const babyList: BabyData[] = [];
+			querySnapshot.forEach((doc) => {
+				babyList.push({ id: doc.id, ...doc.data() } as BabyData);
+			});
+			setBabies(babyList); // Update babies state
+			return babyList; // Return baby list to ensure we can check its length
+		}
+		return [];
+	};
+
+	useEffect(() => {
+		checkOrFetchBabies();
+	}, []);
 
 	const saveUserToParents = async () => {
 		if (user) {
@@ -78,16 +161,21 @@ const Home = () => {
 	};
 
 	useEffect(() => {
-		// clearLocalStorage();
 		fetchData();
 		saveUserToParents();
 	}, [user]);
 
 	const onRefresh = async () => {
 		setRefreshing(true);
-		clearLocalStorage();
+		// clearLocalStorage();
 		fetchData();
 		setRefreshing(false);
+	};
+
+	const handleBabySelection = async (babyId: string) => {
+		setSelectedBabyId(babyId);
+		await AsyncStorage.setItem("selectedBabyId", babyId);
+		setShowBabySelectionModal(false);
 	};
 
 	const closeBottomSheet = useCallback(() => {
@@ -96,6 +184,11 @@ const Home = () => {
 
 	const openBottomSheetHandler = (type: string) => {
 		setOpenBottomSheet(type);
+	};
+
+	const handleRouteRegister = () => {
+		route.navigate("/online/(auth)/profile");
+		setShowBabySelectionModal(false)
 	};
 
 	const getViewAllStyle = (index: number, totalItems: number) => {
@@ -123,7 +216,6 @@ const Home = () => {
 				scrollEnabled={!openBottomSheet} // Disable scrolling when bottom sheet is open
 			>
 				{/* HERO IMAGE */}
-
 				<View style={styles.imageContainer}>
 					<Image
 						source={vaccine}
@@ -131,7 +223,6 @@ const Home = () => {
 						resizeMode="cover"
 					/>
 				</View>
-
 				{/* CATEGORY SECTION */}
 				<View>
 					<ThemedText type="header">Category</ThemedText>
@@ -170,7 +261,70 @@ const Home = () => {
 						/>
 					</View>
 				</View>
-
+				{/* Baby selection modal */}
+				<Modal
+					animationType="fade"
+					transparent={true}
+					visible={showBabySelectionModal}
+					onRequestClose={() => setShowBabySelectionModal(false)}
+				>
+					<View style={styles.modalOverlay}>
+						<View style={styles.modalContainer}>
+							{babies.length === 0 ? (
+								// Show registration option if no babies
+								<>
+									<Image
+										source={noData}
+										className="w-16 h-20 mb-2"
+									/>
+									<ThemedText
+										type="cardHeader"
+										className="mb-3"
+									>
+										No childrens found. Please register.
+									</ThemedText>
+									<TouchableOpacity
+										style={styles.babyButton}
+										onPress={() => handleRouteRegister()}
+									>
+										<ThemedText
+											type="default"
+											className="text-white font-bold"
+										>
+											Register
+										</ThemedText>
+									</TouchableOpacity>
+								</>
+							) : (
+								// Show baby selection if babies exist
+								<>
+									<ThemedText
+										type="cardHeader"
+										className="mb-3"
+									>
+										Select Children
+									</ThemedText>
+									{babies.map((baby) => (
+										<TouchableOpacity
+											key={baby.id}
+											style={styles.babyButton}
+											onPress={() =>
+												handleBabySelection(baby.id)
+											}
+										>
+											<ThemedText
+												type="default"
+												className="text-white first-letter: capitalize"
+											>
+												{baby.firstName} {baby.lastName}
+											</ThemedText>
+										</TouchableOpacity>
+									))}
+								</>
+							)}
+						</View>
+					</View>
+				</Modal>
 				{/* EVENTS SECTION */}
 				<View>
 					<View style={styles.header}>
@@ -272,5 +426,35 @@ const styles = StyleSheet.create({
 		right: 0,
 		bottom: 0,
 		backgroundColor: "rgba(0, 0, 0, 0.8)", // Semi-transparent overlay
+	},
+	modalOverlay: {
+		flex: 1,
+		justifyContent: "center",
+		alignItems: "center",
+		backgroundColor: "rgba(0, 0, 0, 0.5)", // Semi-transparent overlay
+	},
+	modalContainer: {
+		width: 300,
+		padding: 20,
+		backgroundColor: "white",
+		borderRadius: 10,
+		alignItems: "center",
+	},
+	modalTitle: {
+		fontSize: 18,
+		fontWeight: "bold",
+		marginBottom: 10,
+	},
+	modalText: {
+		fontSize: 16,
+		marginBottom: 20,
+	},
+	babyButton: {
+		backgroundColor: "#456B72",
+		padding: 10,
+		borderRadius: 5,
+		marginVertical: 5,
+		width: "100%",
+		alignItems: "center",
 	},
 });
