@@ -67,7 +67,8 @@ const styles = StyleSheet.create({
 	},
 	avatarText: {
 		color: "#fff",
-		fontSize: 16,
+		fontSize: 14,
+		fontWeight: 'semibold',
 	},
 	placeholder: {
 		width: 32,

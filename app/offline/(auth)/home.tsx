@@ -60,6 +60,7 @@ const Home = () => {
 	const route = useRouter();
 
 	const checkOrFetchBabies = async () => {
+		await fetchBabies()
 		try {
 			const storedBabyId = await AsyncStorage.getItem("selectedBabyId");
 			console.log("Stored Baby ID:", storedBabyId);
@@ -91,6 +92,24 @@ const Home = () => {
 			}
 		} catch (error) {
 			console.error("Error fetching or setting baby data:", error);
+		}
+	};
+
+	const fetchBabies = async () => {
+		try {
+			const babiesData = await AsyncStorage.getItem("babies");
+
+			// Parse the stored data, if present
+			if (babiesData) {
+				const babyList: Baby[] = JSON.parse(babiesData);
+				setBabies(babyList);
+				return babyList;
+			}
+
+			return [];
+		} catch (error) {
+			console.error("Error fetching babies from AsyncStorage:", error);
+			return [];
 		}
 	};
 

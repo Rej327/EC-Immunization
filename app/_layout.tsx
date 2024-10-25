@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import NetInfo from "@react-native-community/netinfo";
-import { useRouter, Slot } from "expo-router"; // Import useRouter
-import * as Font from "expo-font"; // Import expo-font
-import * as SplashScreen from "expo-splash-screen"; // Import SplashScreen
+import { useRouter, Slot } from "expo-router";
+import * as Font from "expo-font";
+import * as SplashScreen from "expo-splash-screen";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import Toast from "react-native-toast-message";
 import { Toaster } from "./Toaster";
@@ -11,83 +11,85 @@ import { View } from "react-native";
 import ClearData from "./ClearData";
 
 const RootLayout = () => {
-	const [isOffline, setIsOffline] = useState(false);
-	const [fontsLoaded, setFontsLoaded] = useState(false); // State to track font loading
-	const router = useRouter(); // Initialize router
+  const [isOffline, setIsOffline] = useState(false);
+  const [fontsLoaded, setFontsLoaded] = useState(false);
+  const router = useRouter();
 
-	useEffect(() => {
+  // Load fonts and manage splash screen
+  useEffect(() => {
+    const loadFonts = async () => {
+      await SplashScreen.preventAutoHideAsync();
+
+      try {
+        await Font.loadAsync({
+          Roboto: require("../assets/fonts/Roboto-Regular.ttf"),
+          RobotoBold: require("../assets/fonts/Roboto-Bold.ttf"),
+          Oswald: require("../assets/fonts/Oswald-Regular.ttf"),
+        });
+        setFontsLoaded(true);
+      } catch (error) {
+        console.error("Error loading fonts:", error);
+      } finally {
+        await SplashScreen.hideAsync();
+      }
+    };
+
+    loadFonts();
+  }, []);
+
+  // Check network status
+  useEffect(() => {
+
 		const loadFonts = async () => {
-			try {
-				// Prevent the splash screen from auto-hiding
-				await SplashScreen.preventAutoHideAsync();
+      await SplashScreen.preventAutoHideAsync();
 
-				// Load the fonts
-				await Font.loadAsync({
-					Roboto: require("../assets/fonts/Roboto-Regular.ttf"), // Load the regular font
-					RobotoBold: require("../assets/fonts/Roboto-Bold.ttf"), // Load the regular font
-					Oswald: require("../assets/fonts/Oswald-Regular.ttf"), // Load the regular font
-				});
+      try {
+        await Font.loadAsync({
+          Roboto: require("../assets/fonts/Roboto-Regular.ttf"),
+          RobotoBold: require("../assets/fonts/Roboto-Bold.ttf"),
+          Oswald: require("../assets/fonts/Oswald-Regular.ttf"),
+        });
+        setFontsLoaded(true);
+      } catch (error) {
+        console.error("Error loading fonts:", error);
+      } finally {
+        await SplashScreen.hideAsync();
+      }
+    };
 
-				setFontsLoaded(true); // Set fonts loaded state
-			} catch (error) {
-				console.error("Error loading fonts:", error); // Handle font loading errors
-			} finally {
-				// Hide the splash screen after loading fonts
-				await SplashScreen.hideAsync();
-			}
-		};
+    const checkNetworkStatus = async () => {
+      try {
+        const { isConnected } = await NetInfo.fetch();
+        setIsOffline(!isConnected);
+        router.replace(isConnected ? "/online" : "/offline");
+      } catch (error) {
+        console.error("Error checking network status:", error);
+      }
+    };
 
-		loadFonts();
-	}, []);
+    // Initial check
+    checkNetworkStatus();
 
-	useEffect(() => {
-		const checkNetworkStatus = async () => {
-			try {
-				const netInfoState = await NetInfo.fetch();
-				const isConnected = netInfoState.isConnected;
+    // Subscribe to network changes
+    const unsubscribe = NetInfo.addEventListener(({ isConnected }) => {
+      setIsOffline(!isConnected);
+      router.replace(!isConnected ? "/online" : "/offline");
+    });
 
-				setIsOffline(!isConnected);
+    // Cleanup listener on unmount
+    return unsubscribe;
+  }, []);
 
-				// Use router.replace based on network status
-				if (isConnected) {
-					router.replace("/online");
-				} else {
-					router.replace("/offline");
-				}
-			} catch (error) {
-				console.error("Error checking network status:", error); // Handle any errors
-			}
-		};
-
-		// Initial check
-		checkNetworkStatus();
-
-		// Subscribe to network changes
-		const unsubscribe = NetInfo.addEventListener((state) => {
-			const isConnected = state.isConnected;
-			setIsOffline(!isConnected);
-
-			if (!isConnected) {
-				router.replace("/online");
-			} else {
-				router.replace("/offline");
-			}
-		});
-
-		// Clean up network listener on unmount
-		return () => unsubscribe();
-	}, []); // No need for 'isOffline' in dependencies
-
-	return (
-		<GestureHandlerRootView style={{ flex: 1 }}>
-			<Slot />
-			<Toaster />
-			<View className="flex flex-row justify-around">
-				<CheckLocalData />
-				<ClearData />
-			</View>
-		</GestureHandlerRootView> // Slot will render the appropriate layout from online or offline folders
-	);
+  return (
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <Slot />
+      <Toaster />
+      <View className="flex flex-row justify-around">
+        <CheckLocalData />
+        <ClearData />
+      </View>
+    </GestureHandlerRootView>
+  );
 };
 
 export default RootLayout;

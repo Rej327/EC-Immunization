@@ -8,15 +8,20 @@ import {
 } from "@/types/types";
 
 // 1. Fetch Milestones
-export const getMilestonesDAta = async (): Promise<Milestone[]> => {
-	try {
-		const milestonesData = await AsyncStorage.getItem("milestones");
-		return milestonesData ? JSON.parse(milestonesData) : [];
-	} catch (error) {
-		console.error("Error fetching babies from AsyncStorage: ", error);
-		return [];
-	}
+export const getMilestonesDAta = async (babyId: string): Promise<Milestone[]> => {
+  try {
+    const milestonesData = await AsyncStorage.getItem("milestones");
+    if (!milestonesData) return [];
+    
+    const allMilestones: Milestone[] = JSON.parse(milestonesData);
+    // Filter milestones for the selected baby
+    return allMilestones.filter(milestone => milestone.babyId === babyId);
+  } catch (error) {
+    console.error("Error fetching milestones from AsyncStorage: ", error);
+    return [];
+  }
 };
+
 
 // 2. Fetch Appointments
 export const getAppointmentsData = async (): Promise<Appointment[]> => {

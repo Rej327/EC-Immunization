@@ -131,9 +131,18 @@ export default function Reminder() {
 
 	// UseEffect to handle alertReminder
 	useEffect(() => {
-		if (milestones.length > 0) {
-			alertReminder();
-		}
+		const fetchDataAndAlert = async () => {
+			if (milestones.length > 0) {
+				// Wait for some time or any asynchronous operation if necessary
+				await new Promise(resolve => setTimeout(resolve, 1000)); // Wait for 1 second
+	
+				alertReminder();
+			}
+		};
+	
+		fetchDataAndAlert(); // Call the async function
+	
+		// Optional: cleanup if needed, or any dependencies you want to track
 	}, [milestones]);
 
 	useEffect(() => {

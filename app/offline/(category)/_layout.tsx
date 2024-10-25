@@ -9,7 +9,7 @@ const CategoryLayout = () => {
 	const router = useRouter(); // Get the router
 
 	const handleBackPress = () => {
-		router.push("/online/(auth)/home"); // Navigate to the Home screen
+		router.push("/offline/(auth)/home"); // Navigate to the Home screen
 	};
 
 	return (

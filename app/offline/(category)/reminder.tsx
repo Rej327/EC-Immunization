@@ -7,6 +7,8 @@ import {
 	Text,
 	TouchableOpacity,
 	StyleSheet,
+	Button,
+	Pressable,
 } from "react-native"; // Import Alert for notifications
 import React, { useEffect, useState } from "react";
 import { ThemedText } from "@/components/ThemedText";
@@ -21,15 +23,26 @@ import { Timestamp } from "firebase/firestore"; // Import Timestamp if using Fir
 import * as Print from "expo-print";
 import * as Sharing from "expo-sharing";
 import { Link } from "expo-router";
-import { formatDate, isTodayOrTomorrow } from "@/helper/helper";
+import {
+	formatAge,
+	formatDate,
+	isTodayOrTomorrow,
+	isTodayOrTomorrowOffline,
+	OfflineformatExpectedDate,
+} from "@/helper/helper";
+import {
+	getBabiesData,
+	getMilestonesDAta,
+} from "@/middleware/GetFromLocalStorage";
+import { Milestone, MilestoneData } from "@/types/types";
 
-type MilestoneList = {
-	ageInMonths: number;
-	expectedDate: Timestamp | Date; // Allow Firestore Timestamp or JS Date
-	vaccine: string;
-	description: string;
-	received: boolean;
-};
+// type MilestoneList = {
+// 	ageInMonths: number;
+// 	expectedDate: Timestamp | Date; // Allow Firestore Timestamp or JS Date
+// 	vaccine: string;
+// 	description: string;
+// 	received: boolean;
+// };
 
 type BabyDetails = {
 	firstName: string;
@@ -38,7 +51,7 @@ type BabyDetails = {
 };
 
 export default function Reminder() {
-	const [milestones, setMilestones] = useState<MilestoneList[]>([]);
+	const [milestones, setMilestones] = useState<MilestoneData[]>([]);
 	const [selectedBabyId, setSelectedBabyId] = useState<string | null>(null);
 	const [loading, setLoading] = useState(false);
 	const [babyDetails, setBabyDetails] = useState<BabyDetails | null>(null);
@@ -49,9 +62,9 @@ export default function Reminder() {
 		try {
 			const babyId = await AsyncStorage.getItem("selectedBabyId");
 			if (babyId) {
-				setSelectedBabyId(babyId);
-				await fetchMilestones(babyId);
-				await fetchBabyDetails(babyId);
+				setSelectedBabyId(babyId); // This will update the state
+				await fetchMilestones(babyId); // Pass the babyId to fetchMilestones
+				await fetchBabyDetails(babyId); // Fetch baby details
 			}
 		} catch (error) {
 			console.error("Error fetching baby ID from storage: ", error);
@@ -59,45 +72,50 @@ export default function Reminder() {
 	};
 
 	const fetchBabyDetails = async (babyId: string) => {
-		const babyRef = query(
-			collection(db, "milestones"),
-			where("babyId", "==", babyId)
-		);
 		try {
-			const querySnapshot = await getDocs(babyRef);
-			querySnapshot.forEach((doc) => {
-				const babyData = doc.data();
-				if (babyData) {
-					setBabyDetails({
-						firstName: babyData.firstName,
-						lastName: babyData.lastName,
-					});
-				}
-			});
+			const babies = await getBabiesData(); // Fetch all babies
+			const baby = babies.find((b) => b.id === babyId); // Match the selected babyId
+			if (baby) {
+				setBabyDetails({
+					firstName: baby.firstName,
+					lastName: baby.lastName,
+				});
+			}
 		} catch (error) {
 			console.error("Error fetching baby details: ", error);
 		}
 	};
 
 	const fetchMilestones = async (babyId: string) => {
+		if (!babyId) return; // Ensure babyId is provided
 		setLoading(true); // Start loading spinner
-		const milestonesRef = query(
-			collection(db, "milestones"),
-			where("babyId", "==", babyId)
-		);
-
 		try {
-			const querySnapshot = await getDocs(milestonesRef);
-			const fetchedMilestones: MilestoneList[] = [];
+			const fetchedMilestones: Milestone[] = await getMilestonesDAta(
+				babyId
+			);
 
-			querySnapshot.docs.forEach((doc) => {
-				const milestoneData = doc.data();
-				if (milestoneData.milestone) {
-					fetchedMilestones.push(...milestoneData.milestone);
-				}
-			});
+			// Map fetched milestones to MilestoneData
+			const milestonesData: MilestoneData[] = fetchedMilestones.flatMap(
+				(milestone) =>
+					milestone.milestoneData.map((mData) => {
+						return {
+							ageInMonths: mData.ageInMonths,
+							vaccine: mData.vaccine,
+							expectedDate: mData.expectedDate, // Ensure this is a Date
+							received: mData.received,
+							description: mData.description || "", // Default if necessary
+							updatedAt: mData.updatedAt, // Make sure this is in the correct format
+						};
+					})
+			);
 
-			setMilestones(fetchedMilestones);
+			// console.log(
+			// 	"Dataaa",
+			// 	milestonesData.flatMap((data) => data.expectedDate)
+			// );
+
+			setMilestones(milestonesData);
+			console.log("Fetched milestones:", milestonesData);
 		} catch (error) {
 			console.error("Error fetching milestones: ", error);
 		} finally {
@@ -108,131 +126,161 @@ export default function Reminder() {
 	const alertReminder = () => {
 		if (milestones.length > 0) {
 			milestones.forEach((milestone) => {
-				if (
-					isTodayOrTomorrow(milestone.expectedDate) &&
-					milestone.received === false
-				) {
+				// Determine the expectedDate type and parse accordingly
+				let expectedDate: Date;
+
+				if (milestone.expectedDate instanceof Timestamp) {
+					expectedDate = milestone.expectedDate.toDate(); // Convert Timestamp to Date
+				} else if (typeof milestone.expectedDate === "string") {
+					expectedDate = new Date(milestone.expectedDate); // Convert ISO string to Date
+				} else {
+					expectedDate = milestone.expectedDate; // It should already be a Date
+				}
+
+				// Check if the expectedDate is valid
+				if (!isNaN(expectedDate.getTime()) && !milestone.received) {
 					const today = new Date();
-					const expectedDate = new Date();
-					const isToday =
-						expectedDate.toDateString() === today.toDateString();
+					const tomorrow = new Date(today);
+					tomorrow.setDate(today.getDate() + 1);
 
-					// Set the message based on whether it's today or tomorrow
-					const message = isToday
-						? `The vaccine ${milestone.vaccine} is due today.`
-						: `The vaccine ${milestone.vaccine} is due tomorrow.`;
-
-					setReminderMessage(message);
-					setShowModal(true); // Show the modal
+					// Check if expectedDate is today or tomorrow
+					if (expectedDate.toDateString() === today.toDateString()) {
+						const message = `The vaccine ${milestone.vaccine} is due today.`;
+						setReminderMessage(message);
+						setShowModal(true); // Show the modal
+					} else if (
+						expectedDate.toDateString() === tomorrow.toDateString()
+					) {
+						const message = `The vaccine ${milestone.vaccine} is due tomorrow.`;
+						setReminderMessage(message);
+						setShowModal(true); // Show the modal
+					}
 				}
 			});
 		}
 	};
 
-	// UseEffect to handle alertReminder
 	useEffect(() => {
-		if (milestones.length > 0) {
-			alertReminder();
-		}
+		const fetchDataAndAlert = async () => {
+			if (milestones.length > 0) {
+				// Wait for some time or any asynchronous operation if necessary
+				await new Promise(resolve => setTimeout(resolve, 1000)); // Wait for 1 second
+	
+				alertReminder();
+			}
+		};
+	
+		fetchDataAndAlert(); // Call the async function
+	
+		// Optional: cleanup if needed, or any dependencies you want to track
 	}, [milestones]);
 
 	useEffect(() => {
 		fetchBabyId();
 	}, []);
 
-	// Group milestones by ageInMonths
-	const groupedMilestones = milestones.reduce((acc, milestone) => {
-		const age = milestone.ageInMonths;
-		if (!acc[age]) {
-			acc[age] = [];
+	useEffect(() => {
+		if (selectedBabyId) {
+			fetchMilestones(selectedBabyId); // Only fetch when babyId is available
 		}
-		acc[age].push(milestone);
-		return acc;
-	}, {} as Record<number, MilestoneList[]>);
+	}, [selectedBabyId]);
+
+	// Group milestones by ageInMonths
+	const groupedMilestones = Object.entries(
+		milestones.reduce((acc, milestone) => {
+			const age = milestone.ageInMonths;
+			if (!acc[age]) {
+				acc[age] = [];
+			}
+			acc[age].push(milestone);
+
+			return acc;
+		}, {} as Record<number, MilestoneData[]>)
+	).sort(([ageA], [ageB]) => Number(ageA) - Number(ageB));
 
 	// Generate PDF
-	const generatePDF = async (): Promise<void> => {
-		const htmlContent = `
-      <html>
-      <head>
-          <style>
-              body { 
-                  font-family: Arial, sans-serif; 
-                  margin: 20px; 
-                  padding: 10px; 
-              }
-              h1 {
-                  text-align: center; 
-                  margin-bottom: 10px; 
-              }
-              h3 {
-                  margin-bottom: 20px; 
-              }
-              .card { 
-                  border: 1px solid #d6d6d6; 
-                  padding: 15px; 
-                  margin-bottom: 10px; 
-                  border-radius: 5px; 
-              }
-              .header { 
-                  font-size: 18px; 
-                  font-weight: bold; 
-                  margin-bottom: 10px; 
-              }
-              .bold { 
-                  font-weight: bold; 
-              }
-              .vaccineData {
-                  margin-bottom: 25px;
-              }
-              .vaccineData .list {
-                  line-height: .7;
-              }
-          </style>
-      </head>
-      <body>
-          <h1>Baby Vaccination Reminders</h1>
-					<h3>Name: ${babyDetails?.firstName} ${babyDetails?.lastName}</h3>
-          
-          ${Object.entries(groupedMilestones)
-				.map(
-					([age, vaccines]) => `
-                <div class="card">
-                    <div class="header">${
-						age === "0" ? "At Birth" : `${age} month's`
-					}</div>
-                    ${vaccines
-						.map(
-							(vaccine) => `
-                        <div class="vaccineData">
-                            <p class="list"><span class="bold">Vaccine:</span> ${
-								vaccine.vaccine
-							}</p>
-                            <p class="list"><span class="bold">Expected Date:</span> ${formatDate(
-								vaccine.expectedDate
-							)}</p>
-                            <p class="list"><span class="bold">Received:</span> ${
-								vaccine.received ? "✅" : "❌"
-							}</p>
-                        </div>
-                        `
-						)
-						.join("")}
-                </div>
-                `
-				)
-				.join("")}
-      </body>
-      </html>
-    `;
+	// const generatePDF = async (): Promise<void> => {
+	// 	const htmlContent = `
+	//     <html>
+	//     <head>
+	//         <style>
+	//             body {
+	//                 font-family: Arial, sans-serif;
+	//                 margin: 20px;
+	//                 padding: 10px;
+	//             }
+	//             h1 {
+	//                 text-align: center;
+	//                 margin-bottom: 10px;
+	//             }
+	//             h3 {
+	//                 margin-bottom: 20px;
+	//             }
+	//             .card {
+	//                 border: 1px solid #d6d6d6;
+	//                 padding: 15px;
+	//                 margin-bottom: 10px;
+	//                 border-radius: 5px;
+	//             }
+	//             .header {
+	//                 font-size: 18px;
+	//                 font-weight: bold;
+	//                 margin-bottom: 10px;
+	//             }
+	//             .bold {
+	//                 font-weight: bold;
+	//             }
+	//             .vaccineData {
+	//                 margin-bottom: 25px;
+	//             }
+	//             .vaccineData .list {
+	//                 line-height: .7;
+	//             }
+	//         </style>
+	//     </head>
+	//     <body>
+	//         <h1>Baby Vaccination Reminders</h1>
+	// 				<h3>Name: ${babyDetails?.firstName} ${babyDetails?.lastName}</h3>
 
-		// Create PDF
-		const { uri } = await Print.printToFileAsync({ html: htmlContent });
-		console.log("PDF generated at:", uri);
+	//         ${Object.entries(groupedMilestones)
+	// 			.map(
+	// 				([age, vaccines]) => `
+	//               <div class="card">
+	//                   <div class="header">${
+	// 					age === "0" ? "At Birth" : `${age} month's`
+	// 				}</div>
+	//                   ${vaccines
+	// 					.map(
+	// 						(vaccine) => `
+	//                       <div class="vaccineData">
+	//                           <p class="list"><span class="bold">Vaccine:</span> ${
+	// 							vaccine.vaccine
+	// 						}</p>
+	//                           <p class="list"><span class="bold">Expected Date:</span> ${formatDate(
+	// 							vaccine.expectedDate
+	// 						)}</p>
+	//                           <p class="list"><span class="bold">Received:</span> ${
+	// 							vaccine.received ? "✅" : "❌"
+	// 						}</p>
+	//                       </div>
+	//                       `
+	// 					)
+	// 					.join("")}
+	//               </div>
+	//               `
+	// 			)
+	// 			.join("")}
+	//     </body>
+	//     </html>
+	//   `;
 
-		// Share PDF
-		await Sharing.shareAsync(uri);
-	};
+	// 	// Create PDF
+	// 	const { uri } = await Print.printToFileAsync({ html: htmlContent });
+	// 	console.log("PDF generated at:", uri);
+
+	// 	// Share PDF
+	// 	await Sharing.shareAsync(uri);
+	// };
 
 	const ReminderModal = () => (
 		<Modal
@@ -266,12 +314,12 @@ export default function Reminder() {
 
 	return (
 		<CustomBody
-			backRoute="/online/(auth)/home"
+			backRoute="/offline/(auth)/home"
 			title="Reminders"
 			headerImage={reminder}
 			headerImageStyle="absolute w-64 left-[14%] h-64 mx-auto"
 			fileName=""
-			onDownloadFunction={generatePDF}
+			// onDownloadFunction={generatePDF}
 		>
 			{showModal && <ReminderModal />}
 
@@ -301,66 +349,65 @@ export default function Reminder() {
 					</View>
 				) : (
 					<>
-						{Object.entries(groupedMilestones).map(
-							([age, vaccines]) => (
-								<CustomCard key={age}>
-									<ThemedText
-										type="cardHeader"
-										className="border-b-[1px] pb-3 border-[#d6d6d6]"
+						{groupedMilestones.map(([age, vaccines]) => (
+							<CustomCard key={age}>
+								<ThemedText
+									type="cardHeader"
+									className="border-b-[1px] pb-3 border-[#d6d6d6]"
+								>
+									{formatAge(Number(age))}
+								</ThemedText>
+								{vaccines.map((vaccine, index) => (
+									<View
+										key={index}
+										className={`mx-2 mt-2 ${
+											index !== vaccines.length - 1
+												? "border-b-[1px] border-[#d6d6d6] pb-2"
+												: ""
+										}`}
 									>
-										{age === "0"
-											? "At Birth"
-											: `${age} month's`}
-									</ThemedText>
-									{vaccines.map((vaccine, index) => (
-										<View
-											key={index}
-											className={`mx-2 mt-2 ${
-												index !== vaccines.length - 1
-													? "border-b-[1px] border-[#d6d6d6] pb-2"
-													: ""
-											}`}
-										>
+										<ThemedText type="default">
+											<ThemedText
+												type="default"
+												className="font-bold"
+											>
+												Vaccine:{" "}
+											</ThemedText>
+											{vaccine.vaccine}
+										</ThemedText>
+										<View className="flex flex-row justify-between">
 											<ThemedText type="default">
 												<ThemedText
 													type="default"
 													className="font-bold"
 												>
-													Vaccine:{" "}
+													Expected Date:{" "}
 												</ThemedText>
-												{vaccine.vaccine}
-											</ThemedText>
-											<View className="flex flex-row justify-between">
+
 												<ThemedText type="default">
-													<ThemedText
-														type="default"
-														className="font-bold"
-													>
-														Expected Date:{" "}
-													</ThemedText>
-													{formatDate(
+													{OfflineformatExpectedDate(
 														vaccine.expectedDate
 													)}
 												</ThemedText>
-												{vaccine.received ? (
-													<Ionicons
-														name="checkmark-circle"
-														size={20}
-														color="#4CAF50"
-													/>
-												) : (
-													<Ionicons
-														name="close-circle"
-														size={20}
-														color="#F44336"
-													/>
-												)}
-											</View>
+											</ThemedText>
+											{vaccine.received ? (
+												<Ionicons
+													name="checkmark-circle"
+													size={20}
+													color="#4CAF50"
+												/>
+											) : (
+												<Ionicons
+													name="close-circle"
+													size={20}
+													color="#F44336"
+												/>
+											)}
 										</View>
-									))}
-								</CustomCard>
-							)
-						)}
+									</View>
+								))}
+							</CustomCard>
+						))}
 					</>
 				)}
 			</View>
