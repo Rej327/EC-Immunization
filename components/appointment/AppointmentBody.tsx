@@ -135,54 +135,68 @@ const AppointmentBody = () => {
 
 	// Fetch milestones for selected baby
 	const fetchMilestones = useCallback(async (babyId: string) => {
-		setComponentLoad(true); // Start loading spinner
-		try {
-			const milestonesCollection = collection(db, "milestones");
-			const q = query(
-				milestonesCollection,
-				where("babyId", "==", babyId)
-			);
-			const querySnapshot = await getDocs(q);
+    setComponentLoad(true); // Start loading spinner
+    try {
+        const milestonesCollection = collection(db, "milestones");
+        const q = query(
+            milestonesCollection,
+            where("babyId", "==", babyId)
+        );
+        const querySnapshot = await getDocs(q);
 
-			const milestoneList: VaccineSelection[] = [];
-			querySnapshot.docs.forEach((doc) => {
-				const data = doc.data();
-				if (data.milestone && Array.isArray(data.milestone)) {
-					data.milestone.forEach((m: any) => {
-						milestoneList.push({
-							vaccine: m.vaccine,
-							received: m.received,
-							expectedDate: m.expectedDate
-								.toDate()
-								.toISOString()
-								.split("T")[0], // Format date as YYYY-MM-DD
-						});
-					});
-				}
-			});
+        const milestoneList: VaccineSelection[] = [];
+        querySnapshot.docs.forEach((doc) => {
+            const data = doc.data();
+            if (data.milestone && Array.isArray(data.milestone)) {
+                data.milestone.forEach((m: any) => {
+                    milestoneList.push({
+                        vaccine: m.vaccine,
+                        received: m.received,
+												expectedDate: m.expectedDate
+												.toDate()
+												.toISOString()
+												.split("T")[0], // Format date as YYYY-MM-DD
+								
+												
+                    });
+                });
+            }
+        });
 
-			// Filter out received vaccines and sort by expectedDate
-			const filteredMilestones = milestoneList
-				.filter((milestone) => !milestone.received)
-				.sort(
-					(a, b) =>
-						new Date(a.expectedDate).getTime() -
-						new Date(b.expectedDate).getTime()
-				);
+        // Group milestones based on expectedDate and sort them
+        const groupedMilestones = milestoneList.reduce((acc, milestone) => {
+            const expectedDate = milestone.expectedDate.split("T")[0]; // Use YYYY-MM-DD format for grouping
+            if (!acc[expectedDate]) {
+                acc[expectedDate] = [];
+            }
+            acc[expectedDate].push(milestone);
+            return acc;
+        }, {} as Record<string, VaccineSelection[]>);
 
-			setMilestones(filteredMilestones);
-		} catch (error) {
-			console.error("Error fetching milestones:", error);
-			Toast.show({
-				type: "error",
-				text1: "Error",
-				text2: "Failed to fetch milestones.",
-				position: "top",
-			});
-		} finally {
-			setComponentLoad(false); // Stop loading spinner
-		}
-	}, []);
+        // Sort the groups by date
+        const sortedMilestones = Object.entries(groupedMilestones)
+            .sort(([dateA], [dateB]) => new Date(dateA).getTime() - new Date(dateB).getTime());
+
+        // Flatten the sorted groups back to an array
+        const flattenedMilestones = sortedMilestones.flatMap(([, milestones]) => milestones);
+
+        // Filter out received vaccines
+        const filteredMilestones = flattenedMilestones.filter(milestone => !milestone.received);
+
+        setMilestones(filteredMilestones);
+    } catch (error) {
+        console.error("Error fetching milestones:", error);
+        Toast.show({
+            type: "error",
+            text1: "Error",
+            text2: "Failed to fetch milestones.",
+            position: "top",
+        });
+    } finally {
+        setComponentLoad(false); // Stop loading spinner
+    }
+}, []);
+
 
 	// Handle baby selection
 	const handleSelectBaby = async (baby: SelectedBaby) => {

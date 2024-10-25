@@ -1,19 +1,24 @@
+import { Timestamp } from "firebase/firestore";
+
 export interface MilestoneData {
 	ageInMonths: number;
 	vaccine: string;
 	description: string;
 	received: boolean;
-	expectedDate: Date;
+	expectedDate: Timestamp | Date | string
 	updatedAt: Date;
 }
 
+
+
+
 export interface Milestone {
-	babyId: string;
-	parentId: string;
-	firstName: string;
-	lastName: string;
-	createdAt: Date;
-	milestone: MilestoneData[];
+  babyId: string;  // Ensure you have this property as well
+  parentId: string;
+  firstName: string;
+  lastName: string;
+  createdAt: Date; // or Timestamp if you prefer
+  milestoneData: MilestoneData[]; // If you have an array of milestone data
 }
 
 export interface UserData {

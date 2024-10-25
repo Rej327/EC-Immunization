@@ -253,13 +253,6 @@ const MyBaby = () => {
 			},
 			{
 				vaccine: "Measles-Rubella (2nd dose)",
-				ageInMonths: 9,
-				received: false,
-				description:
-					"Second and last dose of MR vaccine ensures long-lasting protection against measles and rubella.",
-			},
-			{
-				vaccine: "Measles-Rubella (2nd dose)",
 				ageInMonths: 12,
 				received: false,
 				description:
