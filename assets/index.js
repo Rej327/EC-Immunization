@@ -24,6 +24,7 @@ export { default as upcoming } from "./icon/upcoming.png";
 export { default as history } from "./icon/history.png";
 
 export { default as noNotif } from "./icon/noNotif.png";
+export { default as noWifi } from "./icon/noWifi.png";
 
 // OBJECTS
 export { default as mainTop } from "./objects/mainTop.png";

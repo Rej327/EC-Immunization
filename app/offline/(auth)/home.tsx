@@ -28,11 +28,16 @@ import { ThemedText } from "@/components/ThemedText";
 import CategoryCard from "@/components/CategoryCard";
 import CustomBottomSheet from "@/components/CustomBottomSheet";
 import { events, milestones } from "@/assets/data/data";
-import { doc, getDoc, setDoc } from "firebase/firestore";
+import { doc, getDoc, setDoc, Timestamp } from "firebase/firestore";
 import { db } from "@/db/firebaseConfig";
-import { Baby } from "@/types/types";
+import { Baby, Milestone, MilestoneData } from "@/types/types";
 import { useRouter } from "expo-router";
-import { getBabiesData } from "@/middleware/GetFromLocalStorage";
+import {
+	getBabiesData,
+	getMilestonesDAta,
+} from "@/middleware/GetFromLocalStorage";
+import { formatVaccineList } from "@/helper/helper";
+import { Ionicons } from "@expo/vector-icons";
 
 interface UserData {
 	id: string;
@@ -50,6 +55,9 @@ const Home = () => {
 	const [babies, setBabies] = useState<Baby[]>([]);
 	const [selectedBabyId, setSelectedBabyId] = useState<string | null>(null);
 	const [showBabySelectionModal, setShowBabySelectionModal] = useState(false);
+	const [milestones, setMilestones] = useState<MilestoneData[]>([]);
+	const [showModal, setShowModal] = useState(false); // Modal visibility state
+	const [reminderMessage, setReminderMessage] = useState<string | null>(null); // Store reminder message
 
 	// const onRefresh = async () => {
 	// 	setRefreshing(true);
@@ -60,7 +68,7 @@ const Home = () => {
 	const route = useRouter();
 
 	const checkOrFetchBabies = async () => {
-		await fetchBabies()
+		await fetchBabies();
 		try {
 			const storedBabyId = await AsyncStorage.getItem("selectedBabyId");
 			console.log("Stored Baby ID:", storedBabyId);
@@ -113,6 +121,122 @@ const Home = () => {
 		}
 	};
 
+	const fetchMilestones = async (babyId: any) => {
+		if (!babyId) return; // Ensure babyId is provided
+
+		try {
+			const fetchedMilestones: Milestone[] = await getMilestonesDAta(
+				babyId
+			);
+
+			// Map fetched milestones to MilestoneData
+			const milestonesData: MilestoneData[] = fetchedMilestones.flatMap(
+				(milestone) =>
+					milestone.milestoneData.map((mData) => {
+						return {
+							ageInMonths: mData.ageInMonths,
+							vaccine: mData.vaccine,
+							expectedDate: mData.expectedDate, // Ensure this is a Date
+							received: mData.received,
+							description: mData.description || "", // Default if necessary
+							updatedAt: mData.updatedAt, // Make sure this is in the correct format
+						};
+					})
+			);
+
+			setMilestones(milestonesData);
+			console.log("Alert Triggered");
+		} catch (error) {
+			console.error("Error fetching milestones: ", error);
+		}
+	};
+
+	const alertReminder = () => {
+		if (milestones.length > 0) {
+			const vaccinesDueToday: string[] = [];
+			const vaccinesDueTomorrow: string[] = [];
+			const vaccinesPastDue: string[] = []; // Array for overdue vaccines
+
+			milestones.forEach((milestone) => {
+				// Determine the expectedDate type and parse accordingly
+				let expectedDate: Date;
+
+				if (milestone.expectedDate instanceof Timestamp) {
+					expectedDate = milestone.expectedDate.toDate(); // Convert Timestamp to Date
+				} else if (typeof milestone.expectedDate === "string") {
+					expectedDate = new Date(milestone.expectedDate); // Convert ISO string to Date
+				} else {
+					expectedDate = milestone.expectedDate; // It should already be a Date
+				}
+
+				// Check if the expectedDate is valid
+				if (!isNaN(expectedDate.getTime()) && !milestone.received) {
+					const today = new Date();
+					const tomorrow = new Date(today);
+					tomorrow.setDate(today.getDate() + 1);
+
+					// Check if expectedDate is today, tomorrow, or overdue
+					if (expectedDate.toDateString() === today.toDateString()) {
+						vaccinesDueToday.push(milestone.vaccine);
+					} else if (
+						expectedDate.toDateString() === tomorrow.toDateString()
+					) {
+						vaccinesDueTomorrow.push(milestone.vaccine);
+					} else if (expectedDate < today) {
+						// Overdue check
+						vaccinesPastDue.push(milestone.vaccine);
+					}
+				}
+			});
+
+			// Build the reminder message
+			let message = "";
+
+			// Add overdue vaccines
+			if (vaccinesPastDue.length > 0) {
+				message +=
+					formatVaccineList(vaccinesPastDue, "overdue") + "\n\n";
+			}
+
+			// Add today's due vaccines
+			if (vaccinesDueToday.length > 0) {
+				message +=
+					formatVaccineList(vaccinesDueToday, "due today") + "\n\n";
+			}
+
+			// Add tomorrow's due vaccines
+			if (vaccinesDueTomorrow.length > 0) {
+				message +=
+					formatVaccineList(vaccinesDueTomorrow, "due tomorrow") +
+					"\n\n";
+			}
+
+			// Set the reminder message if there's any due
+			if (message.trim()) {
+				setReminderMessage(message.trim());
+				setShowModal(true); // Show the modal
+			}
+		}
+	};
+
+	useEffect(() =>{
+		fetchMilestones(selectedBabyId)
+	},[selectedBabyId])
+
+	useEffect(() => {
+		const fetchDataAndAlert = async () => {
+			if (milestones.length > 0) {
+				// Wait for some time or any asynchronous operation if necessary
+				// await new Promise((resolve) => setTimeout(resolve, 1000)); // Wait for 1 second
+				alertReminder();
+			}
+		};
+
+		fetchDataAndAlert(); // Call the async function
+
+		// Optional: cleanup if needed, or any dependencies you want to track
+	}, [milestones]);
+
 	useEffect(() => {
 		checkOrFetchBabies();
 	}, []);
@@ -147,6 +271,36 @@ const Home = () => {
 		};
 	};
 
+	const ReminderModal = () => (
+		<Modal
+			animationType="fade"
+			transparent={true}
+			visible={showModal}
+			onRequestClose={() => setShowModal(false)}
+		>
+			<View style={styles.modalOverlay}>
+				<View style={styles.modalContent}>
+					<View className="mx-auto mb-2">
+						<Ionicons
+							name="calendar-outline"
+							size={40}
+							color={"#456B72"}
+						/>
+					</View>
+					<ThemedText type="cardHeader" style={styles.modalAlertText}>
+						{reminderMessage}
+					</ThemedText>
+					<TouchableOpacity
+						style={styles.okButton}
+						onPress={() => setShowModal(false)}
+					>
+						<ThemedText style={styles.okButtonText}>OK</ThemedText>
+					</TouchableOpacity>
+				</View>
+			</View>
+		</Modal>
+	);
+
 	return (
 		<View style={{ flex: 1, backgroundColor: "#f5f4f7" }}>
 			<ScrollView
@@ -160,6 +314,7 @@ const Home = () => {
 				className="px-4"
 				scrollEnabled={!openBottomSheet} // Disable scrolling when bottom sheet is open
 			>
+				{showModal && <ReminderModal />}
 				{/* HERO IMAGE */}
 				<View style={styles.imageContainer}>
 					<Image
@@ -399,5 +554,32 @@ const styles = StyleSheet.create({
 		marginVertical: 5,
 		width: "100%",
 		alignItems: "center",
+	},
+	modalContent: {
+		// alignItems: 'center',
+		width: 300,
+		padding: 20,
+		backgroundColor: "white",
+		borderRadius: 10,
+		shadowColor: "#000",
+		shadowOffset: { width: 0, height: 2 },
+		shadowOpacity: 0.25,
+		shadowRadius: 3.84,
+		elevation: 5,
+	},
+	modalAlertText: {
+		marginBottom: 15,
+		textAlign: "center",
+		fontSize: 16,
+	},
+	okButton: {
+		backgroundColor: "#456B72",
+		padding: 8,
+		borderRadius: 5,
+		alignItems: "center",
+	},
+	okButtonText: {
+		color: "white",
+		fontWeight: "bold",
 	},
 });

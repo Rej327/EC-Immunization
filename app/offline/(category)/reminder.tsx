@@ -26,8 +26,9 @@ import { Link } from "expo-router";
 import {
 	formatAge,
 	formatDate,
+	formatVaccineList,
 	isTodayOrTomorrow,
-	isTodayOrTomorrowOffline,
+	// isTodayOrTomorrowOffline,
 	OfflineformatExpectedDate,
 } from "@/helper/helper";
 import {
@@ -123,57 +124,88 @@ export default function Reminder() {
 		}
 	};
 
-	const alertReminder = () => {
-		if (milestones.length > 0) {
-			milestones.forEach((milestone) => {
-				// Determine the expectedDate type and parse accordingly
-				let expectedDate: Date;
+	// const alertReminder = () => {
+	// 	if (milestones.length > 0) {
+	// 		const vaccinesDueToday: string[] = [];
+	// 		const vaccinesDueTomorrow: string[] = [];
+	// 		const vaccinesPastDue: string[] = []; // Array for overdue vaccines
 
-				if (milestone.expectedDate instanceof Timestamp) {
-					expectedDate = milestone.expectedDate.toDate(); // Convert Timestamp to Date
-				} else if (typeof milestone.expectedDate === "string") {
-					expectedDate = new Date(milestone.expectedDate); // Convert ISO string to Date
-				} else {
-					expectedDate = milestone.expectedDate; // It should already be a Date
-				}
+	// 		milestones.forEach((milestone) => {
+	// 			// Determine the expectedDate type and parse accordingly
+	// 			let expectedDate: Date;
 
-				// Check if the expectedDate is valid
-				if (!isNaN(expectedDate.getTime()) && !milestone.received) {
-					const today = new Date();
-					const tomorrow = new Date(today);
-					tomorrow.setDate(today.getDate() + 1);
+	// 			if (milestone.expectedDate instanceof Timestamp) {
+	// 				expectedDate = milestone.expectedDate.toDate(); // Convert Timestamp to Date
+	// 			} else if (typeof milestone.expectedDate === "string") {
+	// 				expectedDate = new Date(milestone.expectedDate); // Convert ISO string to Date
+	// 			} else {
+	// 				expectedDate = milestone.expectedDate; // It should already be a Date
+	// 			}
 
-					// Check if expectedDate is today or tomorrow
-					if (expectedDate.toDateString() === today.toDateString()) {
-						const message = `The vaccine ${milestone.vaccine} is due today.`;
-						setReminderMessage(message);
-						setShowModal(true); // Show the modal
-					} else if (
-						expectedDate.toDateString() === tomorrow.toDateString()
-					) {
-						const message = `The vaccine ${milestone.vaccine} is due tomorrow.`;
-						setReminderMessage(message);
-						setShowModal(true); // Show the modal
-					}
-				}
-			});
-		}
-	};
+	// 			// Check if the expectedDate is valid
+	// 			if (!isNaN(expectedDate.getTime()) && !milestone.received) {
+	// 				const today = new Date();
+	// 				const tomorrow = new Date(today);
+	// 				tomorrow.setDate(today.getDate() + 1);
 
-	useEffect(() => {
-		const fetchDataAndAlert = async () => {
-			if (milestones.length > 0) {
-				// Wait for some time or any asynchronous operation if necessary
-				await new Promise(resolve => setTimeout(resolve, 1000)); // Wait for 1 second
-	
-				alertReminder();
-			}
-		};
-	
-		fetchDataAndAlert(); // Call the async function
-	
-		// Optional: cleanup if needed, or any dependencies you want to track
-	}, [milestones]);
+	// 				// Check if expectedDate is today, tomorrow, or overdue
+	// 				if (expectedDate.toDateString() === today.toDateString()) {
+	// 					vaccinesDueToday.push(milestone.vaccine);
+	// 				} else if (
+	// 					expectedDate.toDateString() === tomorrow.toDateString()
+	// 				) {
+	// 					vaccinesDueTomorrow.push(milestone.vaccine);
+	// 				} else if (expectedDate < today) {
+	// 					// Overdue check
+	// 					vaccinesPastDue.push(milestone.vaccine);
+	// 				}
+	// 			}
+	// 		});
+
+	// 		// Build the reminder message
+	// 		let message = "";
+
+	// 		// Add overdue vaccines
+	// 		if (vaccinesPastDue.length > 0) {
+	// 			message +=
+	// 				formatVaccineList(vaccinesPastDue, "overdue") + "\n\n";
+	// 		}
+
+	// 		// Add today's due vaccines
+	// 		if (vaccinesDueToday.length > 0) {
+	// 			message +=
+	// 				formatVaccineList(vaccinesDueToday, "due today") + "\n\n";
+	// 		}
+
+	// 		// Add tomorrow's due vaccines
+	// 		if (vaccinesDueTomorrow.length > 0) {
+	// 			message +=
+	// 				formatVaccineList(vaccinesDueTomorrow, "due tomorrow") +
+	// 				"\n\n";
+	// 		}
+
+	// 		// Set the reminder message if there's any due
+	// 		if (message.trim()) {
+	// 			setReminderMessage(message.trim());
+	// 			setShowModal(true); // Show the modal
+	// 		}
+	// 	}
+	// };
+
+	// useEffect(() => {
+	// 	const fetchDataAndAlert = async () => {
+	// 		if (milestones.length > 0) {
+	// 			// Wait for some time or any asynchronous operation if necessary
+	// 			await new Promise((resolve) => setTimeout(resolve, 1000)); // Wait for 1 second
+
+	// 			alertReminder();
+	// 		}
+	// 	};
+
+	// 	fetchDataAndAlert(); // Call the async function
+
+	// 	// Optional: cleanup if needed, or any dependencies you want to track
+	// }, [milestones]);
 
 	useEffect(() => {
 		fetchBabyId();
@@ -321,7 +353,7 @@ export default function Reminder() {
 			fileName=""
 			// onDownloadFunction={generatePDF}
 		>
-			{showModal && <ReminderModal />}
+			{/* {showModal && <ReminderModal />} */}
 
 			<View className="px-5 pb-5">
 				{selectedBabyId == null ? (

@@ -13,7 +13,7 @@ import { ThemedText } from "@/components/ThemedText";
 import CustomBody from "@/components/body/CustomBody";
 import { noData, reminder } from "@/assets";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { collection, getDocs, query, where } from "firebase/firestore";
+import { addDoc, collection, getDocs, query, where } from "firebase/firestore";
 import { db } from "@/db/firebaseConfig";
 import CustomCard from "@/components/CustomCard";
 import { Ionicons } from "@expo/vector-icons";
@@ -21,7 +21,14 @@ import { Timestamp } from "firebase/firestore"; // Import Timestamp if using Fir
 import * as Print from "expo-print";
 import * as Sharing from "expo-sharing";
 import { Link } from "expo-router";
-import { formatAge, formatDate, isTodayOrTomorrow } from "@/helper/helper";
+import {
+	formatAge,
+	formatDate,
+	formatVaccineList,
+	isTodayOrTomorrow,
+	isTodayOrTomorrowOrPast,
+} from "@/helper/helper";
+import { useUser } from "@clerk/clerk-expo";
 
 type MilestoneList = {
 	ageInMonths: number;
@@ -42,8 +49,10 @@ export default function Reminder() {
 	const [selectedBabyId, setSelectedBabyId] = useState<string | null>(null);
 	const [loading, setLoading] = useState(false);
 	const [babyDetails, setBabyDetails] = useState<BabyDetails | null>(null);
-	const [showModal, setShowModal] = useState(false); 
-	const [reminderMessage, setReminderMessage] = useState<string | null>(null); 
+	const [showModal, setShowModal] = useState(false);
+	const [reminderMessage, setReminderMessage] = useState<string | null>(null);
+
+	// const { user } = useUser();
 
 	const fetchBabyId = async () => {
 		try {
@@ -105,45 +114,102 @@ export default function Reminder() {
 		}
 	};
 
-	const alertReminder = () => {
-		if (milestones.length > 0) {
-			milestones.forEach((milestone) => {
-				if (
-					isTodayOrTomorrow(milestone.expectedDate) &&
-					milestone.received === false
-				) {
-					const today = new Date();
-					const expectedDate = new Date();
-					const isToday =
-						expectedDate.toDateString() === today.toDateString();
+	//Alert
+	// const alertReminder = async () => {
+	// 	if (milestones.length > 0) {
+	// 		const today = new Date();
+	// 		today.setHours(0, 0, 0, 0); // Set to start of the day
+	// 		const tomorrow = new Date(today);
+	// 		tomorrow.setDate(today.getDate() + 1); // Add 1 day for tomorrow
+	// 		tomorrow.setHours(0, 0, 0, 0); // Set to start of the day
 
-					// Set the message based on whether it's today or tomorrow
-					const message = isToday
-						? `The vaccine ${milestone.vaccine} is due today.`
-						: `The vaccine ${milestone.vaccine} is due tomorrow.`;
+	// 		const vaccinesDueToday: string[] = [];
+	// 		const vaccinesDueTomorrow: string[] = [];
+	// 		const vaccinesPastDue: string[] = [];
 
-					setReminderMessage(message);
-					setShowModal(true); // Show the modal
-				}
-			});
-		}
-	};
+	// 		milestones.forEach((milestone) => {
+	// 			if (!milestone.received) {
+	// 				const dateStatus = isTodayOrTomorrowOrPast(
+	// 					milestone.expectedDate
+	// 				);
+
+	// 				if (dateStatus === "today") {
+	// 					vaccinesDueToday.push(milestone.vaccine);
+	// 				} else if (dateStatus === "tomorrow") {
+	// 					vaccinesDueTomorrow.push(milestone.vaccine);
+	// 				} else if (dateStatus === "past") {
+	// 					vaccinesPastDue.push(milestone.vaccine);
+	// 				}
+	// 			}
+	// 		});
+
+	// 		// Build the message based on the due dates
+	// 		let message = "";
+	// 		if (vaccinesPastDue.length > 0) {
+	// 			message +=
+	// 				formatVaccineList(vaccinesPastDue, "overdue") + "\n\n";
+	// 		}
+	// 		if (vaccinesDueToday.length > 0) {
+	// 			message +=
+	// 				formatVaccineList(vaccinesDueToday, "due today") + "\n\n";
+	// 		}
+	// 		if (vaccinesDueTomorrow.length > 0) {
+	// 			message +=
+	// 				formatVaccineList(vaccinesDueTomorrow, "due tomorrow") +
+	// 				"\n\n";
+	// 		}
+
+	// 		// Set the reminder message if there's any due
+	// 		if (message.trim()) {
+	// 			setReminderMessage(message.trim());
+	// 			setShowModal(true); // Show the modal
+
+	// 			// Check for existing notifications
+	// 			const notificationsRef = collection(db, "notifications");
+	// 			const q = query(
+	// 				notificationsRef,
+	// 				where("message", "==", message.trim()),
+	// 				where("receiverId", "==", user?.id)
+	// 			);
+	// 			const querySnapshot = await getDocs(q);
+
+	// 			if (querySnapshot.empty) {
+	// 				// Prepare notification data
+	// 				const notificationData = {
+	// 					createdAt: Timestamp.fromDate(new Date()), // Current timestamp
+	// 					firstName: user?.firstName, // Set dynamically if needed
+	// 					lastName: user?.lastName, // Set dynamically if needed
+	// 					isRead: false, // Set as false initially
+	// 					message: message.trim(),
+	// 					receiverId: user?.id, // Set to the user's ID
+	// 					subject: "Vaccine Reminder", // Set appropriate subject
+	// 				};
+
+	// 				// Send notification to Firestore
+	// 				await addDoc(notificationsRef, notificationData);
+	// 				console.log("Notification sent successfully!");
+	// 			} else {
+	// 				console.log("Duplicate notification not sent.");
+	// 			}
+	// 		}
+	// 	}
+	// };
 
 	// UseEffect to handle alertReminder
-	useEffect(() => {
-		const fetchDataAndAlert = async () => {
-			if (milestones.length > 0) {
-				// Wait for some time or any asynchronous operation if necessary
-				await new Promise(resolve => setTimeout(resolve, 1000)); // Wait for 1 second
-	
-				alertReminder();
-			}
-		};
-	
-		fetchDataAndAlert(); // Call the async function
-	
-		// Optional: cleanup if needed, or any dependencies you want to track
-	}, [milestones]);
+	// useEffect(() => {
+	// 	const fetchDataAndAlert = async () => {
+	// 		if (milestones.length > 0) {
+	// 			// Wait for some time or any asynchronous operation if necessary
+	// 			await new Promise((resolve) => setTimeout(resolve, 1000)); // Wait for 1 second
+
+	// 			alertReminder();
+	// 		}
+	// 	};
+
+	// 	fetchDataAndAlert(); // Call the async function
+
+	// 	// Optional: cleanup if needed, or any dependencies you want to track
+	// }, [milestones]);
 
 	useEffect(() => {
 		fetchBabyId();
@@ -248,35 +314,35 @@ export default function Reminder() {
 		await Sharing.shareAsync(uri);
 	};
 
-	const ReminderModal = () => (
-		<Modal
-			animationType="fade"
-			transparent={true}
-			visible={showModal}
-			onRequestClose={() => setShowModal(false)}
-		>
-			<View style={styles.modalOverlay}>
-				<View style={styles.modalContent}>
-					<View className="mx-auto mb-2">
-						<Ionicons
-							name="calendar-outline"
-							size={40}
-							color={"#456B72"}
-						/>
-					</View>
-					<ThemedText type="cardHeader" style={styles.modalText}>
-						{reminderMessage}
-					</ThemedText>
-					<TouchableOpacity
-						style={styles.okButton}
-						onPress={() => setShowModal(false)}
-					>
-						<ThemedText style={styles.okButtonText}>OK</ThemedText>
-					</TouchableOpacity>
-				</View>
-			</View>
-		</Modal>
-	);
+	// const ReminderModal = () => (
+	// 	<Modal
+	// 		animationType="fade"
+	// 		transparent={true}
+	// 		visible={showModal}
+	// 		onRequestClose={() => setShowModal(false)}
+	// 	>
+	// 		<View style={styles.modalOverlay}>
+	// 			<View style={styles.modalContent}>
+	// 				<View className="mx-auto mb-2">
+	// 					<Ionicons
+	// 						name="calendar-outline"
+	// 						size={40}
+	// 						color={"#456B72"}
+	// 					/>
+	// 				</View>
+	// 				<ThemedText type="cardHeader" style={styles.modalText}>
+	// 					{reminderMessage}
+	// 				</ThemedText>
+	// 				<TouchableOpacity
+	// 					style={styles.okButton}
+	// 					onPress={() => setShowModal(false)}
+	// 				>
+	// 					<ThemedText style={styles.okButtonText}>OK</ThemedText>
+	// 				</TouchableOpacity>
+	// 			</View>
+	// 		</View>
+	// 	</Modal>
+	// );
 
 	return (
 		<CustomBody
@@ -287,7 +353,7 @@ export default function Reminder() {
 			fileName=""
 			onDownloadFunction={generatePDF}
 		>
-			{showModal && <ReminderModal />}
+			{/* {showModal && <ReminderModal />} */}
 
 			<View className="px-5 pb-5">
 				{selectedBabyId == null ? (

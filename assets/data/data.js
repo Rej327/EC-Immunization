@@ -104,86 +104,75 @@ export const vaccinationGuide = [
 		],
 	},
 	{
-		ageRange: "1 Month",
-		vaccines: [
-			{
-				name: "Hepatitis B (2nd dose)",
-				details: "Administer 1–2 months after the 1st dose.",
-				description:
-					"Second dose to strengthen immunity against Hepatitis B infection.",
-			},
-		],
-	},
-	{
-		ageRange: "2 Months",
+		ageRange: "1½ Months",
 		vaccines: [
 			{
 				name: "Pentavalent Vaccine (1st dose)",
-				details: "Administer at 2 months.",
+				details: "Administer at 1½ months.",
 				description:
 					"Combines protection against 5 diseases: diphtheria (D), pertussis (P), tetanus (T), hepatitis B (HB), and Haemophilus influenzae type B (Hib).",
 			},
 			{
 				name: "Oral Polio Vaccine (1st dose)",
-				details: "Administer at 2 months.",
+				details: "Administer at 1½ months.",
 				description:
 					"Oral Polio Vaccine (OPV) protects against poliovirus, which can lead to paralysis.",
 			},
 			{
 				name: "Pneumococcal Conjugate Vaccine (1st dose)",
-				details: "Administer at 2 months.",
+				details: "Administer at 1½ months.",
 				description:
-					"PCV protects against infections caused by Streptococcus pneumoniae, such as pneumonia, meningitis, and sepsis.",
+					"First dose of PCV for complete protection against pneumococcal diseases.",
 			},
 		],
 	},
 	{
-		ageRange: "4 Months",
+		ageRange: "2½ Months",
 		vaccines: [
 			{
 				name: "Pentavalent Vaccine (2nd dose)",
-				details: "Administer at 4 months.",
+				details: "Administer at 2½ months.",
 				description:
-					"Second dose of DPT-HepB-Hib combination vaccine to maintain immunity.",
+					"Combines protection against 5 diseases: diphtheria (D), pertussis (P), tetanus (T), hepatitis B (HB), and Haemophilus influenzae type B (Hib).",
 			},
 			{
 				name: "Oral Polio Vaccine (2nd dose)",
-				details: "Administer at 4 months.",
+				details: "Administer at 2½ months.",
 				description:
-					"Second dose of OPV to reinforce protection against polio.",
+					"Oral Polio Vaccine (OPV) protects against poliovirus, which can lead to paralysis.",
 			},
 			{
 				name: "Pneumococcal Conjugate Vaccine (2nd dose)",
-				details: "Administer at 4 months.",
+				details: "Administer at 2½ months.",
 				description:
 					"Second dose of PCV for additional protection against pneumococcal diseases.",
 			},
 		],
 	},
 	{
-		ageRange: "6 Months",
+		ageRange: "3½ Months",
 		vaccines: [
 			{
 				name: "Pentavalent Vaccine (3rd dose)",
-				details: "Administer at 6 months.",
+				details: "Administer at 3½ months.",
 				description:
 					"Third and final dose of DPT-HepB-Hib for complete protection.",
 			},
 			{
 				name: "Oral Polio Vaccine (3rd dose)",
-				details: "Administer at 6 months.",
+				details: "Administer at 3½ months.",
 				description:
 					"Third and final OPV dose for full immunity against poliovirus.",
 			},
 			{
 				name: "Inactivated Polio Vaccine (IPV)",
-				details: "Administer at 6 months.",
+				details: "Administer at 3½ months.",
 				description:
 					"IPV is an injected polio vaccine that boosts immunity against poliovirus, complementing the oral vaccine.",
 			},
 			{
 				name: "Pneumococcal Conjugate Vaccine (3rd dose)",
-				details: "Administer at 6 months.",
+				details: "Administer at 3½ months.",
 				description:
 					"Third and final dose of PCV for complete protection against pneumococcal diseases.",
 			},
@@ -196,7 +185,7 @@ export const vaccinationGuide = [
 				name: "Measles-Rubella (1st dose)",
 				details: "Administer at 9 months.",
 				description:
-					"MR vaccine protects against measles and rubella, two viral infections that can lead to serious complications.",
+					"First dose of MR vaccine ensures long-lasting protection against measles and rubella.",
 			},
 			{
 				name: "Japanese Encephalitis (1st dose)",
@@ -218,8 +207,6 @@ export const vaccinationGuide = [
 		],
 	},
 ];
-
-
 
 //mockdata
 export const milestones = [
