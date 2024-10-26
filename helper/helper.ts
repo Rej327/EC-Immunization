@@ -12,25 +12,27 @@ export const formatDate = (date: Timestamp | Date) => {
 };
 
 export const OfflineformatExpectedDate = (date: Timestamp | Date | string) => {
-  // If the date is a Timestamp, convert it to a Date
-  const jsDate = date instanceof Timestamp ? date.toDate() : new Date(date);
+	// If the date is a Timestamp, convert it to a Date
+	const jsDate = date instanceof Timestamp ? date.toDate() : new Date(date);
 
-  // Check if jsDate is a valid Date object
-  if (isNaN(jsDate.getTime())) {
-    return "Invalid Date"; // Fallback for invalid date
-  }
+	// Check if jsDate is a valid Date object
+	if (isNaN(jsDate.getTime())) {
+		return "Invalid Date"; // Fallback for invalid date
+	}
 
-  return jsDate.toLocaleDateString("en-US", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
+	return jsDate.toLocaleDateString("en-US", {
+		year: "numeric",
+		month: "long",
+		day: "numeric",
+	});
 };
-
 
 // Helper function to compare dates
 export const isTodayOrTomorrow = (expectedDate: Timestamp | Date) => {
-	const jsDate = expectedDate instanceof Timestamp ? expectedDate.toDate() : expectedDate;
+	const jsDate =
+		expectedDate instanceof Timestamp
+			? expectedDate.toDate()
+			: expectedDate;
 	const today = new Date();
 	const tomorrow = new Date(today);
 	tomorrow.setDate(today.getDate() + 1); // Add 1 day to today's date for tomorrow
@@ -42,29 +44,50 @@ export const isTodayOrTomorrow = (expectedDate: Timestamp | Date) => {
 	);
 };
 
-export const isTodayOrTomorrowOffline = (expectedDate: Date | null): boolean => {
-	// Ensure expectedDate is not null or undefined
-	if (!expectedDate) return false;
-
+export const isTodayOrTomorrowOrPast = (expectedDate: Timestamp | Date) => {
+	const jsDate =
+		expectedDate instanceof Timestamp
+			? expectedDate.toDate()
+			: expectedDate;
 	const today = new Date();
+	today.setHours(0, 0, 0, 0); // Start of the day
 	const tomorrow = new Date(today);
-	tomorrow.setDate(today.getDate() + 1); // Add 1 day to today's date for tomorrow
+	tomorrow.setDate(today.getDate() + 1);
+	tomorrow.setHours(0, 0, 0, 0); // Start of the day
 
-	// Check if the expectedDate is today or tomorrow
-	return (
-		expectedDate.toDateString() === today.toDateString() ||
-		expectedDate.toDateString() === tomorrow.toDateString()
-	);
+	// Check if the expectedDate is today, tomorrow, or in the past
+	if (jsDate < today) {
+		return "past";
+	} else if (jsDate.toDateString() === today.toDateString()) {
+		return "today";
+	} else if (jsDate.toDateString() === tomorrow.toDateString()) {
+		return "tomorrow";
+	}
+
+	// If none of the above, it's in the future (beyond tomorrow)
+	return "future";
 };
 
+// Helper function to format vaccine list
+export const formatVaccineList = (vaccines: string[], timeFrame: string) => {
+	if (vaccines.length === 0) return "";
+
+	if (vaccines.length === 1) {
+		return `The vaccine ${vaccines[0]} is ${timeFrame}.`;
+	} else if (vaccines.length === 2) {
+		return `The vaccines ${vaccines.join(" and ")} are ${timeFrame}.`;
+	} else {
+		return `The vaccines ${vaccines.slice(0, -1).join(", ")}, and ${
+			vaccines[vaccines.length - 1]
+		} are ${timeFrame}.`;
+	}
+};
 
 
 export const formatNotificationDate = (date: Date) => {
 	if (!date) return "Unknown Date";
 	const now = new Date();
-	const secondsDiff = Math.floor(
-		(now.getTime() - date.getTime()) / 1000
-	);
+	const secondsDiff = Math.floor((now.getTime() - date.getTime()) / 1000);
 
 	// If less than a week ago, show relative time
 	if (secondsDiff < 604800) {

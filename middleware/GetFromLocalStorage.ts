@@ -1,6 +1,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
 	Appointment,
+	AppointmentsByStatus,
 	Baby,
 	Milestone,
 	Notification,
@@ -24,13 +25,34 @@ export const getMilestonesDAta = async (babyId: string): Promise<Milestone[]> =>
 
 
 // 2. Fetch Appointments
-export const getAppointmentsData = async (): Promise<Appointment[]> => {
+export const getAppointmentsData = async (): Promise<AppointmentsByStatus> => {
 	try {
 		const appointmentsData = await AsyncStorage.getItem("appointments");
-		return appointmentsData ? JSON.parse(appointmentsData) : [];
+		const appointments: Appointment[] = appointmentsData
+			? JSON.parse(appointmentsData)
+			: [];
+
+		const appointmentsByStatus: AppointmentsByStatus = {
+			pending: [],
+			upcoming: [],
+			history: [],
+		};
+
+		appointments.forEach((appointment) => {
+
+			if (appointment.status === "pending") {
+				appointmentsByStatus.pending.push(appointment);
+			} else if (appointment.status === "history") {
+				appointmentsByStatus.history.push(appointment);
+			} else if (appointment.status === "upcoming") {
+				appointmentsByStatus.upcoming.push(appointment);
+			}
+		});
+
+		return appointmentsByStatus;
 	} catch (error) {
-		console.error("Error fetching babies from AsyncStorage: ", error);
-		return [];
+		console.error("Error fetching appointments from AsyncStorage:", error);
+		return { pending: [], upcoming: [], history: [] };
 	}
 };
 

@@ -43,6 +43,12 @@ export interface Appointment {
 	updatedAt: Date; // Last updated timestamp
 }
 
+export interface AppointmentsByStatus {
+	pending: Appointment[];
+	upcoming: Appointment[];
+	history: Appointment[];
+}
+
 export interface Baby {
 	id: string;
 	parentId: string;

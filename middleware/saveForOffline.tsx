@@ -22,16 +22,28 @@ export const saveForOffline = async (userId: any) => {
 		const querySnapshot = await getDocs(milestonesRef);
 
 		// Create a mapping of babyId to milestones
-		const milestonesMap: {
-			[key: string]: Milestone;
-		} = {};
+		const milestonesMap: { [key: string]: Milestone } = {};
 
 		querySnapshot.docs.forEach((doc) => {
 			const milestoneData = doc.data();
 			const babyId = milestoneData.babyId;
 			const parentId = milestoneData.parentId;
-			const milestoneArray: MilestoneData[] =
-				milestoneData.milestone || [];
+
+			// Transform milestoneData array items to ensure proper types
+			const milestoneArray: MilestoneData[] = (
+				milestoneData.milestone || []
+			).map((milestone: any) => ({
+				ageInMonths: milestone.ageInMonths,
+				vaccine: milestone.vaccine,
+				description: milestone.description,
+				received: Boolean(milestone.received),
+				expectedDate: milestone.expectedDate.toDate
+					? milestone.expectedDate.toDate()
+					: new Date(milestone.expectedDate),
+				updatedAt: milestone.updatedAt
+					? milestone.updatedAt.toDate()
+					: new Date(),
+			}));
 
 			if (!milestonesMap[babyId]) {
 				milestonesMap[babyId] = {
@@ -40,18 +52,22 @@ export const saveForOffline = async (userId: any) => {
 					firstName: milestoneData.firstName || "",
 					lastName: milestoneData.lastName || "",
 					createdAt: milestoneData.createdAt.toDate(),
-					milestone: [],
+					milestoneData: [],
 				};
 			}
-			milestonesMap[babyId].milestone.push(...milestoneArray);
+
+			// Push transformed data into the milestones map
+			milestonesMap[babyId].milestoneData.push(...milestoneArray);
 		});
 
 		const fetchedMilestones: Milestone[] = Object.values(milestonesMap);
 
+		// Save milestones to AsyncStorage
 		await AsyncStorage.setItem(
 			"milestones",
 			JSON.stringify(fetchedMilestones)
 		);
+
 		// // 2 Fetch users based on userId
 		const usersRef = collection(db, "parents");
 		const usersSnapshot = await getDocs(usersRef);
