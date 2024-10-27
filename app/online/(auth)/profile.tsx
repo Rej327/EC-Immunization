@@ -76,7 +76,7 @@ const Profile = () => {
 				<MyBaby />
 				<Notification />
 				<Milestones />
-				<Logout />
+				{/* <Logout /> */}
 			</View>
 		</ScrollView>
 	);

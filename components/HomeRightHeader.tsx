@@ -128,7 +128,7 @@ export const HomeRightHeader = () => {
 	return (
 		<View style={{ flexDirection: "row", alignItems: "center" }}>
 			<TouchableOpacity
-				style={{ marginRight: 10 }}
+				style={{ marginRight: 20 }}
 				onPress={toggleDrawer}
 			>
 				<View>
@@ -140,20 +140,16 @@ export const HomeRightHeader = () => {
 					{/* Show red dot with unread count if there are unread notifications */}
 					{unreadCount > 0 && (
 						<View style={styles.redDot}>
-							<ThemedText type="cardTitle" style={styles.unreadCountText}>
+							<ThemedText
+								type="cardTitle"
+								style={styles.unreadCountText}
+							>
 								{unreadCount}
 							</ThemedText>
 						</View>
 					)}
 				</View>
 			</TouchableOpacity>
-
-			{user && (
-				<Image
-					source={{ uri: user.imageUrl }}
-					style={styles.profileImage}
-				/>
-			)}
 
 			<Notification
 				notifications={notifications}
@@ -168,12 +164,6 @@ export const HomeRightHeader = () => {
 };
 
 const styles = StyleSheet.create({
-	profileImage: {
-		width: 32,
-		height: 32,
-		borderRadius: 16,
-		marginRight: 20,
-	},
 	redDot: {
 		position: "absolute",
 		top: -4,
@@ -186,7 +176,7 @@ const styles = StyleSheet.create({
 		justifyContent: "center",
 	},
 	unreadCountText: {
-		lineHeight: 27,
+		lineHeight: 24,
 		marginTop: -3,
 		color: "white",
 		fontSize: 12,

@@ -15,7 +15,7 @@ const InitialLayout = () => {
 			if (!isLoaded) return; // Wait until Clerk is loaded
 
 			if (isSignedIn) {
-				router.replace("/online/(auth)/home");
+				router.replace("/online/(auth)/");
 			} else {
 				router.replace("/online/(public)/main");
 			}

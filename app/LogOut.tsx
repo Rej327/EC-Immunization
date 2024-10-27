@@ -1,4 +1,11 @@
-import { View, Text, Pressable, TouchableOpacity, Modal } from "react-native";
+import {
+	View,
+	Text,
+	Pressable,
+	TouchableOpacity,
+	Modal,
+	StyleSheet,
+} from "react-native";
 import React, { useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useAuth } from "@clerk/clerk-expo"; // Import Clerk's useAuth hook
@@ -38,19 +45,31 @@ export default function Logout() {
 		}
 	};
 
+	{
+		/* Profile Menu Item */
+	}
+	// <Pressable
+	// 	style={[
+	// 		styles.menuItem,
+	// 		route.pathname === "profile" && styles.activeMenuItem,
+	// 	]}
+	// 	onPress={() => navigation.navigate("profile")}
+	// >
+	// 	<Ionicons name="person-outline" size={20} color="#456B72" />
+	// 	<ThemedText type="default" style={styles.link}>
+	// 		Profile
+	// 	</ThemedText>
+	// </Pressable>;
+
 	return (
 		<>
 			<TouchableOpacity
+				style={styles.menuItem}
 				onPress={() => setModalVisible(true)} // Open modal on press
-				className="bg-none border-[1px] border-[#aa0202] mt-1 mb-2 py-2 rounded-xl"
 			>
-				<View className="flex flex-row gap-1 items-center justify-center">
-					<Ionicons
-						name="log-out-outline"
-						size={20}
-						color={"#aa0202"}
-					/>
-					<ThemedText className="text-center text-[#aa0202]">
+				<View className="flex flex-row gap-1 items-center">
+					<Ionicons name="log-out-sharp" size={20} color="#456B72" />
+					<ThemedText type="default" style={styles.link}>
 						Logout
 					</ThemedText>
 				</View>
@@ -80,7 +99,7 @@ export default function Logout() {
 							to log in or use this application in offline mode.
 						</ThemedText>
 						<View className="flex-row justify-between">
-							<Pressable
+							<TouchableOpacity
 								onPress={() => {
 									setModalVisible(false); // Close modal
 									handleLogout(); // Proceed with logout
@@ -90,15 +109,15 @@ export default function Logout() {
 								<ThemedText className="text-white text-center">
 									Yes, Logout
 								</ThemedText>
-							</Pressable>
-							<Pressable
+							</TouchableOpacity>
+							<TouchableOpacity
 								onPress={() => setModalVisible(false)} // Close modal without action
 								className="bg-gray-300 p-2 rounded-lg flex-1 ml-2"
 							>
 								<ThemedText className="text-black text-center">
 									Cancel
 								</ThemedText>
-							</Pressable>
+							</TouchableOpacity>
 						</View>
 					</View>
 				</View>
@@ -106,3 +125,17 @@ export default function Logout() {
 		</>
 	);
 }
+
+const styles = StyleSheet.create({
+	link: {
+		fontSize: 14,
+		color: "#456B72",
+		marginVertical: 1,
+		marginLeft: 5,
+	},
+	menuItem: {
+		flexDirection: "row",
+		alignItems: "center",
+		paddingVertical: 12,
+	},
+});

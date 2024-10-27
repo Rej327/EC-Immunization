@@ -228,16 +228,16 @@ const Home = () => {
 		}
 	};
 
-	useEffect(() => {
-		const fetchDataAndAlert = async () => {
-			if (milestones.length > 0) {
-				// await new Promise((resolve) => setTimeout(resolve, 1000)); // Wait for 1 second
-				alertReminder();
-			}
-		};
+	// useEffect(() => {
+	// 	const fetchDataAndAlert = async () => {
+	// 		if (milestones.length > 0) {
+	// 			// await new Promise((resolve) => setTimeout(resolve, 1000)); // Wait for 1 second
+	// 			alertReminder();
+	// 		}
+	// 	};
 
-		fetchDataAndAlert();
-	}, [milestones]);
+	// 	fetchDataAndAlert();
+	// }, [milestones]);
 
 	useEffect(() => {
 		fetchMilestones(selectedBabyId);
