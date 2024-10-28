@@ -4,6 +4,7 @@ import { getUserData } from "@/middleware/GetFromLocalStorage"; // Fetching from
 import { UserData } from "@/types/types"; // Assuming this is your UserData interface
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
+import { ThemedText } from "@/components/ThemedText";
 
 export default function OfflineProfileAvatar() {
 	const [data, setData] = useState<UserData | null>(null); // State is UserData or null
@@ -52,22 +53,23 @@ export default function OfflineProfileAvatar() {
 			>
 				<Text style={styles.avatarText}>{initials}</Text>
 			</LinearGradient>
+				<ThemedText style={styles.userName}>{data.firstName} {data.lastName}</ThemedText>
 		</View>
 	);
 }
 
 const styles = StyleSheet.create({
 	avatarContainer: {
-		width: 32,
-		height: 32,
-		borderRadius: 16,
+		width: 60,
+		height: 60,
+		borderRadius: 50,
 		justifyContent: "center",
 		alignItems: "center",
-		marginRight: 20,
+		marginHorizontal: 'auto'
 	},
 	avatarText: {
 		color: "#fff",
-		fontSize: 14,
+		fontSize: 28,
 		fontWeight: 'semibold',
 	},
 	placeholder: {
@@ -75,5 +77,11 @@ const styles = StyleSheet.create({
 		height: 32,
 		justifyContent: "center",
 		alignItems: "center",
+	},
+	userName: {
+		marginTop: 8,
+		color: "#fff",
+		fontSize: 18,
+		fontWeight: "bold",
 	},
 });

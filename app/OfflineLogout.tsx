@@ -1,13 +1,14 @@
-import { View, TouchableOpacity, Alert } from "react-native";
-import React from "react";
+import { View, TouchableOpacity, Alert, Modal, StyleSheet } from "react-native";
+import React, { useState } from "react";
 import { ThemedText } from "@/components/ThemedText";
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
 
 export default function OfflineLogout() {
+	const [modalVisible, setModalVisible] = useState(false); // State for modal visibility
 
-	const router = useRouter()
+	const router = useRouter();
 
 	const handleLogout = async () => {
 		try {
@@ -25,7 +26,10 @@ export default function OfflineLogout() {
 				};
 
 				// Save the updated userData back to AsyncStorage
-				await AsyncStorage.setItem("users", JSON.stringify(updatedUserData));
+				await AsyncStorage.setItem(
+					"users",
+					JSON.stringify(updatedUserData)
+				);
 				router.replace("/offline/(public)/main");
 				// Alert.alert("Logout successful", "User is now inactive.");
 			} else {
@@ -38,14 +42,79 @@ export default function OfflineLogout() {
 	};
 
 	return (
-		<TouchableOpacity
-			onPress={handleLogout}
-			className="bg-none border-[1px] border-[#aa0202] mt-1 mb-2 py-2 mx-2 rounded-xl"
-		>
-			<View className="flex flex-row gap-1 items-center justify-center">
-				<Ionicons name="log-out-outline" size={20} color={"#aa0202"} />
-				<ThemedText className="text-center text-[#aa0202]">Logout</ThemedText>
-			</View>
-		</TouchableOpacity>
+		<>
+			<TouchableOpacity
+				style={styles.menuItem}
+				onPress={() => setModalVisible(true)} // Open modal on press
+			>
+				<View className="flex flex-row gap-1 items-center">
+					<Ionicons name="log-out-sharp" size={20} color="#456B72" />
+					<ThemedText type="default" style={styles.link}>
+						Logout
+					</ThemedText>
+				</View>
+			</TouchableOpacity>
+
+			{/* Confirmation Modal */}
+			<Modal
+				transparent={true}
+				animationType="fade"
+				visible={modalVisible}
+				onRequestClose={() => setModalVisible(false)}
+			>
+				<View className="flex-1 justify-center items-center bg-black/80">
+					<View className="bg-white rounded-lg p-4 w-80">
+						<View className="flex items-center justify-center mb-2">
+							<Ionicons
+								name="alert-circle-outline"
+								color={"#aa0202"}
+								size={40}
+							/>
+						</View>
+						<ThemedText className="text-xl font-bold mb-4 text-center">
+							Confirm Logout?
+						</ThemedText>
+						{/* <ThemedText className="text-gray-700 mb-4 text-center">
+							Are you sure you want to log out? You won’t be able
+							to log in or use this application in offline mode.
+						</ThemedText> */}
+						<View className="flex-row justify-between">
+							<TouchableOpacity
+								onPress={() => {
+									setModalVisible(false); // Close modal
+									handleLogout(); // Proceed with logout
+								}}
+								className="bg-[#aa0202] p-2 rounded-lg flex-1 mr-2"
+							>
+								<ThemedText className="text-white text-center">
+									Yes, Logout
+								</ThemedText>
+							</TouchableOpacity>
+							<TouchableOpacity
+								onPress={() => setModalVisible(false)} // Close modal without action
+								className="bg-gray-300 p-2 rounded-lg flex-1 ml-2"
+							>
+								<ThemedText className="text-black text-center">
+									Cancel
+								</ThemedText>
+							</TouchableOpacity>
+						</View>
+					</View>
+				</View>
+			</Modal>
+		</>
 	);
 }
+const styles = StyleSheet.create({
+	link: {
+		fontSize: 14,
+		color: "#456B72",
+		marginVertical: 1,
+		marginLeft: 5,
+	},
+	menuItem: {
+		flexDirection: "row",
+		alignItems: "center",
+		paddingVertical: 12,
+	},
+});

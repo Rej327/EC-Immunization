@@ -62,7 +62,7 @@ export const OfflineHomeRightHeader = () => {
 	return (
 		<View style={{ flexDirection: "row", alignItems: "center" }}>
 			<TouchableOpacity
-				style={{ marginRight: 10 }}
+				style={{ marginRight: 20 }}
 				onPress={toggleDrawer}
 			>
 				<View>
@@ -73,15 +73,6 @@ export const OfflineHomeRightHeader = () => {
 					/>
 				</View>
 			</TouchableOpacity>
-
-			{/* {user && (
-				<Image
-					source={{ uri: user.imageUrl }}
-					style={styles.profileImage}
-				/>
-			)} */}
-
-			<OfflineProfileAvatar />
 
 			<OfflineNotification
 				notifications={notifications}
