@@ -28,6 +28,8 @@ import { useUser } from "@clerk/clerk-expo";
 import Toast from "react-native-toast-message"; // Ensure you have this installed
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { noData } from "@/assets";
+import { useNavigation, useRouter } from "expo-router";
+import { useRoute } from "@react-navigation/native";
 
 // Define the interface for Baby
 interface Baby {
@@ -54,6 +56,7 @@ const MyBaby = () => {
 	const [selectedBaby, setSelectedBaby] = useState<SelectedBaby | null>(null);
 	const [showDropdown, setShowDropdown] = useState(false);
 	const { user } = useUser();
+	const router = useRouter()
 
 	// Load babies from Firestore when the component mounts
 	const loadBabies = async () => {
@@ -370,6 +373,10 @@ const MyBaby = () => {
 		);
 	};
 
+	const handelRouteToRegister = () => {
+		router.push('online/(auth)/registerchild')
+	}
+
 	return (
 		<ScrollView>
 			{babies.length > 0 ? (
@@ -417,7 +424,7 @@ const MyBaby = () => {
 					)}
 					<StyledButton
 						title="Register Baby"
-						onPress={() => setIsModalVisible(true)}
+						onPress={handelRouteToRegister}
 						paddingVertical={10}
 						fontSize={14}
 						borderRadius={12}
