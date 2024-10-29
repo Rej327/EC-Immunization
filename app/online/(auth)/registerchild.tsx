@@ -18,6 +18,7 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import StepIndicator from "react-native-step-indicator";
 import { Picker } from "@react-native-picker/picker";
 import { barangays } from "@/assets/data/data";
+import { useRouter } from "expo-router";
 
 interface Baby {
 	firstName: string;
@@ -49,10 +50,10 @@ export default function RegisterChildren() {
 	const [weight, setWeight] = useState("");
 	const [gender, setGender] = useState("");
 	const [contact, setContact] = useState("");
-
 	const [currentStep, setCurrentStep] = useState(0);
 
 	const { user } = useUser();
+	const router = useRouter();
 
 	// Function to Register Baby to Firestore
 	const addBabyToFirestore = async (newBaby: Baby) => {
@@ -80,12 +81,12 @@ export default function RegisterChildren() {
 			// Generate the vaccination milestones for the baby
 			await addMilestoneToFirestore(docRef.id, newBaby);
 
-			Toast.show({
-				type: "success",
-				text1: "Success",
-				text2: "Baby and milestones register successfully! 👶",
-				position: "top",
-			});
+			// Toast.show({
+			// 	type: "success",
+			// 	text1: "Success",
+			// 	text2: "Baby and milestones register successfully! 👶",
+			// 	position: "top",
+			// });
 		} catch (error) {
 			console.error("Error adding baby to Firestore: ", error);
 			Toast.show({
@@ -246,9 +247,9 @@ export default function RegisterChildren() {
 	};
 
 	// Handle adding a baby (only to Firestore)
-	const handleAddBaby = () => {
+	const handleAddBaby = async () => {
 		// Check if all fields are filled
-		if (!contact || !height || !weight || !birthday) {
+		if (!height || !weight || !birthday) {
 			// Show an error toast if any field is empty
 			Toast.show({
 				type: "error",
@@ -257,7 +258,6 @@ export default function RegisterChildren() {
 				position: "top",
 			});
 			console.log("Failed to Register Baby in Firestore!");
-
 			return; // Stop the function here if any field is empty
 		}
 
@@ -276,11 +276,30 @@ export default function RegisterChildren() {
 			birthPlace,
 		}; // Use the Date object for birthday
 
-		// Register Baby to Firestore
-		addBabyToFirestore(newBaby);
+		try {
+			// Register Baby to Firestore
+			await addBabyToFirestore(newBaby);
+			resetForm();
+			setCurrentStep(0)
+			// Toast.show({
+			// 	type: "success",
+			// 	text1: "Success",
+			// 	text2: "Baby registered successfully!",
+			// 	position: "top",
+			// });
 
-		// Reset form fields
-		resetForm();
+			// Navigate to success page only after successful Firestore operation
+			router.push("/online/(auth)/successpage");
+		} catch (error) {
+			// Handle Firestore error
+			Toast.show({
+				type: "error",
+				text1: "Registration Failed",
+				text2: "An error occurred. Please try again.",
+				position: "top",
+			});
+			console.error("Error registering baby:", error);
+		}
 	};
 
 	const handleDateChange = (event: any, selectedDate?: Date) => {
@@ -412,12 +431,14 @@ export default function RegisterChildren() {
 						value={firstName}
 						onChangeText={setFirstName}
 						style={styles.input}
+						autoCapitalize="words"
 					/>
 					<TextInput
 						placeholder="Last Name"
 						value={lastName}
 						onChangeText={setLastName}
 						style={styles.input}
+						autoCapitalize="words"
 					/>
 					<Picker
 						style={styles.input}
@@ -467,6 +488,7 @@ export default function RegisterChildren() {
 						value={birthPlace}
 						onChangeText={setBirthPlace}
 						style={styles.input}
+						autoCapitalize="words"
 					/>
 					<Picker
 						selectedValue={address} // Use the selected address as the value
@@ -491,6 +513,7 @@ export default function RegisterChildren() {
 						value={addressInfo}
 						onChangeText={setAddressInfo}
 						style={styles.input}
+						autoCapitalize="words"
 					/>
 				</View>
 			)}
@@ -501,12 +524,22 @@ export default function RegisterChildren() {
 						value={motherName}
 						onChangeText={setMotherName}
 						style={styles.input}
+						autoCapitalize="words"
 					/>
 					<TextInput
 						placeholder="Father's Name"
 						value={fatherName}
 						onChangeText={setFatherName}
 						style={styles.input}
+						autoCapitalize="words"
+					/>
+					<TextInput
+						placeholder="Contact Number"
+						value={contact}
+						onChangeText={setContact}
+						style={styles.input}
+						keyboardType="phone-pad"
+						maxLength={11}
 					/>
 				</View>
 			)}
@@ -517,18 +550,16 @@ export default function RegisterChildren() {
 						value={height}
 						onChangeText={setHeight}
 						style={styles.input}
+						keyboardType="numeric"
+						maxLength={3}
 					/>
 					<TextInput
 						placeholder="Weight (kg)"
 						value={weight}
 						onChangeText={setWeight}
 						style={styles.input}
-					/>
-					<TextInput
-						placeholder="Contact Number"
-						value={contact}
-						onChangeText={setContact}
-						style={styles.input}
+						keyboardType="numeric"
+						maxLength={2}
 					/>
 				</View>
 			)}
@@ -544,7 +575,7 @@ export default function RegisterChildren() {
 						width="47%"
 						bgColor="#DAE9EA"
 						textColor="#456B72"
-					/> 
+					/>
 				)}
 				{currentStep < labels.length - 1 ? (
 					<>

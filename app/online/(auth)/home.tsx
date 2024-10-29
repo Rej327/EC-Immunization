@@ -228,6 +228,7 @@ const Home = () => {
 		}
 	};
 
+	// UNCOMMENT THIS BEFORE DEPLOY
 	// useEffect(() => {
 	// 	const fetchDataAndAlert = async () => {
 	// 		if (milestones.length > 0) {
@@ -318,7 +319,7 @@ const Home = () => {
 	};
 
 	const handleRouteRegister = () => {
-		route.navigate("/online/(auth)/profile");
+		route.navigate("/online/(auth)/registerchild");
 		setShowBabySelectionModal(false);
 	};
 
