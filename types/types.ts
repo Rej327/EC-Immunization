@@ -5,20 +5,17 @@ export interface MilestoneData {
 	vaccine: string;
 	description: string;
 	received: boolean;
-	expectedDate: Timestamp | Date | string
+	expectedDate: Timestamp | Date | string;
 	updatedAt: Date;
 }
 
-
-
-
 export interface Milestone {
-  babyId: string;  // Ensure you have this property as well
-  parentId: string;
-  firstName: string;
-  lastName: string;
-  createdAt: Date; // or Timestamp if you prefer
-  milestoneData: MilestoneData[]; // If you have an array of milestone data
+	babyId: string; // Ensure you have this property as well
+	parentId: string;
+	firstName: string;
+	lastName: string;
+	createdAt: Date; // or Timestamp if you prefer
+	milestoneData: MilestoneData[]; // If you have an array of milestone data
 }
 
 export interface UserData {

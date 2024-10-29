@@ -30,7 +30,7 @@ export default function ProfileInformation() {
 			const parentRef = doc(db, "parents", user?.id);
 			await updateDoc(parentRef, {
 				username: username,
-				updatedAt: new Date()
+				updatedAt: new Date(),
 			});
 
 			Toast.show({
@@ -69,6 +69,7 @@ export default function ProfileInformation() {
 				</ThemedText>
 				<TextInput
 					value={user?.id}
+					editable={false}
 					className=" border-[#d6d6d6] my-1 h-10 w-auto p-2 rounded-xl bg-[#ebebeb]"
 				/>
 				<ThemedText type="default" className="font-bold">
@@ -89,6 +90,7 @@ export default function ProfileInformation() {
 					<TextInput
 						// onChangeText={setFirstName}
 						value={firstName}
+						editable={false}
 						placeholder="First name"
 						className=" border-[#d6d6d6] my-1 h-10 w-auto  p-2 rounded-xl bg-[#ebebeb]"
 					/>
@@ -100,6 +102,7 @@ export default function ProfileInformation() {
 					<TextInput
 						placeholder="Last Name"
 						value={lastName}
+						editable={false}
 						// onChangeText={setLastName}
 						className=" border-[#d6d6d6] my-1 h-10 w-auto p-2 rounded-xl bg-[#ebebeb] mb-2"
 					/>
