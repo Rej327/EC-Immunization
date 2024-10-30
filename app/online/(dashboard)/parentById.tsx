@@ -23,6 +23,7 @@ import { ThemedText } from "@/components/ThemedText";
 import { Ionicons } from "@expo/vector-icons";
 import StyledButton from "@/components/StyledButton";
 import Toast from "react-native-toast-message";
+import { formatDate } from "@/helper/helper";
 
 // Define BabyData and Milestone interfaces
 interface BabyData {
@@ -30,7 +31,16 @@ interface BabyData {
 	id: string;
 	firstName: string;
 	lastName: string;
+	gender: string;
 	birthday: Timestamp; // Update to Timestamp
+	birthPlace: string;
+	height: string;
+	weight: string;
+	motherName: string;
+	fatherName: string;
+	contact: string;
+	address: string;
+	addressInfo: string;
 }
 
 interface MilestoneData {
@@ -246,12 +256,38 @@ export default function ParentById() {
 						onPress={() => handleSelectBaby(baby)}
 						style={styles.babyItem}
 					>
-						<ThemedText>
+						<ThemedText type="default">
 							Name: {baby.firstName} {baby.lastName}
 						</ThemedText>
-						<ThemedText>
-							Birthday:{" "}
-							{baby.birthday.toDate().toLocaleDateString("en-US")}
+						<ThemedText type="default">
+							Birthday: {formatDate(baby.birthday)}
+						</ThemedText>
+						<ThemedText type="default">
+							Place of Birth: {baby.birthPlace}
+						</ThemedText>
+						<ThemedText type="default">
+							Sex: {baby.gender}
+						</ThemedText>
+						<ThemedText type="default">
+							Heigth: {baby.height}
+						</ThemedText>
+						<ThemedText type="default">
+							Weight: {baby.weight}
+						</ThemedText>
+						<ThemedText type="default">
+							St. or Sitio: {baby.addressInfo}
+						</ThemedText>
+						<ThemedText type="default">
+							Mother's Name: {baby.motherName}
+						</ThemedText>
+						<ThemedText type="default">
+							Father's Name: {baby.fatherName}
+						</ThemedText>
+						<ThemedText type="default">
+							Address: {baby.address}
+						</ThemedText>
+						<ThemedText type="default">
+							Contact No.#: {baby.contact}
 						</ThemedText>
 					</TouchableOpacity>
 				))
@@ -263,7 +299,7 @@ export default function ParentById() {
 			{selectedBaby && milestones.length > 0 && (
 				<View style={styles.milestoneContainer}>
 					<ThemedText type="header">
-						Milestones for {selectedBaby.firstName}
+						Milestones for {selectedBaby.firstName} {selectedBaby.lastName}
 					</ThemedText>
 					{milestones.map((milestone, index) => (
 						<TouchableOpacity
@@ -276,9 +312,7 @@ export default function ParentById() {
 							</ThemedText>
 							<ThemedText>
 								Expected Date:{" "}
-								{milestone.expectedDate
-									.toDate()
-									.toLocaleDateString("en-US")}
+								{formatDate(milestone.expectedDate)}
 							</ThemedText>
 							<ThemedText>
 								Status:{" "}

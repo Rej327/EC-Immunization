@@ -41,7 +41,7 @@ const DashboardLayout = () => {
 				<Stack.Screen
 					name="parentById" // Route for the Guide page
 					options={{
-						title: "Parents",
+						title: "Parent's Children",
 					}}
 				/>
 				<Stack.Screen

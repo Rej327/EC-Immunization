@@ -24,7 +24,7 @@ const CustomInput: React.FC<InputProps> = ({
         placeholder={placeholder}
         value={value}
         onChangeText={onChangeText}
-        autoCapitalize="none"
+        autoCapitalize="words"
         secureTextEntry={secureTextEntry}
       />
     </View>

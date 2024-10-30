@@ -30,6 +30,7 @@ import Toast from "react-native-toast-message";
 import { noData } from "@/assets";
 import StyledButton from "@/components/StyledButton";
 import { useUser } from "@clerk/clerk-expo";
+import { formatDate } from "@/helper/helper";
 
 interface AppointmentData {
 	id: string;
@@ -198,13 +199,13 @@ export default function ScheduleByStatus() {
 		setRefreshing(false);
 	};
 
-		// Route handler for parentById
-		const handleRoute = (id: string) => {
-			route.push({
-				pathname: "/online/(dashboard)/parentById",
-				params: { parentIdFromDashboard: id },
-			});
-		};
+	// Route handler for parentById
+	const handleRoute = (id: string) => {
+		route.push({
+			pathname: "/online/(dashboard)/parentById",
+			params: { parentIdFromDashboard: id },
+		});
+	};
 
 	if (loading) {
 		return (
@@ -216,7 +217,7 @@ export default function ScheduleByStatus() {
 
 	// Render each appointment item
 	const renderAppointment = ({ item }: { item: AppointmentData }) => (
-<TouchableOpacity
+		<TouchableOpacity
 			style={styles.appointmentContainer}
 			key={item.id}
 			onPress={() => {
@@ -232,14 +233,16 @@ export default function ScheduleByStatus() {
 			}}
 		>
 			<ThemedText type="default">
+				User Account: {item.parentName}
+			</ThemedText>
+			<ThemedText type="default">
 				Baby: {item.babyFirstName} {item.babyLastName}
 			</ThemedText>
-			<ThemedText type="default">Parent: {item.parentName}</ThemedText>
 			<ThemedText type="default">Vaccine: {item.vaccine}</ThemedText>
 			<ThemedText type="default">
-				Schedule Date: {item.scheduleDate.toLocaleDateString()}
+				Schedule Date: {formatDate(item.scheduleDate)}
 			</ThemedText>
-			<ThemedText type="default">Status: {item.status}</ThemedText>
+			<ThemedText type="default" className="capitalize">Status: {item.status}</ThemedText>
 			<View>
 				<ThemedText className="absolute bottom-1 right-1">
 					<Ionicons name="create-outline" size={24} color="#456B72" />
@@ -280,6 +283,7 @@ export default function ScheduleByStatus() {
 					placeholder="🔍 Search by baby name or vaccine"
 					value={searchQuery}
 					onChangeText={setSearchQuery}
+					autoCapitalize="words"
 				/>
 			</View>
 			{filteredAppointments.length > 0 ? (

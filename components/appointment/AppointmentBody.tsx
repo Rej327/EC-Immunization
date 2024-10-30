@@ -30,6 +30,7 @@ import Toast from "react-native-toast-message"; // Ensure you have this installe
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { events, milestones as miles } from "@/assets/data/data";
 import { noData } from "@/assets";
+import { formatDate } from "@/helper/helper";
 
 // Define interfaces
 interface SelectedBaby {
@@ -489,7 +490,7 @@ const AppointmentBody = () => {
 									</ThemedText>
 									<ThemedText type="date" style={styles.date}>
 										When:{" "}
-										{appointment.scheduleDate.toLocaleDateString()}{" "}
+										{formatDate(appointment.scheduleDate)}
 										{/* Format the date as needed */}
 									</ThemedText>
 								</View>
@@ -531,7 +532,7 @@ const AppointmentBody = () => {
 									</ThemedText>
 									<ThemedText type="date" style={styles.date}>
 										When:{" "}
-										{appointment.scheduleDate.toLocaleDateString()}{" "}
+										{formatDate(appointment.scheduleDate)}
 										{/* Format the date as needed */}
 									</ThemedText>
 								</View>
@@ -573,7 +574,7 @@ const AppointmentBody = () => {
 									</ThemedText>
 									<ThemedText type="date" style={styles.date}>
 										Vaccinated on:{" "}
-										{appointment.scheduleDate.toLocaleDateString()}{" "}
+										{formatDate(appointment.scheduleDate)}
 										{/* Format the date as needed */}
 									</ThemedText>
 								</View>
@@ -661,8 +662,7 @@ const AppointmentBody = () => {
 								Vaccine: {appointment.vaccine}
 							</ThemedText>
 							<ThemedText type="date" style={styles.date}>
-								When:{" "}
-								{appointment.scheduleDate.toLocaleDateString()}{" "}
+								When: {formatDate(appointment.scheduleDate)}
 								{/* Format the date as needed */}
 							</ThemedText>
 						</View>
@@ -698,7 +698,7 @@ const AppointmentBody = () => {
 							</ThemedText>
 							<ThemedText type="date">
 								Vaccinated on:{" "}
-								{appointment.scheduleDate.toLocaleDateString()}{" "}
+								{formatDate(appointment.scheduleDate)}
 								{/* Format the date as needed */}
 							</ThemedText>
 						</View>

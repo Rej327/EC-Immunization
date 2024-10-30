@@ -166,6 +166,7 @@ export default function Dashboard() {
 					placeholder="🔍 Search"
 					value={searchQuery}
 					onChangeText={setSearchQuery}
+					autoCapitalize="words"
 				/>
 			</View>
 			{/* Counts Card */}
@@ -274,6 +275,7 @@ export default function Dashboard() {
 							placeholder="Subject"
 							value={subject}
 							onChangeText={setSubject}
+							autoCapitalize="words"
 						/>
 						<TextInput
 							style={styles.textarea}
@@ -282,6 +284,7 @@ export default function Dashboard() {
 							onChangeText={setMessage}
 							multiline
 							numberOfLines={4}
+							autoCapitalize="words"
 						/>
 						<StyledButton
 							title="Send Message"
