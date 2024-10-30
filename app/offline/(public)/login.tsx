@@ -11,8 +11,8 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import Toast from "react-native-toast-message";
 
 const Login = () => {
-	const [emailAddress, setEmailAddress] = useState("patrick0");
-	const [password, setPassword] = useState("asdasdasd");
+	const [emailAddress, setEmailAddress] = useState("");
+	const [password, setPassword] = useState("");
 	const [username, setUsername] = useState("");
 	const [loading, setLoading] = useState(false);
 
