@@ -44,3 +44,8 @@ export { default as guide } from "./images/guide.png";
 export { default as reminder } from "./images/reminder.png";
 export { default as countBaby } from "./images/countBaby.png";
 export { default as countParent } from "./images/countParent.png";
+
+export { default as ligtas } from "./images/ligtas.png";
+export { default as f1 } from "./images/f1.png";
+export { default as doh } from "./images/doh.png";
+

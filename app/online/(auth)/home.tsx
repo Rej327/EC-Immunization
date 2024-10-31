@@ -270,12 +270,11 @@ const Home = () => {
 			const userId = user.id;
 
 			const userDocRef = doc(db, "parents", userId);
-
 			const userDoc = await getDoc(userDocRef);
+
 
 			if (!userDoc.exists()) {
 				await setDoc(userDocRef, {
-					// id: userId,
 					email: user.emailAddresses?.[0]?.emailAddress || "",
 					username: user.username || "",
 					firstName: user.firstName || "",

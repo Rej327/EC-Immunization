@@ -21,6 +21,7 @@ import {
 	updateDoc,
 	doc,
 	addDoc,
+	getDoc,
 } from "firebase/firestore";
 import { db } from "@/db/firebaseConfig"; // Firestore instance
 import { Timestamp } from "firebase/firestore";
@@ -31,9 +32,13 @@ import { noData } from "@/assets";
 import StyledButton from "@/components/StyledButton";
 import { useUser } from "@clerk/clerk-expo";
 import { formatDate } from "@/helper/helper";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { format } from "date-fns";
 
 interface AppointmentData {
 	id: string;
+	vaccineId: string;
+	babyId: string;
 	parentId: string;
 	babyFirstName: string;
 	babyLastName: string;
@@ -56,12 +61,14 @@ export default function ScheduleByStatus() {
 	const [loading, setLoading] = useState(true);
 	const [selectedStatus, setSelectedStatus] = useState<string>("");
 	const [refreshing, setRefreshing] = useState(false);
+	const [selectedBabyId, setSelectedBabyId] = useState<string | null>(null);
 
 	const { scheduleByStats } = useLocalSearchParams() as {
 		scheduleByStats: string;
 	};
 
 	const route = useRouter();
+	const { isLoaded, user } = useUser();
 
 	// Fetch appointments based on status
 	const fetchAppointments = async () => {
@@ -111,87 +118,116 @@ export default function ScheduleByStatus() {
 		}
 	}, [searchQuery, appointments]);
 
-	const { isLoaded, user } = useUser();
-	// Handle updating status and updating the 'updatedAt' field
 	const handleUpdateStatus = async () => {
-		if (!selectedAppointment) return;
+    if (!selectedAppointment) return;
 
-		// Ensure that the user data is loaded
-		if (!isLoaded || !user) {
-			Toast.show({
-				type: "error",
-				text1: "User data not loaded. Please try again later.",
-			});
-			return;
-		}
+    // Ensure that the user data is loaded
+    if (!isLoaded || !user) {
+        Toast.show({
+            type: "error",
+            text1: "User data not loaded. Please try again later.",
+        });
+        return;
+    }
 
-		try {
-			// Reference to the appointment document in Firestore
-			const appointmentDocRef = doc(
-				db,
-				"appointments",
-				selectedAppointment.id
-			);
+    try {
+        // Reference to the appointment document in Firestore
+        const appointmentDocRef = doc(db, "appointments", selectedAppointment.id);
 
-			// Update the appointment status in Firestore
-			await updateDoc(appointmentDocRef, {
-				status: selectedStatus,
-				updatedAt: Timestamp.now(),
-			});
+        // Update the appointment status in Firestore
+        await updateDoc(appointmentDocRef, {
+            status: selectedStatus,
+            updatedAt: Timestamp.now(),
+        });
 
-			// Check if user data is complete before adding to notifications
-			const userId = user.id || "";
-			const firstName = user.firstName || "Unknown";
-			const lastName = user.lastName || "Unknown";
+        // Check if user data is complete before adding to notifications
+        const userId = user.id || "";
+        const firstName = user.firstName || "Unknown";
+        const lastName = user.lastName || "Unknown";
 
-			// Add a notification entry to Firestore
-			await addDoc(collection(db, "notifications"), {
-				receiverId: selectedAppointment.parentId,
-				firstName: firstName,
-				lastName: lastName,
-				isRead: false, // Notification is initially unread
-				subject: "Appointment Status Update",
-				message: `Your appointment for ${selectedAppointment.vaccine} is now marked as ${selectedStatus}.`,
-				createdAt: Timestamp.now(),
-			});
+        // Add a notification entry to Firestore
+        await addDoc(collection(db, "notifications"), {
+            receiverId: selectedAppointment.parentId,
+            firstName: firstName,
+            lastName: lastName,
+            isRead: false, // Notification is initially unread
+            subject: "Appointment Status Update",
+            message: `Your appointment for ${selectedAppointment.vaccine} is now marked as ${selectedStatus}.`,
+            createdAt: Timestamp.now(),
+        });
 
-			// Update the local state to reflect the appointment status change
-			setAppointments((prev) =>
-				prev.map((appt) =>
-					appt.id === selectedAppointment.id
-						? {
-								...appt,
-								status: selectedStatus,
-								updatedAt: new Date(),
-						  }
-						: appt
-				)
-			);
+        // Update the local state to reflect the appointment status change
+        setAppointments((prev) =>
+            prev.map((appt) =>
+                appt.id === selectedAppointment.id
+                    ? {
+                          ...appt,
+                          status: selectedStatus,
+                          updatedAt: new Date(),
+                      }
+                    : appt
+            )
+        );
 
-			// Show success notification
-			Toast.show({
-				type: "success",
-				text1: "Status updated successfully!",
-				text2: `${selectedAppointment.vaccine} status set to ${selectedStatus}`,
-			});
-		} catch (error) {
-			// Log and show error toast
-			console.error(
-				"Error updating status or sending notification:",
-				error
-			);
-			Toast.show({
-				type: "error",
-				text1: "Error updating status or sending notification.",
-				text2: "Please try again.",
-			});
-		} finally {
-			// Ensure modal is closed and data is refreshed even if an error occurs
-			handleRefresh();
-			setModalVisible(false);
-			setSelectedAppointment(null);
-		}
-	};
+        // Step 1: Update the babies collection based on the appointment
+        const babyId = selectedAppointment.babyId; // Assuming babyId is part of the appointment data
+        const babyDocRef = doc(db, "babies", babyId);
+        const babyDocSnap = await getDoc(babyDocRef);
+				if (babyDocSnap.exists()) {
+					const babyData = babyDocSnap.data();
+			
+					// Step 2: Find the card with the matching vaccineId
+					const vaccineId = selectedAppointment.vaccineId; // Assuming this is in the appointment data
+					const cardIndex = babyData.card.findIndex((card: { id: string; }) => card.id === vaccineId);
+			
+					if (cardIndex !== -1 && selectedStatus === "upcoming") {
+							// Step 3: Add the formatted date to the array of dates for the found card
+							// Ensure that scheduleDate is a Date object before formatting
+							const currentDate = selectedAppointment.scheduleDate instanceof Timestamp 
+									? selectedAppointment.scheduleDate.toDate() 
+									: new Date(selectedAppointment.scheduleDate);
+			
+							const formattedDate = format(currentDate, 'MM-dd-yyyy'); // Format the date to MM-DD-YYYY
+			
+							const updatedCard = {
+									...babyData.card[cardIndex],
+									date: [...babyData.card[cardIndex].date, formattedDate], // Add formatted date to the date array
+							};
+			
+							// Update the baby's document with the new card array and updatedAt
+							const updatedCardArray = [...babyData.card];
+							updatedCardArray[cardIndex] = updatedCard;
+			
+							// Update the baby's document
+							await updateDoc(babyDocRef, {
+									card: updatedCardArray,
+									updatedAt: Timestamp.now(),
+							});
+					}
+			}
+
+        // Show success notification
+        Toast.show({
+            type: "success",
+            text1: "Status updated successfully!",
+            text2: `${selectedAppointment.vaccine} status set to ${selectedStatus}`,
+        });
+    } catch (error) {
+        // Log and show error toast
+        console.error("Error updating status or sending notification:", error);
+        Toast.show({
+            type: "error",
+            text1: "Error updating status or sending notification.",
+            text2: "Please try again.",
+        });
+    } finally {
+        // Ensure modal is closed and data is refreshed even if an error occurs
+        handleRefresh();
+        setModalVisible(false);
+        setSelectedAppointment(null);
+    }
+};
+
 
 	const handleRefresh = async () => {
 		setRefreshing(true);
@@ -242,7 +278,9 @@ export default function ScheduleByStatus() {
 			<ThemedText type="default">
 				Schedule Date: {formatDate(item.scheduleDate)}
 			</ThemedText>
-			<ThemedText type="default" className="capitalize">Status: {item.status}</ThemedText>
+			<ThemedText type="default" className="capitalize">
+				Status: {item.status}
+			</ThemedText>
 			<View>
 				<ThemedText className="absolute bottom-1 right-1">
 					<Ionicons name="create-outline" size={24} color="#456B72" />
@@ -440,14 +478,14 @@ export default function ScheduleByStatus() {
 							<StyledButton
 								title="Update Status"
 								onPress={handleUpdateStatus}
-								paddingVertical={8}
+								paddingVertical={10}
 								fontSize={14}
 								borderRadius={12}
 							/>
 							<StyledButton
 								title="Cancel"
 								onPress={() => setModalVisible(false)}
-								paddingVertical={8}
+								paddingVertical={10}
 								fontSize={14}
 								borderRadius={12}
 								bgColor="#DAE9EA" // Fixed duplicate #

@@ -108,3 +108,4 @@ export const formatAge = (ageInMonths: number): string => {
 		return `${ageInMonths} month's`;
 	}
 };
+

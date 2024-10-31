@@ -20,6 +20,14 @@ import { Picker } from "@react-native-picker/picker";
 import { barangays } from "@/assets/data/data";
 import { useRouter } from "expo-router";
 
+interface Card {
+	id: string;
+	vaccineName: string;
+	date: string[]; 
+	doses: string;
+	remarks: string[];
+}
+
 interface Baby {
 	firstName: string;
 	lastName: string;
@@ -33,6 +41,7 @@ interface Baby {
 	weight: string;
 	gender: string;
 	contact: string;
+	card: Card[]
 }
 
 export default function RegisterChildren() {
@@ -57,6 +66,57 @@ export default function RegisterChildren() {
 
 	// Function to Register Baby to Firestore
 	const addBabyToFirestore = async (newBaby: Baby) => {
+		const cards: Card[] = [
+			{
+				id: "bcg",
+				vaccineName: "BCG",
+				date: [],
+				doses: "1 (pagkapanganak)",
+				remarks: [],
+			},
+			{
+				id: "hepa",
+				vaccineName: "Hepatitis B",
+				date: [],
+				doses: "1 (pagkapanganak)",
+				remarks: [],
+			},
+			{
+				id: "penta",
+				vaccineName: "Pentavalent Vaccine (DPT-HepB-HiB)",
+				date: [],
+				doses: "3 (1½, 2½, 3½ buwan )",
+				remarks: [],
+			},
+			{
+				id: "oral",
+				vaccineName: "Oral Polio Vaccine (OPV)",
+				date: [],
+				doses: "3 (1½, 2½, 3½ buwan )",
+				remarks: [],
+			},
+			{
+				id: "polio",
+				vaccineName: "Inactivated Polio Vaccine (IPV)",
+				date: [],
+				doses: "3(3½ buwan )",
+				remarks: [],
+			},
+			{
+				id: "pneumo",
+				vaccineName: "Pneumococcal Conjugate Vaccine - 13 (PCV 13)",
+				date: [],
+				doses: "3 (1½, 2½, 3½ buwan )",
+				remarks: [],
+			},
+			{
+				id: "measles",
+				vaccineName: "Measles-Containing Vaccine (MCV) MR/MMR",
+				date: [],
+				doses: "2 (9 buwan & 1 taon )",
+				remarks: [],
+			},
+		];
 		try {
 			// Register Baby to Firestore
 			const docRef = await addDoc(collection(db, "babies"), {
@@ -74,6 +134,7 @@ export default function RegisterChildren() {
 				gender: newBaby.gender,
 				contact: newBaby.contact,
 				createdAt: new Date() as Date,
+				card: cards
 			});
 
 			console.log("Baby register to Firestore!");
@@ -102,6 +163,7 @@ export default function RegisterChildren() {
 	const addMilestoneToFirestore = async (babyId: string, newBaby: Baby) => {
 		const vaccineSchedule = [
 			{
+				id: "bcg",
 				vaccine: "BCG",
 				ageInMonths: 0,
 				received: false,
@@ -109,6 +171,7 @@ export default function RegisterChildren() {
 					"Bacillus Calmette-Guérin (BCG) vaccine protects against tuberculosis (TB), particularly severe forms in children like TB meningitis.",
 			},
 			{
+				id: "hepa",
 				vaccine: "Hepatitis B",
 				ageInMonths: 0,
 				received: false,
@@ -116,27 +179,31 @@ export default function RegisterChildren() {
 					"Prevents Hepatitis B virus (HBV) infection, which can cause chronic liver disease and liver cancer.",
 			},
 			{
-				vaccine: "Pentavalent Vaccine (1st dose)",
+				id: "penta",
+				vaccine: "Pentavalent Vaccine (DPT-HepB-HiB) (1st dose)",
 				ageInMonths: 1.5,
 				received: false,
 				description:
 					"Combines protection against 5 diseases: diphtheria (D), pertussis (P), tetanus (T), hepatitis B (HB), and Haemophilus influenzae type B (Hib).",
 			},
 			{
-				vaccine: "Pentavalent Vaccine (2nd dose)",
+				id: "penta",
+				vaccine: "Pentavalent Vaccine (DPT-HepB-HiB) (2nd dose)",
 				ageInMonths: 2.5,
 				received: false,
 				description:
 					"Combines protection against 5 diseases: diphtheria (D), pertussis (P), tetanus (T), hepatitis B (HB), and Haemophilus influenzae type B (Hib).",
 			},
 			{
-				vaccine: "Pentavalent Vaccine (3rd dose)",
+				id: "penta",
+				vaccine: "Pentavalent Vaccine (DPT-HepB-HiB) (3rd dose)",
 				ageInMonths: 3.5,
 				received: false,
 				description:
 					"Combines protection against 5 diseases: diphtheria (D), pertussis (P), tetanus (T), hepatitis B (HB), and Haemophilus influenzae type B (Hib).",
 			},
 			{
+				id: "oral",
 				vaccine: "Oral Polio Vaccine (1st dose)",
 				ageInMonths: 1.5,
 				received: false,
@@ -144,6 +211,7 @@ export default function RegisterChildren() {
 					"Oral Polio Vaccine (OPV) protects against poliovirus, which can lead to paralysis.",
 			},
 			{
+				id: "oral",
 				vaccine: "Oral Polio Vaccine (2nd dose)",
 				ageInMonths: 2.5,
 				received: false,
@@ -151,6 +219,7 @@ export default function RegisterChildren() {
 					"Oral Polio Vaccine (OPV) protects against poliovirus, which can lead to paralysis.",
 			},
 			{
+				id: "oral",
 				vaccine: "Oral Polio Vaccine (3rd dose)",
 				ageInMonths: 3.5,
 				received: false,
@@ -158,6 +227,7 @@ export default function RegisterChildren() {
 					"Oral Polio Vaccine (OPV) protects against poliovirus, which can lead to paralysis.",
 			},
 			{
+				id: "polio",
 				vaccine: "Inactivated Polio Vaccine (IPV)",
 				ageInMonths: 3.5,
 				received: false,
@@ -165,35 +235,40 @@ export default function RegisterChildren() {
 					"IPV is an injected polio vaccine that boosts immunity against poliovirus, complementing the oral vaccine.",
 			},
 			{
-				vaccine: "Pneumococcal Conjugate Vaccine (1st dose)",
+				id: "pneumo",
+				vaccine: "Pneumococcal Conjugate Vaccine - 13 (PCV 13) (1st dose)",
 				ageInMonths: 1.5,
 				received: false,
 				description:
 					"First dose of PCV for complete protection against pneumococcal diseases.",
 			},
 			{
-				vaccine: "Pneumococcal Conjugate Vaccine (2nd dose)",
+				id: "pneumo",
+				vaccine: "Pneumococcal Conjugate Vaccine - 13 (PCV 13) (2nd dose)",
 				ageInMonths: 2.5,
 				received: false,
 				description:
 					"Second dose of PCV for complete protection against pneumococcal diseases.",
 			},
 			{
-				vaccine: "Pneumococcal Conjugate Vaccine (3rd dose)",
+				id: "pneumo",
+				vaccine: "Pneumococcal Conjugate Vaccine - 13 (PCV 13) (3rd dose)",
 				ageInMonths: 3.5,
 				received: false,
 				description:
 					"Third and last dose of PCV for complete protection against pneumococcal diseases.",
 			},
 			{
-				vaccine: "Measles-Rubella (1st dose)",
+				id: "measles",
+				vaccine: "Measles-Containing Vaccine (MCV) MR/MMR (1st dose)",
 				ageInMonths: 9,
 				received: false,
 				description:
 					"First dose of MR vaccine ensures long-lasting protection against measles and rubella.",
 			},
 			{
-				vaccine: "Measles-Rubella (2nd dose)",
+				id: "measles",
+				vaccine: "Measles-Containing Vaccine (MCV) MR/MMR (2nd dose)",
 				ageInMonths: 12,
 				received: false,
 				description:
@@ -222,6 +297,7 @@ export default function RegisterChildren() {
 			expectedDate.setDate(expectedDate.getDate() + extraDays);
 
 			return {
+				id: vaccine.id,
 				vaccine: vaccine.vaccine,
 				ageInMonths: vaccine.ageInMonths,
 				expectedDate: expectedDate, // Store as a date string
@@ -245,6 +321,7 @@ export default function RegisterChildren() {
 			console.error("Error adding milestones to Firestore: ", error);
 		}
 	};
+
 
 	// Handle adding a baby (only to Firestore)
 	const handleAddBaby = async () => {
@@ -274,6 +351,7 @@ export default function RegisterChildren() {
 			motherName,
 			weight,
 			birthPlace,
+			card: []
 		}; // Use the Date object for birthday
 
 		try {
@@ -446,17 +524,17 @@ export default function RegisterChildren() {
 						onValueChange={(itemValue) => setGender(itemValue)}
 					>
 						<Picker.Item
-							style={styles.input}
+							// style={styles.input}
 							label="Select gender"
 							value=""
 						/>
 						<Picker.Item
-							style={styles.input}
+							// style={styles.input}
 							label="Male"
 							value="Male"
 						/>
 						<Picker.Item
-							style={styles.input}
+							// style={styles.input}
 							label="Female"
 							value="Female"
 						/>
@@ -469,7 +547,7 @@ export default function RegisterChildren() {
 						onPress={() => setShowDatePicker(true)}
 						style={styles.input}
 					>
-						<ThemedText type="default" className="my-1">
+						<ThemedText type="default" className="my-1 text-[16px] font-semibold">
 							{birthday
 								? birthday.toLocaleDateString("en-US")
 								: "Select Birthday"}
@@ -613,7 +691,7 @@ const styles = StyleSheet.create({
 		borderColor: "#d6d6d6",
 		marginBottom: 10,
 		padding: 12,
-		fontSize: 14,
+		fontSize: 16,
 		backgroundColor: "#ebebeb",
 	},
 	buttonContainer: {

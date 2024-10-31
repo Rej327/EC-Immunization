@@ -29,7 +29,7 @@ import { Ionicons } from "@expo/vector-icons";
 import Toast from "react-native-toast-message"; // Ensure you have this installed
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { events, milestones as miles } from "@/assets/data/data";
-import { noData } from "@/assets";
+import { noData, vaccine } from "@/assets";
 import { formatDate } from "@/helper/helper";
 
 // Define interfaces
@@ -42,12 +42,15 @@ interface SelectedBaby {
 
 interface VaccineSelection {
 	vaccine: string;
+	vaccineId: string;
 	received: boolean;
 	expectedDate: string;
 }
 
 interface AppointmentData {
 	id?: string;
+	babyId: string;
+	vaccineId: string;
 	parentId: string;
 	parentName: string;
 	babyFirstName: string;
@@ -63,6 +66,7 @@ const AppointmentBody = () => {
 	const { user } = useUser(); // Get logged-in user from Clerk
 	const [refreshing, setRefreshing] = useState(false);
 	const [vaccineName, setVaccineName] = useState("");
+	const [vaccineId, setVaccineId] = useState("");
 	const [openBottomSheet, setOpenBottomSheet] = useState<string | null>(null);
 	const [isBottomSheetOpen, setBottomSheetOpen] = useState(false);
 	const [showDropdown, setShowDropdown] = useState(false);
@@ -151,6 +155,7 @@ const AppointmentBody = () => {
 				if (data.milestone && Array.isArray(data.milestone)) {
 					data.milestone.forEach((m: any) => {
 						milestoneList.push({
+							vaccineId: m.id,
 							vaccine: m.vaccine,
 							received: m.received,
 							expectedDate: m.expectedDate
@@ -211,52 +216,78 @@ const AppointmentBody = () => {
 
 	// Handle setting appointment
 	const handleSetAppointment = async () => {
-		if (selectedBaby && appointmentDate && vaccineName) {
-			const appointmentData: AppointmentData = {
-				parentId: user?.id || "",
-				parentName: user?.firstName + " " + user?.lastName,
-				babyFirstName: selectedBaby.firstName,
-				babyLastName: selectedBaby.lastName,
-				vaccine: vaccineName,
-				scheduleDate: appointmentDate,
-				status: "pending",
-				createdAt: new Date(),
-				updatedAt: new Date(),
-			};
+    if (selectedBaby && appointmentDate && vaccineName && vaccineId) {
+        const appointmentData: AppointmentData = {
+            parentId: user?.id || "",
+            parentName: user?.firstName + " " + user?.lastName,
+            babyFirstName: selectedBaby.firstName,
+            babyLastName: selectedBaby.lastName,
+            babyId: selectedBaby.id,
+            vaccine: vaccineName,
+            vaccineId: vaccineId,
+            scheduleDate: appointmentDate,
+            status: "pending",
+            createdAt: new Date(),
+            updatedAt: new Date(),
+        };
 
-			try {
-				await addDoc(collection(db, "appointments"), appointmentData);
-				Toast.show({
-					type: "success",
-					text1: "Appointment Set",
-					text2: `Vaccine ${vaccineName} scheduled for ${appointmentDate}.`,
-					position: "top",
-				});
-			} catch (error) {
-				console.error("Error setting appointment:", error);
-				Toast.show({
-					type: "error",
-					text1: "Error",
-					text2: "Failed to set appointment.",
-					position: "top",
-				});
-			}
-		} else {
-			Toast.show({
-				type: "error",
-				text1: "Missing Information",
-				text2: "Please fill in all fields.",
-				position: "top",
-			});
-			console.warn("Please fill in all fields.");
-		}
-		setVaccineName("");
-		setSelectedBaby(null);
-		setAppointmentDate(undefined);
-		setSelectedMilestoneIndex(null);
-		setMilestones([]);
-		fetchAppointments();
-	};
+        try {
+            // Check for existing appointments
+            const q = query(
+                collection(db, "appointments"),
+                where("babyId", "==", selectedBaby.id),
+                where("vaccine", "==", vaccineName),
+            );
+
+            const querySnapshot = await getDocs(q);
+
+            if (!querySnapshot.empty) {
+                // An appointment with the same babyId, vaccineId, and scheduleDate already exists
+                Toast.show({
+                    type: "error",
+                    text1: "Duplicate Appointment",
+                    text2: "An appointment with the same details already exists.",
+                    position: "top",
+                });
+                return;
+            }
+
+            // If no duplicate is found, add the new appointment
+            await addDoc(collection(db, "appointments"), appointmentData);
+            Toast.show({
+                type: "success",
+                text1: "Appointment Set",
+                text2: `Vaccine ${vaccineName} scheduled for ${appointmentDate}.`,
+                position: "top",
+            });
+        } catch (error) {
+            console.error("Error setting appointment:", error);
+            Toast.show({
+                type: "error",
+                text1: "Error",
+                text2: "Failed to set appointment.",
+                position: "top",
+            });
+        }
+    } else {
+        Toast.show({
+            type: "error",
+            text1: "Missing Information",
+            text2: "Please fill in all fields.",
+            position: "top",
+        });
+        console.warn("Please fill in all fields.");
+    }
+
+    // Reset state
+    setVaccineName("");
+    setSelectedBaby(null);
+    setAppointmentDate(undefined);
+    setSelectedMilestoneIndex(null);
+    setMilestones([]);
+    fetchAppointments();
+};
+
 
 	const closeBottomSheetHandler = useCallback(() => {
 		setOpenBottomSheet(null);
@@ -812,6 +843,7 @@ const AppointmentBody = () => {
 							disabled={milestone.received}
 							onPress={() => {
 								setVaccineName(milestone.vaccine);
+								setVaccineId(milestone.vaccineId);
 								setSelectedMilestoneIndex(index); // Set the selected milestone index
 							}}
 						>

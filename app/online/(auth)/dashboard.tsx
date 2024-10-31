@@ -290,7 +290,7 @@ export default function Dashboard() {
 							title="Send Message"
 							onPress={handleSendMessage}
 							borderRadius={12}
-							paddingVertical={8}
+							paddingVertical={10}
 							fontSize={14}
 						/>
 						<StyledButton
@@ -299,7 +299,7 @@ export default function Dashboard() {
 							bgColor="#d6d6d6"
 							customWeight="500"
 							fontSize={14}
-							paddingVertical={8}
+							paddingVertical={10}
 							borderRadius={12}
 							textColor="#456B72"
 						/>
