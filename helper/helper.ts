@@ -1,5 +1,6 @@
 import { format, formatDistanceToNow } from "date-fns";
 import { Timestamp } from "firebase/firestore";
+import { useEffect, useState } from "react";
 
 // Helper function to format date
 export const formatDate = (date: Timestamp | Date) => {
@@ -109,3 +110,20 @@ export const formatAge = (ageInMonths: number): string => {
 	}
 };
 
+
+export const useDebounce = (value: any, delay: any) => {
+	const [debouncedValue, setDebouncedValue] = useState(value);
+
+	useEffect(() => {
+			const handler = setTimeout(() => {
+					setDebouncedValue(value);
+			}, delay);
+
+			// Cleanup function to clear the timeout if the component unmounts or value changes
+			return () => {
+					clearTimeout(handler);
+			};
+	}, [value, delay]);
+
+	return debouncedValue;
+};

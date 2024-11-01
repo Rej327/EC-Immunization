@@ -27,13 +27,13 @@ export const generatePDF = async (): Promise<void> => {
 		// Step 3: Map the baby data to populate the immunization card
 		const immunizationRows = babyData.card
 			.map(
-				(vaccine: { vaccineName: any; doses: any; date: any[] }) => `
+				(vaccine: { vaccineName: any; doses: any; date: any[], remarks: any[] }) => `
       <tr>
         <td>${vaccine.vaccineName}</td>
         <td>${vaccine.doses}</td>
         <td class='petsa'>${vaccine.date.join(" ┃ ")}</td>
         <td></td>
-        <td></td>
+        <td>${vaccine.remarks.join(" ┃ ")}</td>
       </tr>
     `
 			)

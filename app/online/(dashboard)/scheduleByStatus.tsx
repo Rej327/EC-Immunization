@@ -31,7 +31,7 @@ import Toast from "react-native-toast-message";
 import { noData } from "@/assets";
 import StyledButton from "@/components/StyledButton";
 import { useUser } from "@clerk/clerk-expo";
-import { formatDate } from "@/helper/helper";
+import { formatDate, useDebounce } from "@/helper/helper";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { format } from "date-fns";
 
@@ -62,6 +62,9 @@ export default function ScheduleByStatus() {
 	const [selectedStatus, setSelectedStatus] = useState<string>("");
 	const [refreshing, setRefreshing] = useState(false);
 	const [selectedBabyId, setSelectedBabyId] = useState<string | null>(null);
+	const [showInput, setShowInput] = useState(false);
+	const [remarksData, setRemarksData] = useState("");
+	const debouncedSearchQuery = useDebounce(searchQuery, 500);
 
 	const { scheduleByStats } = useLocalSearchParams() as {
 		scheduleByStats: string;
@@ -69,6 +72,10 @@ export default function ScheduleByStatus() {
 
 	const route = useRouter();
 	const { isLoaded, user } = useUser();
+
+	const toggleInput = () => {
+		setShowInput(!showInput);
+	};
 
 	// Fetch appointments based on status
 	const fetchAppointments = async () => {
@@ -102,132 +109,167 @@ export default function ScheduleByStatus() {
 
 	// Filter appointments based on the search query
 	useEffect(() => {
-		if (searchQuery.trim() === "") {
+		if (debouncedSearchQuery.trim() === "") {
 			setFilteredAppointments(appointments); // Show all if search query is empty
 		} else {
 			const filtered = appointments.filter(
 				(appointment) =>
 					`${appointment.babyFirstName} ${appointment.babyLastName}`
 						.toLowerCase()
-						.includes(searchQuery.toLowerCase()) ||
+						.includes(debouncedSearchQuery.toLowerCase()) ||
 					appointment.vaccine
 						.toLowerCase()
-						.includes(searchQuery.toLowerCase())
+						.includes(debouncedSearchQuery.toLowerCase())
 			);
 			setFilteredAppointments(filtered);
 		}
-	}, [searchQuery, appointments]);
+	}, [debouncedSearchQuery, appointments]); // Depend on debouncedSearchQuery and appointments
+
+	// Your input handler for search query
+	const handleSearchChange = (text: any) => {
+		setSearchQuery(text);
+	};
 
 	const handleUpdateStatus = async () => {
-    if (!selectedAppointment) return;
+		if (!selectedAppointment) return;
 
-    // Ensure that the user data is loaded
-    if (!isLoaded || !user) {
-        Toast.show({
-            type: "error",
-            text1: "User data not loaded. Please try again later.",
-        });
-        return;
-    }
+		// Ensure that the user data is loaded
+		if (!isLoaded || !user) {
+			Toast.show({
+				type: "error",
+				text1: "User data not loaded. Please try again later.",
+			});
+			return;
+		}
 
-    try {
-        // Reference to the appointment document in Firestore
-        const appointmentDocRef = doc(db, "appointments", selectedAppointment.id);
+		try {
+			// Reference to the appointment document in Firestore
+			const appointmentDocRef = doc(
+				db,
+				"appointments",
+				selectedAppointment.id
+			);
 
-        // Update the appointment status in Firestore
-        await updateDoc(appointmentDocRef, {
-            status: selectedStatus,
-            updatedAt: Timestamp.now(),
-        });
+			// Update the appointment status in Firestore
+			await updateDoc(appointmentDocRef, {
+				status: selectedStatus,
+				updatedAt: Timestamp.now(),
+			});
 
-        // Check if user data is complete before adding to notifications
-        const userId = user.id || "";
-        const firstName = user.firstName || "Unknown";
-        const lastName = user.lastName || "Unknown";
+			// Check if user data is complete before adding to notifications
+			const userId = user.id || "";
+			const firstName = user.firstName || "Unknown";
+			const lastName = user.lastName || "Unknown";
 
-        // Add a notification entry to Firestore
-        await addDoc(collection(db, "notifications"), {
-            receiverId: selectedAppointment.parentId,
-            firstName: firstName,
-            lastName: lastName,
-            isRead: false, // Notification is initially unread
-            subject: "Appointment Status Update",
-            message: `Your appointment for ${selectedAppointment.vaccine} is now marked as ${selectedStatus}.`,
-            createdAt: Timestamp.now(),
-        });
+			// Add a notification entry to Firestore
+			await addDoc(collection(db, "notifications"), {
+				receiverId: selectedAppointment.parentId,
+				firstName: firstName,
+				lastName: lastName,
+				isRead: false,
+				subject: "Appointment Status Update",
+				message: `Your appointment for ${
+					selectedAppointment.vaccine
+				} is now marked as ${
+					selectedStatus === "history" ? "vaccinated" : selectedStatus
+				}.`,
+				createdAt: Timestamp.now(),
+			});
 
-        // Update the local state to reflect the appointment status change
-        setAppointments((prev) =>
-            prev.map((appt) =>
-                appt.id === selectedAppointment.id
-                    ? {
-                          ...appt,
-                          status: selectedStatus,
-                          updatedAt: new Date(),
-                      }
-                    : appt
-            )
-        );
+			// Update the local state to reflect the appointment status change
+			setAppointments((prev) =>
+				prev.map((appt) =>
+					appt.id === selectedAppointment.id
+						? {
+								...appt,
+								status: selectedStatus,
+								updatedAt: new Date(),
+						  }
+						: appt
+				)
+			);
 
-        // Step 1: Update the babies collection based on the appointment
-        const babyId = selectedAppointment.babyId; // Assuming babyId is part of the appointment data
-        const babyDocRef = doc(db, "babies", babyId);
-        const babyDocSnap = await getDoc(babyDocRef);
-				if (babyDocSnap.exists()) {
-					const babyData = babyDocSnap.data();
-			
-					// Step 2: Find the card with the matching vaccineId
-					const vaccineId = selectedAppointment.vaccineId; // Assuming this is in the appointment data
-					const cardIndex = babyData.card.findIndex((card: { id: string; }) => card.id === vaccineId);
-			
-					if (cardIndex !== -1 && selectedStatus === "upcoming") {
-							// Step 3: Add the formatted date to the array of dates for the found card
-							// Ensure that scheduleDate is a Date object before formatting
-							const currentDate = selectedAppointment.scheduleDate instanceof Timestamp 
-									? selectedAppointment.scheduleDate.toDate() 
-									: new Date(selectedAppointment.scheduleDate);
-			
-							const formattedDate = format(currentDate, 'MM-dd-yyyy'); // Format the date to MM-DD-YYYY
-			
-							const updatedCard = {
-									...babyData.card[cardIndex],
-									date: [...babyData.card[cardIndex].date, formattedDate], // Add formatted date to the date array
-							};
-			
-							// Update the baby's document with the new card array and updatedAt
-							const updatedCardArray = [...babyData.card];
-							updatedCardArray[cardIndex] = updatedCard;
-			
-							// Update the baby's document
-							await updateDoc(babyDocRef, {
-									card: updatedCardArray,
-									updatedAt: Timestamp.now(),
-							});
+			// Step 1: Update the babies collection based on the appointment
+			const babyId = selectedAppointment.babyId;
+			const babyDocRef = doc(db, "babies", babyId);
+			const babyDocSnap = await getDoc(babyDocRef);
+			if (babyDocSnap.exists()) {
+				const babyData = babyDocSnap.data();
+
+				// Step 2: Find the card with the matching vaccineId
+				const vaccineId = selectedAppointment.vaccineId;
+				const cardIndex = babyData.card.findIndex(
+					(card: any) => card.id === vaccineId
+				);
+
+				if (cardIndex !== -1) {
+					const updatedCard = { ...babyData.card[cardIndex] };
+
+					// Step 3: Handle remarks addition if status is "history"
+					if (selectedStatus === "history" && remarksData.trim()) {
+						updatedCard.remarks = [
+							...(updatedCard.remarks || []),
+							remarksData.trim(), // Add the new remark
+						];
 					}
+
+					// Step 4: Add formatted date if status is "upcoming"
+					if (selectedStatus === "upcoming") {
+						const currentDate =
+							selectedAppointment.scheduleDate instanceof
+							Timestamp
+								? selectedAppointment.scheduleDate.toDate()
+								: new Date(selectedAppointment.scheduleDate);
+
+						const formattedDate = format(currentDate, "MM-dd-yyyy");
+
+						updatedCard.date = [
+							...(updatedCard.date || []),
+							formattedDate,
+						];
+					}
+
+					// Update the baby's document with the modified card array
+					const updatedCardArray = [...babyData.card];
+					updatedCardArray[cardIndex] = updatedCard;
+
+					await updateDoc(babyDocRef, {
+						card: updatedCardArray,
+						updatedAt: Timestamp.now(),
+					});
+				}
 			}
 
-        // Show success notification
-        Toast.show({
-            type: "success",
-            text1: "Status updated successfully!",
-            text2: `${selectedAppointment.vaccine} status set to ${selectedStatus}`,
-        });
-    } catch (error) {
-        // Log and show error toast
-        console.error("Error updating status or sending notification:", error);
-        Toast.show({
-            type: "error",
-            text1: "Error updating status or sending notification.",
-            text2: "Please try again.",
-        });
-    } finally {
-        // Ensure modal is closed and data is refreshed even if an error occurs
-        handleRefresh();
-        setModalVisible(false);
-        setSelectedAppointment(null);
-    }
-};
+			// Show success notification
+			Toast.show({
+				type: "success",
+				text1: "Status updated successfully!",
+				text2: `${selectedAppointment.vaccine} status set to ${selectedStatus}`,
+			});
+		} catch (error) {
+			// Log and show error toast
+			console.error(
+				"Error updating status or sending notification:",
+				error
+			);
+			Toast.show({
+				type: "error",
+				text1: "Error updating status or sending notification.",
+				text2: "Please try again.",
+			});
+		} finally {
+			// Ensure modal is closed and data is refreshed
+			handleRefresh();
+			pressCancel();
+			setSelectedAppointment(null);
+			setRemarksData(""); // Clear remarks data
+		}
+	};
 
+	const pressCancel = () => {
+		setModalVisible(false);
+		setShowInput(false);
+	};
 
 	const handleRefresh = async () => {
 		setRefreshing(true);
@@ -320,7 +362,7 @@ export default function ScheduleByStatus() {
 					style={styles.searchInput}
 					placeholder="🔍 Search by baby name or vaccine"
 					value={searchQuery}
-					onChangeText={setSearchQuery}
+					onChangeText={handleSearchChange}
 					autoCapitalize="words"
 				/>
 			</View>
@@ -468,10 +510,44 @@ export default function ScheduleByStatus() {
 											: styles.optionText
 									}
 								>
-									History
+									Vaccinated
 								</ThemedText>
 							</View>
 						</TouchableOpacity>
+						{selectedStatus === "history" && (
+							<>
+								<TouchableOpacity
+									className="flex flex-row gap-1 justify-start items-center my-2"
+									onPress={toggleInput}
+								>
+									<Ionicons
+										name={
+											!showInput
+												? "add-circle-outline"
+												: "close-circle-outline"
+										}
+										size={26}
+										color={"#456B72"}
+									/>
+									<ThemedText type="default">
+										{!showInput ? "Add Remarks" : "Cancel"}
+									</ThemedText>
+								</TouchableOpacity>
+
+								{showInput && (
+									<TextInput
+										multiline={true}
+										numberOfLines={5}
+										className="border border-gray-300 rounded px-3 py-2"
+										placeholder="Enter your remarks"
+										value={remarksData}
+										onChangeText={setRemarksData}
+										autoCapitalize="sentences"
+										autoFocus
+									/>
+								)}
+							</>
+						)}
 
 						{/* Update Button */}
 						<View className="mt-2">
@@ -484,7 +560,7 @@ export default function ScheduleByStatus() {
 							/>
 							<StyledButton
 								title="Cancel"
-								onPress={() => setModalVisible(false)}
+								onPress={() => pressCancel()}
 								paddingVertical={10}
 								fontSize={14}
 								borderRadius={12}

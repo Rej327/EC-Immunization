@@ -99,7 +99,7 @@ export default function RegisterChildren() {
 				id: "polio",
 				vaccineName: "Inactivated Polio Vaccine (IPV)",
 				date: [],
-				doses: "3(3½ buwan )",
+				doses: "3 (3½ buwan )",
 				remarks: [],
 			},
 			{

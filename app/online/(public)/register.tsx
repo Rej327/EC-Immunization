@@ -15,6 +15,7 @@ import { ThemedText } from "@/components/ThemedText";
 import CustomHeadFoot from "@/components/CustomHeadFoot";
 import { babyIcon } from "@/assets";
 import StyledButton from "@/components/StyledButton";
+import Toast from "react-native-toast-message";
 
 const Register = () => {
 	const { isLoaded, signUp, setActive } = useSignUp();
@@ -53,7 +54,11 @@ const Register = () => {
 			// Change the UI to verify the email address
 			setPendingVerification(true);
 		} catch (err: any) {
-			alert(err.errors[0].message);
+			Toast.show({
+				type: "error",
+				text1: "Error",
+				text2: "Please fill out all fields.",
+			});
 		} finally {
 			setLoading(false);
 		}
@@ -75,7 +80,11 @@ const Register = () => {
 
 			await setActive({ session: completeSignUp.createdSessionId });
 		} catch (err: any) {
-			alert(err.errors[0].message);
+			Toast.show({
+				type: "error",
+				text1: "Error",
+				text2: "Verification failed.",
+			});
 		} finally {
 			setLoading(false);
 		}
@@ -107,6 +116,7 @@ const Register = () => {
 									label="First Name"
 									placeholder="Enter your first name"
 									value={firstName}
+									autoCapitalize="words"
 									onChangeText={setFirstName}
 								/>
 							</View>
@@ -115,6 +125,7 @@ const Register = () => {
 									label="Last Name"
 									placeholder="Enter your last name"
 									value={lastName}
+									autoCapitalize="words"
 									onChangeText={setLastName}
 								/>
 							</View>
@@ -145,7 +156,7 @@ const Register = () => {
 							borderRadius={12}
 						/>
 
-						<View className="flex flex-row-reverse w-full justify-between">
+						<View className="flex flex-row-reverse w-full justify-between mt-2">
 							<Link href="/online/(public)/login" asChild>
 								<Pressable>
 									<ThemedText type="link">

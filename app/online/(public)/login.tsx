@@ -84,7 +84,6 @@ const Login = () => {
 					</ThemedText>
 					<CustomInput
 						label="Email or Username"
-						auto
 						placeholder="Enter your email or username"
 						value={emailAddress}
 						onChangeText={setEmailAddress}

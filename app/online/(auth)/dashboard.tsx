@@ -20,6 +20,7 @@ import { ThemedText } from "@/components/ThemedText";
 import { countBaby, countParent, noData } from "@/assets";
 import ScheduleList from "@/components/dashboard/ScheduleList";
 import Toast from "react-native-toast-message";
+import { useDebounce } from "@/helper/helper";
 
 export default function Dashboard() {
 	const [parents, setParents] = useState<any[]>([]); // State to store parents data
@@ -31,6 +32,7 @@ export default function Dashboard() {
 	const [searchQuery, setSearchQuery] = useState(""); // State for search input
 	const [babyCount, setBabyCount] = useState(0); // State to store the count of babies
 	const [parentCount, setParentCount] = useState(0); // State to store the count of parents
+	const debouncedSearchQuery = useDebounce(searchQuery, 500);
 
 	const route = useRouter();
 
@@ -135,13 +137,18 @@ export default function Dashboard() {
 
 	// Filter parents based on search query
 	const filteredParents =
-		searchQuery.length >= 1
-			? parents.filter((parent) =>
-					`${parent.firstName} ${parent.lastName}`
+		debouncedSearchQuery.trim().length > 0
+			? parents.filter(({ firstName, lastName }) =>
+					`${firstName} ${lastName}`
 						.toLowerCase()
-						.includes(searchQuery.toLowerCase())
+						.includes(debouncedSearchQuery.toLowerCase())
 			  )
 			: parents;
+
+	// Your input handler for search query
+	const handleSearchChange = (text: any) => {
+		setSearchQuery(text);
+	};
 
 	// If loading, show a loading indicator
 	if (loading) {
@@ -165,7 +172,7 @@ export default function Dashboard() {
 					style={styles.searchInput}
 					placeholder="🔍 Search"
 					value={searchQuery}
-					onChangeText={setSearchQuery}
+					onChangeText={handleSearchChange}
 					autoCapitalize="words"
 				/>
 			</View>
