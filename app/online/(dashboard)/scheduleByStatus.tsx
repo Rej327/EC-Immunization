@@ -293,6 +293,10 @@ export default function ScheduleByStatus() {
 		);
 	}
 
+	const disableAction = () => {
+		return selectedStatus === "upcoming" ? true : false;
+	};
+
 	// Render each appointment item
 	const renderAppointment = ({ item }: { item: AppointmentData }) => (
 		<TouchableOpacity
@@ -411,6 +415,7 @@ export default function ScheduleByStatus() {
 						{/* Status Selection */}
 						<TouchableOpacity
 							onPress={() => setSelectedStatus("pending")}
+							disabled={disableAction()}
 						>
 							<View
 								className="flex flex-row-reverse justify-between"
