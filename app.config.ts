@@ -5,15 +5,15 @@ export default {
     name: "VacApp",
     slug: "VacApp",
     icon: "./assets/icon.png", // Add your icon path here
-    plugins: [
-      [
-        "expo-notifications",
-        {
-          "icon": "./assets/icon(24x24).png", 
-          "color": "#456B72"
-        }
-      ]
-    ],
+    // plugins: [
+    //   [
+    //     "expo-notifications",
+    //     {
+    //       "icon": "./assets/icon(24x24).png", 
+    //       "color": "#456B72"
+    //     }
+    //   ]
+    // ],
     
     android: {
       package: "com.yourname.vacapp", // Replace this with your desired Android package name
