@@ -48,6 +48,7 @@ import StyledButton from "@/components/StyledButton";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { formatVaccineList, isTodayOrTomorrowOrPast } from "@/helper/helper";
+import * as Notifications from "expo-notifications";
 
 interface UserData {
 	id: string;
@@ -220,6 +221,16 @@ const Home = () => {
 
 					// Send notification to Firestore
 					await addDoc(notificationsRef, notificationData);
+
+					await Notifications.scheduleNotificationAsync({
+						content: {
+							title: notificationData.subject,
+							body: notificationData.message,
+						},
+						trigger: {
+							seconds: 1, // Trigger immediately after being called
+						},
+					});
 					console.log("Notification sent successfully!");
 				} else {
 					console.log("Duplicate notification not sent.");
@@ -237,6 +248,7 @@ const Home = () => {
 			}
 		};
 
+		checkOrFetchBabies();
 		fetchDataAndAlert();
 	}, []);
 
@@ -261,17 +273,12 @@ const Home = () => {
 		return [];
 	};
 
-	useEffect(() => {
-		checkOrFetchBabies();
-	}, []);
-
 	const saveUserToParents = async () => {
 		if (user) {
 			const userId = user.id;
 
 			const userDocRef = doc(db, "parents", userId);
 			const userDoc = await getDoc(userDocRef);
-
 
 			if (!userDoc.exists()) {
 				await setDoc(userDocRef, {
