@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { ActivityIndicator, Text, View } from "react-native";
 import * as SecureStore from "expo-secure-store";
 import Constants from "expo-constants"; // Import to access Expo's extra configuration
+import PushNotificationFeature from "../PushNotificationFeature";
 
 const InitialLayout = () => {
 	const { isLoaded, isSignedIn } = useAuth();
@@ -63,6 +64,7 @@ const RootLayout = () => {
 			tokenCache={tokenCache}
 		>
 			<InitialLayout />
+			<PushNotificationFeature />
 		</ClerkProvider>
 	);
 };

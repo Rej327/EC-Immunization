@@ -36,6 +36,10 @@ export default function Logout() {
 			await AsyncStorage.removeItem("reminders");
 			await AsyncStorage.removeItem("babyDetails");
 
+			await AsyncStorage.removeItem("lastNotificationTapped");
+			await AsyncStorage.removeItem("processedNotifications");
+			await AsyncStorage.removeItem("notifiedPendingCount");
+
 			console.log("User signed out and all data was cleared");
 
 			// Redirect to the login page after sign-out
