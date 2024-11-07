@@ -5,11 +5,40 @@ import { history, pending, upcoming } from "@/assets";
 import { useRouter } from "expo-router";
 import { collection, query, where, onSnapshot } from "firebase/firestore";
 import { db } from "@/db/firebaseConfig"; // Ensure your Firebase config is imported
+import * as Notifications from "expo-notifications";
+import AsyncStorage from "@react-native-async-storage/async-storage"; // Import AsyncStorage
 
 export default function ScheduleList() {
 	const route = useRouter();
 	const [pendingCount, setPendingCount] = useState(0);
 	const [hasNewPending, setHasNewPending] = useState(false);
+
+	// Function to send push notification when there are new pending appointments
+	const sendPushNotification = async (count: number) => {
+		// Check if a notification has already been sent for this count
+		const notifiedCount = await AsyncStorage.getItem(
+			"notifiedPendingCount"
+		);
+
+		if (count > 0 && notifiedCount !== count.toString()) {
+			await Notifications.scheduleNotificationAsync({
+				content: {
+					title: "New Pending Appointment!",
+					body: `You have ${count} new pending appointments.`,
+					data: { type: "pending", count: count },
+				},
+				trigger: {
+					seconds: 1, // Trigger immediately after being called
+				},
+			});
+
+			// Save the count to AsyncStorage to prevent re-sending the same notification
+			await AsyncStorage.setItem(
+				"notifiedPendingCount",
+				count.toString()
+			);
+		}
+	};
 
 	// Real-time listener for pending appointments
 	useEffect(() => {
@@ -23,8 +52,9 @@ export default function ScheduleList() {
 			const pendingAppointments = snapshot.docs.length;
 			setPendingCount(pendingAppointments);
 
-			// Show red dot if there are pending appointments
+			// Set the red dot and send a notification if there are pending appointments
 			setHasNewPending(pendingAppointments > 0);
+			sendPushNotification(pendingAppointments); // Trigger notification when data updates
 		});
 
 		// Cleanup the listener when the component unmounts
