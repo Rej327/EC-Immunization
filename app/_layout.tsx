@@ -9,7 +9,6 @@ import { Toaster } from "./Toaster";
 import CheckLocalData from "./CheckLocalData";
 import { View } from "react-native";
 import ClearData from "./ClearData";
-import ForegroundNotification from "./ForegroundNotification";
 
 const RootLayout = () => {
 	const [isOffline, setIsOffline] = useState(false);
@@ -84,7 +83,6 @@ const RootLayout = () => {
 		<GestureHandlerRootView style={{ flex: 1 }}>
 			<Slot />
 			<Toaster />
-			<ForegroundNotification />
 			{/* <View className="flex flex-row justify-around">
         <CheckLocalData />
         <ClearData />
