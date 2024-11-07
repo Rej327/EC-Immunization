@@ -3,7 +3,6 @@ import { View, Text, Button } from "react-native";
 import * as Notifications from "expo-notifications";
 import * as Device from "expo-device";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import ForegroundNotification from "./ForegroundNotification";
 
 // Function to register for push notifications and save the token in AsyncStorage
 async function registerForPushNotificationsAsync() {
@@ -76,7 +75,7 @@ const PushNotificationFeature = () => {
     };
   }, []);
 
-  return <ForegroundNotification />;
+  return null;
 };
 
 export default PushNotificationFeature;

@@ -229,16 +229,16 @@ const Home = () => {
 	};
 
 	// UNCOMMENT THIS BEFORE DEPLOY
-	useEffect(() => {
-		const fetchDataAndAlert = async () => {
-			if (milestones.length > 0) {
-				// await new Promise((resolve) => setTimeout(resolve, 1000)); // Wait for 1 second
-				alertReminder();
-			}
-		};
+	// useEffect(() => {
+	// 	const fetchDataAndAlert = async () => {
+	// 		if (milestones.length > 0) {
+	// 			// await new Promise((resolve) => setTimeout(resolve, 1000)); // Wait for 1 second
+	// 			alertReminder();
+	// 		}
+	// 	};
 
-		fetchDataAndAlert();
-	}, []);
+	// 	fetchDataAndAlert();
+	// }, [milestones]);
 
 	useEffect(() => {
 		fetchMilestones(selectedBabyId);
