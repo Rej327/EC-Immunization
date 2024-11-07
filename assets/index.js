@@ -26,8 +26,6 @@ export { default as history } from "./icon/history.png";
 export { default as noNotif } from "./icon/noNotif.png";
 export { default as noWifi } from "./icon/noWifi.png";
 
-export { default as notifIcon } from "./icon(24x24).png";
-
 // OBJECTS
 export { default as mainTop } from "./objects/mainTop.png";
 export { default as mainBottom } from "./objects/mainBottom.png";
@@ -50,3 +48,4 @@ export { default as countParent } from "./images/countParent.png";
 export { default as ligtas } from "./images/ligtas.png";
 export { default as f1 } from "./images/f1.png";
 export { default as doh } from "./images/doh.png";
+
