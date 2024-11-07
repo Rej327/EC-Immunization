@@ -71,6 +71,7 @@ const styles = StyleSheet.create({
 		color: "#fff",
 		fontSize: 28,
 		fontWeight: 'semibold',
+		textTransform: 'capitalize',
 	},
 	placeholder: {
 		width: 32,
