@@ -28,6 +28,12 @@ export { default as noWifi } from "./icon/noWifi.png";
 
 export { default as notifIcon } from "./icon(24x24).png";
 
+export { default as announcementPost } from "./icon/announcementPost.png";
+export { default as noticePost } from "./icon/noticePost.png";
+export { default as tipsPost } from "./icon/tipsPost.png";
+
+
+
 // OBJECTS
 export { default as mainTop } from "./objects/mainTop.png";
 export { default as mainBottom } from "./objects/mainBottom.png";

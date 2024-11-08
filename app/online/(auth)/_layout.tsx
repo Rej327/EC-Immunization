@@ -39,12 +39,26 @@ const DrawerPage = () => {
 			>
 				{/* Dashboard - Admin Only */}
 				{user?.id === adminUserId && (
-					<Drawer.Screen
-						name="dashboard"
-						options={{
-							headerTitle: "Dashboard",
-						}}
-					/>
+					<>
+						<Drawer.Screen
+							name="dashboard"
+							options={{
+								headerTitle: "Dashboard",
+							}}
+						/>
+						<Drawer.Screen
+							name="events"
+							options={{
+								headerTitle: "Events",
+							}}
+						/>
+						<Drawer.Screen
+							name="posts"
+							options={{
+								headerTitle: "Posts",
+							}}
+						/>
+					</>
 				)}
 
 				{/* Home */}

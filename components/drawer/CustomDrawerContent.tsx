@@ -37,15 +37,39 @@ const CustomDrawerContent: React.FC<CustomDrawerContentProps> = ({
 			<View style={styles.menuContainer}>
 				{/* Show Dashboard Menu Item (Admin Only) */}
 				{user?.id === adminUserId && (
-					<TouchableOpacity
-						style={styles.menuItem}
-						onPress={() => navigation.navigate("dashboard")}
-					>
-						<Ionicons name="grid-sharp" size={20} color="#456B72" />
-						<ThemedText type="default" style={styles.link}>
-							Dashboard
-						</ThemedText>
-					</TouchableOpacity>
+					<>
+						<TouchableOpacity
+							style={styles.menuItem}
+							onPress={() => navigation.navigate("dashboard")}
+						>
+							<Ionicons
+								name="grid-sharp"
+								size={20}
+								color="#456B72"
+							/>
+							<ThemedText type="default" style={styles.link}>
+								Dashboard
+							</ThemedText>
+						</TouchableOpacity>
+						<TouchableOpacity
+							style={styles.menuItem}
+							onPress={() => navigation.navigate("events")}
+						>
+							<Ionicons name="albums" size={20} color="#456B72" />
+							<ThemedText type="default" style={styles.link}>
+								Events
+							</ThemedText>
+						</TouchableOpacity>
+						<TouchableOpacity
+							style={styles.menuItem}
+							onPress={() => navigation.navigate("posts")}
+						>
+							<Ionicons name="add-circle" size={20} color="#456B72" />
+							<ThemedText type="default" style={styles.link}>
+								Post Events
+							</ThemedText>
+						</TouchableOpacity>
+					</>
 				)}
 				{/* Only show Home and Profile for non-admin users */}
 				{user?.id !== adminUserId && (
@@ -127,7 +151,7 @@ const styles = StyleSheet.create({
 		color: "#fff",
 		fontSize: 18,
 		fontWeight: "bold",
-		textTransform: 'capitalize',
+		textTransform: "capitalize",
 	},
 	menuContainer: {
 		position: "relative",
