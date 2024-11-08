@@ -49,6 +49,7 @@ import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { formatVaccineList, isTodayOrTomorrowOrPast } from "@/helper/helper";
 import * as Notifications from "expo-notifications";
+import Events from "@/components/home/Events";
 
 interface UserData {
 	id: string;
@@ -430,8 +431,34 @@ const Home = () => {
 						/>
 					</View>
 				</View>
-				{/* Baby selection modal */}
-				<Modal
+		
+				{/* EVENTS SECTION */}
+				<ThemedText type="header">Feeds</ThemedText>
+				<Events />
+				{/* <View>
+					<View style={styles.header}>
+						<ThemedText type="header">Events</ThemedText>
+						<TouchableOpacity
+							onPress={() => openBottomSheetHandler("event")}
+						>
+							<ThemedText type="link">View all</ThemedText>
+						</TouchableOpacity>
+					</View>
+					<View style={styles.card}>
+						<ThemedText type="cardHeader">Lorem, ipsum.</ThemedText>
+						<ThemedText type="default">
+							Lorem ipsum dolor sit amet consectetur adipisicing
+							elit. Perspiciatis, commodi.
+						</ThemedText>
+						<ThemedText type="date" style={styles.date}>
+							01/25/2024
+						</ThemedText>
+					</View>
+				</View> */}
+			</ScrollView>
+
+					{/* Baby selection modal */}
+					<Modal
 					animationType="fade"
 					transparent={true}
 					visible={showBabySelectionModal}
@@ -494,34 +521,12 @@ const Home = () => {
 						</View>
 					</View>
 				</Modal>
-				{/* EVENTS SECTION */}
-				<View>
-					<View style={styles.header}>
-						<ThemedText type="header">Events</ThemedText>
-						<TouchableOpacity
-							onPress={() => openBottomSheetHandler("event")}
-						>
-							<ThemedText type="link">View all</ThemedText>
-						</TouchableOpacity>
-					</View>
-					<View style={styles.card}>
-						<ThemedText type="cardHeader">Lorem, ipsum.</ThemedText>
-						<ThemedText type="default">
-							Lorem ipsum dolor sit amet consectetur adipisicing
-							elit. Perspiciatis, commodi.
-						</ThemedText>
-						<ThemedText type="date" style={styles.date}>
-							01/25/2024
-						</ThemedText>
-					</View>
-				</View>
-			</ScrollView>
 
 			{/* Overlay to prevent interaction with outer components */}
 			{openBottomSheet && <View style={styles.overlay} />}
 
 			{/* CUSTOM BOTTOM SHEET FOR EVENTS */}
-			<CustomBottomSheet
+			{/* <CustomBottomSheet
 				isOpen={openBottomSheet === "event"}
 				onClose={closeBottomSheet}
 				title="Events"
@@ -540,7 +545,7 @@ const Home = () => {
 						<ThemedText type="date">{event.date}</ThemedText>
 					</View>
 				))}
-			</CustomBottomSheet>
+			</CustomBottomSheet> */}
 		</View>
 	);
 };

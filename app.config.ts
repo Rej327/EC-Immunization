@@ -5,16 +5,6 @@ export default {
     name: "VacApp",
     slug: "VacApp",
     icon: "./assets/icon.png", // Add your icon path here
-    // plugins: [
-    //   [
-    //     "expo-notifications",
-    //     {
-    //       "icon": "./assets/icon(24x24).png", 
-    //       "color": "#456B72"
-    //     }
-    //   ]
-    // ],
-    
     android: {
       package: "com.yourname.vacapp", // Replace this with your desired Android package name
       permissions: [
@@ -30,7 +20,8 @@ export default {
     ios: {
       bundleIdentifier: "com.yourname.vacapp", // Replace this with your desired iOS bundle identifier
     },
-    // Other Expo config
+    // Add the scheme configuration for deep linking
+    scheme: "vacapp", // You can replace "vacapp" with your custom scheme name
     extra: {
       clerkPublishableKey: process.env.EXPO_CLERK_PUBLISHABLE_KEY,
       eas: {

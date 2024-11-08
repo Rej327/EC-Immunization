@@ -12,7 +12,6 @@ import CustomDrawerContent from "@/components/drawer/CustomDrawerContent";
 const DrawerPage = () => {
 	const { isSignedIn } = useAuth();
 	const { user } = useUser(); // Get current user data
-	const adminUserId = "user_2mW7YxivRkryvJ3m0kEYqWDLRPb"; // Admin user ID
 
 	const navigation = useNavigation();
 
@@ -37,71 +36,23 @@ const DrawerPage = () => {
 				}}
 				drawerContent={(props) => <CustomDrawerContent {...props} />}
 			>
-				{/* Dashboard - Admin Only */}
-				{user?.id === adminUserId && (
-					<>
-						<Drawer.Screen
-							name="dashboard"
-							options={{
-								headerTitle: "Dashboard",
-							}}
-						/>
-						<Drawer.Screen
-							name="events"
-							options={{
-								headerTitle: "Events",
-							}}
-						/>
-						<Drawer.Screen
-							name="posts"
-							options={{
-								headerTitle: "Posts",
-							}}
-						/>
-					</>
-				)}
-
-				{/* Home */}
 				<Drawer.Screen
-					name="home"
+					name="dashboard"
 					options={{
-						headerTitle: "VacApp",
-						headerLeft: () => (
-							<Pressable onPress={openDrawer}>
-								<Ionicons
-									name="menu"
-									size={24}
-									color="#456B72"
-									style={{ marginLeft: 16 }}
-								/>
-							</Pressable>
-						),
-						headerRight: () => <HomeRightHeader />,
+						headerTitle: "Dashboard",
 					}}
-					redirect={!isSignedIn}
-				/>
-
-				{/* Profile */}
-				<Drawer.Screen
-					name="profile"
-					options={{
-						headerTitle: "My Profile",
-					}}
-					redirect={!isSignedIn}
 				/>
 				<Drawer.Screen
-					name="registerchild"
+					name="events"
 					options={{
-						headerTitle: "Register Children",
+						headerTitle: "Events",
 					}}
-					redirect={!isSignedIn}
 				/>
 				<Drawer.Screen
-					name="successpage"
+					name="posts"
 					options={{
-						headerShown: false,
+						headerTitle: "Posts",
 					}}
-					redirect={!isSignedIn}
 				/>
 			</Drawer>
 		</>

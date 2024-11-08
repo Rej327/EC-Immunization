@@ -1,14 +1,14 @@
-import { ClerkProvider, useAuth } from "@clerk/clerk-expo";
-import { Slot, useRouter, useSegments } from "expo-router";
+import { ClerkProvider, useAuth, useUser } from "@clerk/clerk-expo";
+import { Slot, useRouter } from "expo-router";
 import { useEffect } from "react";
-import { ActivityIndicator, Text, View } from "react-native";
+import { ActivityIndicator, View } from "react-native";
 import * as SecureStore from "expo-secure-store";
 import Constants from "expo-constants"; // Import to access Expo's extra configuration
 import PushNotificationFeature from "../PushNotificationFeature";
 
 const InitialLayout = () => {
-	const { isLoaded, isSignedIn } = useAuth();
-	const segments = useSegments();
+	const { isLoaded, isSignedIn } = useAuth(); // Accessing the user object
+	const {user} = useUser()
 	const router = useRouter();
 
 	useEffect(() => {
@@ -16,14 +16,22 @@ const InitialLayout = () => {
 			if (!isLoaded) return; // Wait until Clerk is loaded
 
 			if (isSignedIn) {
-				router.replace("/online/(auth)/");
+				// Check if the signed-in user is the admin
+				if (user?.id === "user_2mW7YxivRkryvJ3m0kEYqWDLRPb") {
+					// Redirect to admin dashboard
+					router.replace("/online/(admin)/dashboard");
+				} else {
+					// Redirect other users to their relevant screen
+					router.replace("/online/(auth)/home");
+				}
 			} else {
+				// Redirect non-signed-in users to the main public page
 				router.replace("/online/(public)/main");
 			}
 		};
 
 		redirectUser();
-	}, [isSignedIn, isLoaded]);
+	}, [isSignedIn, isLoaded, user, router]); // Make sure to include 'user' in the dependency array
 
 	if (!isLoaded) {
 		return (

@@ -22,6 +22,7 @@
     "@react-native-async-storage/async-storage": "^2.0.0",
     "@react-native-community/datetimepicker": "^8.2.0",
     "@react-native-community/netinfo": "^11.3.1",
+    "@react-native-firebase/storage": "^21.4.0",
     "@react-native-picker/picker": "^2.9.0",
     "@react-navigation/drawer": "^6.7.2",
     "@react-navigation/native": "^6.0.2",
@@ -33,9 +34,12 @@
     "expo-calendar": "~13.0.5",
     "expo-constants": "~16.0.2",
     "expo-crypto": "~13.0.2",
+    "expo-device": "~6.0.2",
     "expo-font": "~12.0.10",
+    "expo-image-picker": "~15.0.7",
     "expo-linear-gradient": "^13.0.2",
     "expo-linking": "~6.3.1",
+    "expo-notifications": "~0.28.19",
     "expo-print": "~13.0.1",
     "expo-router": "~3.5.23",
     "expo-secure-store": "^13.0.2",
@@ -58,9 +62,7 @@
     "react-native-step-indicator": "^1.0.3",
     "react-native-svg": "15.2.0",
     "react-native-toast-message": "^2.2.1",
-    "react-native-web": "~0.19.10",
-    "expo-device": "~6.0.2",
-    "expo-notifications": "~0.28.19"
+    "react-native-web": "~0.19.10"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",
