@@ -9,15 +9,19 @@ import {
 	TouchableOpacity,
 	Button,
 	ActivityIndicator,
+	RefreshControl,
 } from "react-native";
 import { db } from "@/db/firebaseConfig";
 import { collection, query, onSnapshot } from "firebase/firestore";
 import { ThemedText } from "@/components/ThemedText";
-import { announcementPost, noticePost, tipsPost } from "@/assets";
+import { announcementPost, noData, noticePost, tipsPost } from "@/assets";
 import { format, formatDistanceToNow } from "date-fns";
 import { Ionicons } from "@expo/vector-icons";
 import Toast from "react-native-toast-message";
 import { Timestamp, updateDoc, deleteDoc, doc } from "firebase/firestore";
+import { Picker } from "@react-native-picker/picker"; // Import Picker
+import DateTimePicker from "@react-native-community/datetimepicker";
+import { ScrollView } from "react-native-gesture-handler";
 
 type Post = {
 	id: string;
@@ -34,8 +38,14 @@ export default function Events() {
 	const [selectedPost, setSelectedPost] = useState<Post | null>(null);
 	const [subject, setSubject] = useState("");
 	const [description, setDescription] = useState("");
+	const [type, setType] = useState<"announcement" | "notice" | "tips">(
+		"announcement"
+	); // Add type state
 	const [loading, setLoading] = useState(false);
 	const [loadingDelete, setLoadingDelete] = useState(false);
+	const [date, setDate] = useState<Date | null>(null);
+	const [showDatePicker, setShowDatePicker] = useState(false);
+	const [refreshing, setRefreshing] = useState(false);
 
 	useEffect(() => {
 		fetchPosts();
@@ -106,6 +116,8 @@ export default function Events() {
 		setSelectedPost(post);
 		setSubject(post.subject);
 		setDescription(post.description);
+		setDate(post.date);
+		setType(post.type); // Set the selected type
 		setModalVisible(true);
 	};
 
@@ -129,15 +141,11 @@ export default function Events() {
 		try {
 			const postRef = doc(db, "feeds", selectedPost.id);
 
-			// Check if the date is valid; if not, set it to null or leave it out of the update
-			const dateToUpdate = selectedPost.date
-				? Timestamp.fromDate(selectedPost.date)
-				: null;
-
 			await updateDoc(postRef, {
 				subject,
 				description,
-				date: dateToUpdate, // Only update the date if it's valid
+				type, // Update the type
+				date: date, // Only update the date if it's valid
 			});
 
 			Toast.show({
@@ -189,6 +197,19 @@ export default function Events() {
 		}
 	};
 
+	const handleDateChange = (event: any, selectedDate?: Date) => {
+		setShowDatePicker(false);
+		if (selectedDate) {
+			setDate(selectedDate);
+		}
+	};
+
+	const handleRefresh = async () => {
+		setRefreshing(true);
+		await fetchPosts();
+		setRefreshing(false);
+	};
+
 	const renderItem = ({ item }: { item: Post }) => {
 		const typeImage = getImageForType(item.type);
 
@@ -221,10 +242,31 @@ export default function Events() {
 
 	return (
 		<View style={styles.container}>
+			<ThemedText type="cardHeader" className="ml-4 pb-2">
+				Event List
+			</ThemedText>
+
 			<FlatList
 				data={posts}
 				renderItem={renderItem}
-				keyExtractor={(item) => item.id || item.createdAt.toString()} // Fall back to createdAt if id is not available
+				keyExtractor={(item) => item.id || `${item.createdAt.getTime()}`}
+				refreshControl={
+					<RefreshControl
+						refreshing={refreshing}
+						onRefresh={handleRefresh}
+					/>
+				}
+				ListEmptyComponent={() => (
+					<View style={styles.emptyContainer}>
+						<Image
+									source={noData}
+									className="w-16 h-20 mb-2"
+								/>
+						<ThemedText type="default" style={styles.emptyText}>
+							No Data Available
+						</ThemedText>
+					</View>
+				)}
 			/>
 
 			<Modal
@@ -232,24 +274,66 @@ export default function Events() {
 				animationType="slide"
 				onRequestClose={closeModal}
 			>
-				<View style={styles.modalContainer}>
-					<ThemedText type="subtitle" className="mb-2">
-						Modify Data
-					</ThemedText>
+				<ScrollView style={styles.modalContainer}>
+					<ThemedText type="subtitle">Modify Data</ThemedText>
+					<ThemedText style={styles.label}>Subject</ThemedText>
 					<TextInput
-						style={[styles.inputModal, styles.inputField]}
+						style={styles.inputField}
 						value={subject}
 						onChangeText={setSubject}
 						placeholder="Subject"
 						placeholderTextColor="#888"
+						multiline
 					/>
+					<ThemedText style={styles.label}>Description</ThemedText>
 					<TextInput
-						style={[styles.inputModal, styles.inputField]}
+						style={styles.inputField}
 						value={description}
 						onChangeText={setDescription}
 						placeholder="Description"
 						placeholderTextColor="#888"
+						multiline
 					/>
+
+					<ThemedText style={styles.label}>
+						Date (optional)
+					</ThemedText>
+					<TouchableOpacity
+						onPress={() => setShowDatePicker(true)}
+						style={styles.dateButton}
+					>
+						<ThemedText style={styles.dateText}>
+							{/* {date ? date.toLocaleDateString() : "Select Date"} */}
+							{date ? formatDate(date) : "Select Date"}
+						</ThemedText>
+					</TouchableOpacity>
+					{showDatePicker && (
+						<DateTimePicker
+							value={date || new Date()}
+							mode="date"
+							display="default"
+							onChange={handleDateChange}
+						/>
+					)}
+
+					{/* Add Picker for type */}
+					<Picker
+						selectedValue={type}
+						onValueChange={(itemValue) =>
+							setType(
+								itemValue as "announcement" | "notice" | "tips"
+							)
+						}
+						style={styles.inputField}
+					>
+						<Picker.Item
+							label="Announcement"
+							value="announcement"
+						/>
+						<Picker.Item label="Notice" value="notice" />
+						<Picker.Item label="Tips" value="tips" />
+					</Picker>
+
 					<View style={styles.buttonContainer}>
 						<TouchableOpacity
 							style={styles.updateButton}
@@ -258,8 +342,11 @@ export default function Events() {
 							{loading ? (
 								<ActivityIndicator color="#fff" />
 							) : (
-								<ThemedText style={styles.buttonText}>
-									Update
+								<ThemedText
+									type="default"
+									style={styles.buttonText}
+								>
+									Update Post
 								</ThemedText>
 							)}
 						</TouchableOpacity>
@@ -270,8 +357,11 @@ export default function Events() {
 							{loadingDelete ? (
 								<ActivityIndicator color="#fff" />
 							) : (
-								<ThemedText style={styles.buttonText}>
-									Delete
+								<ThemedText
+									type="default"
+									style={styles.buttonText}
+								>
+									Delete Post
 								</ThemedText>
 							)}
 						</TouchableOpacity>
@@ -284,7 +374,7 @@ export default function Events() {
 							</ThemedText>
 						</TouchableOpacity>
 					</View>
-				</View>
+				</ScrollView>
 			</Modal>
 		</View>
 	);
@@ -298,7 +388,7 @@ const styles = StyleSheet.create({
 	postContainer: {
 		flexDirection: "row",
 		marginHorizontal: 16,
-		marginTop: 10,
+		marginBottom: 10,
 		padding: 12,
 		backgroundColor: "#fff",
 		borderRadius: 8,
@@ -328,7 +418,7 @@ const styles = StyleSheet.create({
 	},
 	modalContainer: {
 		padding: 20,
-		justifyContent: "center",
+		// justifyContent: "center",
 		marginVertical: "auto",
 	},
 	input: {
@@ -339,23 +429,17 @@ const styles = StyleSheet.create({
 		marginBottom: 10,
 		padding: 8,
 	},
-
-	inputModal: {
-		height: 45,
-		borderColor: "#ccc", // Lighter border color
-		borderWidth: 1,
-		marginBottom: 15,
-		borderRadius: 8,
-		paddingHorizontal: 10,
-		backgroundColor: "#fff", // White background for inputs
-	},
 	inputField: {
-		fontSize: 16,
-		color: "#333", // Dark text for readability
+		borderColor: "#ccc",
+		borderWidth: 1,
+		padding: 8,
+		borderRadius: 5,
+		marginTop: 8,
 	},
 	buttonContainer: {
 		display: "flex",
 		gap: 10,
+		marginTop: 12,
 	},
 	buttonText: {
 		color: "white",
@@ -377,4 +461,29 @@ const styles = StyleSheet.create({
 		borderRadius: 8,
 		padding: 12,
 	},
+	label: {
+		fontSize: 16,
+		fontWeight: "bold",
+		marginTop: 16,
+	},
+	dateText: {
+		color: "#555",
+	},
+	dateButton: {
+		borderColor: "#ccc",
+		borderWidth: 1,
+		padding: 10,
+		borderRadius: 5,
+		marginVertical: 8,
+	},
+	emptyContainer: {
+		alignItems: "center",
+		justifyContent: "center",
+		marginTop: 20,
+	},
+	emptyText: {
+		color: "#888",
+		fontSize: 16,
+	},
+	
 });

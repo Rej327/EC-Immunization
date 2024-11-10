@@ -381,6 +381,7 @@ const Home = () => {
 						colors={["#456B72"]}
 					/>
 				}
+				stickyHeaderIndices={[2]}
 				className="px-4"
 				scrollEnabled={!openBottomSheet} // Disable scrolling when bottom sheet is open
 			>
@@ -431,10 +432,12 @@ const Home = () => {
 						/>
 					</View>
 				</View>
-		
+
 				{/* EVENTS SECTION */}
-				<ThemedText type="header">Feeds</ThemedText>
+
+				<ThemedText type="header" style={styles.feed}>Feeds</ThemedText>
 				<Events />
+
 				{/* <View>
 					<View style={styles.header}>
 						<ThemedText type="header">Events</ThemedText>
@@ -457,70 +460,64 @@ const Home = () => {
 				</View> */}
 			</ScrollView>
 
-					{/* Baby selection modal */}
-					<Modal
-					animationType="fade"
-					transparent={true}
-					visible={showBabySelectionModal}
-					onRequestClose={() => setShowBabySelectionModal(false)}
-				>
-					<View style={styles.modalOverlay}>
-						<View style={styles.modalContainer}>
-							{babies.length === 0 ? (
-								// Show registration option if no babies
-								<>
-									<Image
-										source={noData}
-										className="w-16 h-20 mb-2"
-									/>
+			{/* Baby selection modal */}
+			<Modal
+				animationType="fade"
+				transparent={true}
+				visible={showBabySelectionModal}
+				onRequestClose={() => setShowBabySelectionModal(false)}
+			>
+				<View style={styles.modalOverlay}>
+					<View style={styles.modalContainer}>
+						{babies.length === 0 ? (
+							// Show registration option if no babies
+							<>
+								<Image
+									source={noData}
+									className="w-16 h-20 mb-2"
+								/>
+								<ThemedText type="cardHeader" className="mb-3">
+									No childrens found. Please register.
+								</ThemedText>
+								<TouchableOpacity
+									style={styles.babyButton}
+									onPress={() => handleRouteRegister()}
+								>
 									<ThemedText
-										type="cardHeader"
-										className="mb-3"
+										type="default"
+										className="text-white font-bold"
 									>
-										No childrens found. Please register.
+										Register
 									</ThemedText>
+								</TouchableOpacity>
+							</>
+						) : (
+							// Show baby selection if babies exist
+							<>
+								<ThemedText type="cardHeader" className="mb-3">
+									Select Children
+								</ThemedText>
+								{babies.map((baby) => (
 									<TouchableOpacity
+										key={baby.id}
 										style={styles.babyButton}
-										onPress={() => handleRouteRegister()}
+										onPress={() =>
+											handleBabySelection(baby.id)
+										}
 									>
 										<ThemedText
 											type="default"
-											className="text-white font-bold"
+											className="text-white first-letter: capitalize"
 										>
-											Register
+											{baby.firstName} {baby.lastName}
 										</ThemedText>
 									</TouchableOpacity>
-								</>
-							) : (
-								// Show baby selection if babies exist
-								<>
-									<ThemedText
-										type="cardHeader"
-										className="mb-3"
-									>
-										Select Children
-									</ThemedText>
-									{babies.map((baby) => (
-										<TouchableOpacity
-											key={baby.id}
-											style={styles.babyButton}
-											onPress={() =>
-												handleBabySelection(baby.id)
-											}
-										>
-											<ThemedText
-												type="default"
-												className="text-white first-letter: capitalize"
-											>
-												{baby.firstName} {baby.lastName}
-											</ThemedText>
-										</TouchableOpacity>
-									))}
-								</>
-							)}
-						</View>
+								))}
+							</>
+						)}
 					</View>
-				</Modal>
+				</View>
+			</Modal>
 
 			{/* Overlay to prevent interaction with outer components */}
 			{openBottomSheet && <View style={styles.overlay} />}
@@ -659,4 +656,7 @@ const styles = StyleSheet.create({
 		color: "white",
 		fontWeight: "bold",
 	},
+	feed: {
+		backgroundColor: '#f5f4f7'
+	}
 });

@@ -3,7 +3,7 @@ import { View, FlatList, StyleSheet, Image } from "react-native";
 import { db } from "@/db/firebaseConfig";
 import { collection, query, onSnapshot } from "firebase/firestore";
 import { ThemedText } from "@/components/ThemedText";
-import { announcementPost, noticePost, tipsPost } from "@/assets";
+import { announcementPost, noData, noticePost, tipsPost } from "@/assets";
 import { format, formatDistanceToNow } from "date-fns";
 import { Ionicons } from "@expo/vector-icons";
 
@@ -16,12 +16,8 @@ type Post = {
 	createdAt: Date;
 };
 
-const PAGE_SIZE = 5;
-
 export default function Events() {
 	const [posts, setPosts] = useState<Post[]>([]);
-	const [visiblePosts, setVisiblePosts] = useState<Post[]>([]);
-	const [currentPage, setCurrentPage] = useState(1);
 
 	useEffect(() => {
 		const fetchPosts = () => {
@@ -34,11 +30,11 @@ export default function Events() {
 					createdAt: doc.data().createdAt.toDate(),
 				})) as Post[];
 
+				// Sort by createdAt in descending order
 				const sortedPosts = postData.sort(
 					(a, b) => b.createdAt.getTime() - a.createdAt.getTime()
 				);
 				setPosts(sortedPosts);
-				setVisiblePosts(sortedPosts.slice(0, PAGE_SIZE));
 			});
 			return unsubscribe;
 		};
@@ -46,20 +42,18 @@ export default function Events() {
 		fetchPosts();
 	}, []);
 
-	const loadMorePosts = () => {
-		const nextPage = currentPage + 1;
-		const newVisiblePosts = posts.slice(0, nextPage * PAGE_SIZE);
-		setVisiblePosts(newVisiblePosts);
-		setCurrentPage(nextPage);
-	};
-
 	const formatCreatedAt = (date: Date) => {
-		if (!date) return "Unknown Date";
+		if (!date) return "Unknown Date"; // Fallback if date is not valid
 		const now = new Date();
 		const secondsDiff = Math.floor((now.getTime() - date.getTime()) / 1000);
-		return secondsDiff < 604800
-			? formatDistanceToNow(date, { addSuffix: true })
-			: format(date, "PPPP");
+
+		// If less than a week ago, show relative time
+		if (secondsDiff < 604800) {
+			return formatDistanceToNow(date, { addSuffix: true });
+		}
+
+		// If older than a week, show the actual date
+		return format(date, "PPPP");
 	};
 
 	const formatDate = (date: Date | null) => {
@@ -83,11 +77,11 @@ export default function Events() {
 		}
 	};
 
-	const renderItem = ({ item }: { item: Post }) => {
+	const renderItem = (item: Post) => {
 		const typeImage = getImageForType(item.type);
 
 		return (
-			<View style={styles.postContainer}>
+			<View key={item.id} style={styles.postContainer}>
 				{typeImage && <Image source={typeImage} style={styles.img} />}
 				<View style={styles.textContainer}>
 					<ThemedText type="default" style={styles.subject}>
@@ -113,22 +107,25 @@ export default function Events() {
 	};
 
 	return (
-		<FlatList
-			data={visiblePosts}
-			renderItem={renderItem}
-			keyExtractor={(item) => item.id}
-			onEndReached={loadMorePosts}
-			onEndReachedThreshold={0.5}
-			scrollEnabled={false}
-			contentContainerStyle={{ paddingBottom: 16 }}
-		/>
+		<View>
+			{posts.length > 0 ? (
+				<>{posts.map((item) => renderItem(item))}</>
+			) : (
+				<View style={styles.emptyContainer}>
+					<Image source={noData} className="w-16 h-20 mb-2" />
+					<ThemedText type="default" style={styles.emptyText}>
+						No Data Available
+					</ThemedText>
+				</View>
+			)}
+		</View>
 	);
 }
 
 const styles = StyleSheet.create({
 	postContainer: {
 		flexDirection: "row",
-		marginVertical: 8,
+		marginTop: 10,
 		padding: 12,
 		backgroundColor: "#fff",
 		borderRadius: 8,
@@ -155,5 +152,14 @@ const styles = StyleSheet.create({
 	date: {
 		color: "#888",
 		fontSize: 12,
+	},
+	emptyContainer: {
+		alignItems: "center",
+		justifyContent: "center",
+		marginTop: 20,
+	},
+	emptyText: {
+		color: "#888",
+		fontSize: 16,
 	},
 });

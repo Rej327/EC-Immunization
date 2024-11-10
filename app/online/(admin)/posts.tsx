@@ -90,6 +90,7 @@ export default function CreatePost() {
 				onChangeText={setSubject}
 				placeholder="Enter subject"
 				autoFocus
+				multiline
 			/>
 
 			<ThemedText style={styles.label}>Description *</ThemedText>
