@@ -7,7 +7,8 @@ type InputProps = {
 	value: string; // Input value
 	onChangeText: (text: string) => void; // Function to handle input changes
 	secureTextEntry?: boolean; // Optional prop to handle password inputs
-	autoCapitalize?: 'none' | 'sentences' | 'words' | 'characters'; // Restrict options to valid values
+	autoCapitalize?: 'none' | 'sentences' | 'words' | 'characters' ; // Restrict options to valid values
+	keyboardType?: 'default',
 };
 
 const CustomInput: React.FC<InputProps> = ({
@@ -17,6 +18,7 @@ const CustomInput: React.FC<InputProps> = ({
 	autoCapitalize = "none",
 	onChangeText,
 	secureTextEntry = false, // Default to false unless explicitly passed
+	keyboardType = "default",
 }) => {
 	return (
 		<View style={styles.container}>
@@ -28,6 +30,7 @@ const CustomInput: React.FC<InputProps> = ({
 				onChangeText={onChangeText}
 				autoCapitalize={autoCapitalize}
 				secureTextEntry={secureTextEntry}
+				keyboardType={keyboardType}
 				// Accessibility props
 				accessible={true}
 				accessibilityLabel={placeholder} // Use placeholder as accessibility label

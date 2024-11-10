@@ -30,6 +30,13 @@ const Register = () => {
 	const [loading, setLoading] = useState(false);
 
 	// Create the user and send the verification email
+	const sanitizeUsername = (username: string) => {
+		return username
+			.normalize("NFD")
+			.replace(/[\u0300-\u036f]/g, "")
+			.toLowerCase();
+	};
+
 	const onSignUpPress = async () => {
 		if (!isLoaded) {
 			return;
@@ -37,11 +44,14 @@ const Register = () => {
 		setLoading(true);
 
 		try {
-			// Create the user on Clerk with firstName, lastName, and username
+			// Sanitize the username before sending it to Clerk
+			const sanitizedUsername = sanitizeUsername(username);
+
+			// Create the user on Clerk with sanitized username
 			await signUp.create({
 				firstName,
 				lastName,
-				username,
+				username: sanitizedUsername,
 				emailAddress,
 				password,
 			});
@@ -53,7 +63,8 @@ const Register = () => {
 
 			// Change the UI to verify the email address
 			setPendingVerification(true);
-		} catch (err: any) {
+		} catch (err) {
+			console.log("Err", err);
 			Toast.show({
 				type: "error",
 				text1: "Error",
@@ -133,18 +144,23 @@ const Register = () => {
 						<CustomInput
 							label="Username"
 							placeholder="Enter your username"
+							autoCapitalize="none"
 							value={username}
 							onChangeText={setUsername}
+							keyboardType="default"
 						/>
 						<CustomInput
 							label="Email address"
 							placeholder="Enter your email address"
+							autoCapitalize="none"
 							value={emailAddress}
 							onChangeText={setEmailAddress}
+							keyboardType="default"
 						/>
 						<CustomInput
 							label="Password"
 							placeholder="Enter your password"
+							autoCapitalize="none"
 							value={password}
 							onChangeText={setPassword}
 							secureTextEntry

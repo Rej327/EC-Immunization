@@ -22,6 +22,14 @@ import {
 import Spinner from "react-native-loading-spinner-overlay";
 import Toast from "react-native-toast-message";
 
+// Function to sanitize the email address
+const sanitizeEmail = (email: string) => {
+	return email
+		.normalize("NFD")
+		.replace(/[\u0300-\u036f]/g, "")
+		.toLowerCase();
+};
+
 const Login = () => {
 	const { signIn, setActive, isLoaded } = useSignIn();
 
@@ -35,8 +43,11 @@ const Login = () => {
 		}
 		setLoading(true);
 		try {
+			// Sanitize the email address before submitting
+			const sanitizedEmail = sanitizeEmail(emailAddress);
+
 			const completeSignIn = await signIn.create({
-				identifier: emailAddress,
+				identifier: sanitizedEmail,
 				password,
 			});
 
