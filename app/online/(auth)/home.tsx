@@ -50,6 +50,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { formatVaccineList, isTodayOrTomorrowOrPast } from "@/helper/helper";
 import * as Notifications from "expo-notifications";
 import Events from "@/components/home/Events";
+import EventsShort from "@/components/home/EventsShort";
 
 interface UserData {
 	id: string;
@@ -381,7 +382,6 @@ const Home = () => {
 						colors={["#456B72"]}
 					/>
 				}
-				stickyHeaderIndices={[2]}
 				className="px-4"
 				scrollEnabled={!openBottomSheet} // Disable scrolling when bottom sheet is open
 			>
@@ -433,31 +433,19 @@ const Home = () => {
 					</View>
 				</View>
 
-				{/* EVENTS SECTION */}
+				{/* FEEDS SECTION */}
 
-				<ThemedText type="header" style={styles.feed}>Feeds</ThemedText>
-				<Events />
-
-				{/* <View>
+				<View>
 					<View style={styles.header}>
-						<ThemedText type="header">Events</ThemedText>
+						<ThemedText type="header">News & Insights</ThemedText>
 						<TouchableOpacity
 							onPress={() => openBottomSheetHandler("event")}
 						>
 							<ThemedText type="link">View all</ThemedText>
 						</TouchableOpacity>
 					</View>
-					<View style={styles.card}>
-						<ThemedText type="cardHeader">Lorem, ipsum.</ThemedText>
-						<ThemedText type="default">
-							Lorem ipsum dolor sit amet consectetur adipisicing
-							elit. Perspiciatis, commodi.
-						</ThemedText>
-						<ThemedText type="date" style={styles.date}>
-							01/25/2024
-						</ThemedText>
-					</View>
-				</View> */}
+					<EventsShort />
+				</View>
 			</ScrollView>
 
 			{/* Baby selection modal */}
@@ -522,27 +510,14 @@ const Home = () => {
 			{/* Overlay to prevent interaction with outer components */}
 			{openBottomSheet && <View style={styles.overlay} />}
 
-			{/* CUSTOM BOTTOM SHEET FOR EVENTS */}
-			{/* <CustomBottomSheet
+			{/* CUSTOM BOTTOM SHEET FOR News & Insights */}
+			<CustomBottomSheet
 				isOpen={openBottomSheet === "event"}
 				onClose={closeBottomSheet}
-				title="Events"
+				title="News & Insights"
 			>
-				{events.map((event, index) => (
-					<View
-						key={index}
-						style={getViewAllStyle(index, events.length)}
-					>
-						<ThemedText type="cardHeader">
-							{event.header}
-						</ThemedText>
-						<ThemedText type="default">
-							{event.description}
-						</ThemedText>
-						<ThemedText type="date">{event.date}</ThemedText>
-					</View>
-				))}
-			</CustomBottomSheet> */}
+				<Events />
+			</CustomBottomSheet>
 		</View>
 	);
 };
@@ -657,6 +632,6 @@ const styles = StyleSheet.create({
 		fontWeight: "bold",
 	},
 	feed: {
-		backgroundColor: '#f5f4f7'
-	}
+		backgroundColor: "#f5f4f7",
+	},
 });

@@ -16,7 +16,7 @@ type Post = {
 	createdAt: Date;
 };
 
-export default function Events() {
+export default function EventsShort() {
 	const [posts, setPosts] = useState<Post[]>([]);
 
 	useEffect(() => {
@@ -109,7 +109,7 @@ export default function Events() {
 	return (
 		<View>
 			{posts.length > 0 ? (
-				<>{posts.map((item) => renderItem(item))}</>
+				<>{posts.slice(0, 3).map((item) => renderItem(item))}</>
 			) : (
 				<View style={styles.emptyContainer}>
 					<Image source={noData} className="w-16 h-20 mb-2" />
