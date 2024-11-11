@@ -3,6 +3,7 @@ import { formatNotificationDate } from "@/helper/helper";
 import {
 	Appointment,
 	Baby,
+	Feed,
 	Milestone,
 	MilestoneData,
 	Notification,
@@ -180,7 +181,46 @@ export const saveForOffline = async (userId: any) => {
 			)
 		);
 
-		console.log("Data fetched and saved to AsyncStorage successfully!");
+		// 6. Fetch feeds
+		const feedsRef = collection(db, "feeds");
+		const feedsSnapshot = await getDocs(feedsRef);
+
+		const feeds: Feed[] = feedsSnapshot.docs.map((doc) => {
+			const data = doc.data();
+
+			const createdAt = data.createdAt?.toDate
+				? data.createdAt.toDate() // Firestore Timestamp to Date
+				: new Date(data.createdAt); // Handle string/other date formats
+
+			const formattedCreatedAt = formatNotificationDate(createdAt);
+
+			return {
+				id: doc.id,
+				type: data.type,
+				subject: data.subject,
+				description: data.description,
+				date: data.date ? data.date.toDate() : null,
+				createdAt: data.createdAt.toDate(),
+				offlineCreatedAt: formattedCreatedAt,
+			} as Feed;
+		});
+
+		// Sort feeds by createdAt in descending order
+		feeds.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+
+		// Save feeds to AsyncStorage
+		await AsyncStorage.setItem(
+			"feeds",
+			JSON.stringify(
+				feeds.map((feed) => ({
+					...feed,
+					date: feed.date ? feed.date.toISOString() : null,
+					createdAt: feed.createdAt.toISOString(),
+				}))
+			)
+		);
+
+		console.log("Feeds fetched and saved to AsyncStorage successfully!");
 	} catch (error) {
 		console.error("Error fetching data: ", error);
 	}

@@ -66,3 +66,13 @@ export interface Notification {
 	createdAt: Date;
 	formattedCreatedAt: string;
 }
+
+export interface Feed {
+	id: string;
+	type: "announcement" | "notice" | "tips";
+	subject: string;
+	description: string;
+	date: Date | null;
+	offlineCreatedAt: string
+	createdAt: Date;
+}

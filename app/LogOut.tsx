@@ -39,6 +39,7 @@ export default function Logout() {
 			await AsyncStorage.removeItem("lastNotificationTapped");
 			await AsyncStorage.removeItem("processedNotifications");
 			await AsyncStorage.removeItem("notifiedPendingCount");
+			await AsyncStorage.removeItem("feeds");
 
 			console.log("User signed out and all data was cleared");
 

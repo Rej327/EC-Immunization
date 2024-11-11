@@ -38,6 +38,8 @@ import {
 } from "@/middleware/GetFromLocalStorage";
 import { formatVaccineList } from "@/helper/helper";
 import { Ionicons } from "@expo/vector-icons";
+import OfflineEventsShort from "@/components/home/OfflineEventsShort";
+import OfflineEvents from "@/components/home/OfflineEvents";
 
 interface UserData {
 	id: string;
@@ -366,23 +368,14 @@ const Home = () => {
 				{/* EVENTS SECTION */}
 				<View>
 					<View style={styles.header}>
-						<ThemedText type="header">Events</ThemedText>
+						<ThemedText type="header">News & Insights</ThemedText>
 						<TouchableOpacity
 							onPress={() => openBottomSheetHandler("event")}
 						>
 							<ThemedText type="link">View all</ThemedText>
 						</TouchableOpacity>
 					</View>
-					<View style={styles.card}>
-						<ThemedText type="cardHeader">Lorem, ipsum.</ThemedText>
-						<ThemedText type="default">
-							Lorem ipsum dolor sit amet consectetur adipisicing
-							elit. Perspiciatis, commodi.
-						</ThemedText>
-						<ThemedText type="date" style={styles.date}>
-							01/25/2024
-						</ThemedText>
-					</View>
+					<OfflineEventsShort />
 				</View>
 			</ScrollView>
 
@@ -452,22 +445,9 @@ const Home = () => {
 			<CustomBottomSheet
 				isOpen={openBottomSheet === "event"}
 				onClose={closeBottomSheet}
-				title="Events"
+				title="News & Insights"
 			>
-				{events.map((event, index) => (
-					<View
-						key={index}
-						style={getViewAllStyle(index, events.length)}
-					>
-						<ThemedText type="cardHeader">
-							{event.header}
-						</ThemedText>
-						<ThemedText type="default">
-							{event.description}
-						</ThemedText>
-						<ThemedText type="date">{event.date}</ThemedText>
-					</View>
-				))}
+				<OfflineEvents />
 			</CustomBottomSheet>
 		</View>
 	);

@@ -3,26 +3,28 @@ import {
 	Appointment,
 	AppointmentsByStatus,
 	Baby,
+	Feed,
 	Milestone,
 	Notification,
 	UserData,
 } from "@/types/types";
 
 // 1. Fetch Milestones
-export const getMilestonesDAta = async (babyId: string): Promise<Milestone[]> => {
-  try {
-    const milestonesData = await AsyncStorage.getItem("milestones");
-    if (!milestonesData) return [];
-    
-    const allMilestones: Milestone[] = JSON.parse(milestonesData);
-    // Filter milestones for the selected baby
-    return allMilestones.filter(milestone => milestone.babyId === babyId);
-  } catch (error) {
-    console.error("Error fetching milestones from AsyncStorage: ", error);
-    return [];
-  }
-};
+export const getMilestonesDAta = async (
+	babyId: string
+): Promise<Milestone[]> => {
+	try {
+		const milestonesData = await AsyncStorage.getItem("milestones");
+		if (!milestonesData) return [];
 
+		const allMilestones: Milestone[] = JSON.parse(milestonesData);
+		// Filter milestones for the selected baby
+		return allMilestones.filter((milestone) => milestone.babyId === babyId);
+	} catch (error) {
+		console.error("Error fetching milestones from AsyncStorage: ", error);
+		return [];
+	}
+};
 
 // 2. Fetch Appointments
 export const getAppointmentsData = async (): Promise<AppointmentsByStatus> => {
@@ -39,7 +41,6 @@ export const getAppointmentsData = async (): Promise<AppointmentsByStatus> => {
 		};
 
 		appointments.forEach((appointment) => {
-
 			if (appointment.status === "pending") {
 				appointmentsByStatus.pending.push(appointment);
 			} else if (appointment.status === "history") {
@@ -92,5 +93,17 @@ export const getUserData = async (): Promise<UserData | null> => {
 			error
 		);
 		return null;
+	}
+};
+
+// 5. Get Feeds
+export const getFeedData = async (): Promise<Feed[]> => {
+	try {
+		// Check if feeds are stored in AsyncStorage
+		const storedFeeds = await AsyncStorage.getItem("feeds");
+		return storedFeeds ? JSON.parse(storedFeeds) : [];
+	} catch (error) {
+		console.error("Error fetching feed data from AsyncStorage: ", error);
+		return [];
 	}
 };

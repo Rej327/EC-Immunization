@@ -71,7 +71,7 @@ const styles = StyleSheet.create({
 		color: "#fff",
 		fontSize: 28,
 		fontWeight: 'semibold',
-		textTransform: 'capitalize',
+		textTransform: 'uppercase',
 	},
 	placeholder: {
 		width: 32,
