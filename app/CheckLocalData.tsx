@@ -18,7 +18,7 @@ import StyledButton from "@/components/StyledButton";
 export default function CheckLocalData() {
 	const checkUserData = async () => {
 		try {
-			const userDataJson = await AsyncStorage.getItem("feeds");
+			const userDataJson = await AsyncStorage.getItem("babies");
 
 			if (userDataJson !== null) {
 				// Parse userData and log it
