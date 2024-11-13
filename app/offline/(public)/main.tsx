@@ -32,7 +32,7 @@ export default function Main() {
 						source={babyIcon}
 						style={{ width: 100, height: 100 }}
 					/>
-					<Text
+					{/* <Text
 						style={{
 							fontSize: 18,
 							color: "#456B72",
@@ -40,6 +40,15 @@ export default function Main() {
 						}}
 					>
 						Know More, Care Better!
+					</Text> */}
+						<Text
+						style={{
+							fontSize: 18,
+							color: "#456B72",
+							fontWeight: "bold",
+						}}
+					>
+						Easy Childhood Immunization App
 					</Text>
 				</View>
 				<Link href="/offline/(public)/login" asChild>

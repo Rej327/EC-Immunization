@@ -64,7 +64,7 @@ const TabsPage = () => {
 				<Drawer.Screen
 					name="home"
 					options={{
-						headerTitle: "VacApp",
+						headerTitle: "E.C. Immunization",
 						headerLeft: () => (
 							<Pressable onPress={openDrawer}>
 								<Ionicons

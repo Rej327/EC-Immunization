@@ -2,11 +2,11 @@ import "dotenv/config"; // This will load the .env file
 
 export default {
   expo: {
-    name: "VacApp",
-    slug: "VacApp",
+    name: "E.C-Immunization",
+    slug: "E.C-Immunization",
     icon: "./assets/icon.png", // Add your icon path here
     android: {
-      package: "com.yourname.vacapp", // Replace this with your desired Android package name
+      package: "com.yourname.ecimmune", // Replace this with your desired Android package name
       permissions: [
         "ACCESS_NETWORK_STATE",
         "INTERNET",
@@ -18,10 +18,10 @@ export default {
       ],
     },
     ios: {
-      bundleIdentifier: "com.yourname.vacapp", // Replace this with your desired iOS bundle identifier
+      bundleIdentifier: "com.yourname.ecimmune", // Replace this with your desired iOS bundle identifier
     },
     // Add the scheme configuration for deep linking
-    scheme: "vacapp", // You can replace "vacapp" with your custom scheme name
+    scheme: "E.C-Immunization", // You can replace "vacapp" with your custom scheme name
     extra: {
       clerkPublishableKey: process.env.EXPO_CLERK_PUBLISHABLE_KEY,
       eas: {

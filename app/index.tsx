@@ -62,7 +62,7 @@ export default function StartPage() {
 						source={babyIcon}
 						style={{ width: 100, height: 100 }}
 					/>
-					<Text
+					{/* <Text
 						style={{
 							fontSize: 18,
 							color: "#456B72",
@@ -70,8 +70,21 @@ export default function StartPage() {
 						}}
 					>
 						Know More, Care Better!
+					</Text> */}
+					<Text
+						style={{
+							fontSize: 18,
+							color: "#456B72",
+							fontWeight: "bold",
+						}}
+					>
+						Easy Childhood Immunization App
 					</Text>
-					<ActivityIndicator className="mt-4" size="large" color="#456B72" />
+					<ActivityIndicator
+						className="mt-4"
+						size="large"
+						color="#456B72"
+					/>
 				</View>
 
 				<Image
