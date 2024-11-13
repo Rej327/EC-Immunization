@@ -5,6 +5,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { ThemedText } from "../ThemedText";
 import { Ionicons } from "@expo/vector-icons";
 import Logout from "@/app/LogOut";
+import { generatePDF } from "@/helper/downloadPdf";
 
 type CustomDrawerContentProps = {
 	navigation: any; // Adjust to match your type
@@ -15,6 +16,10 @@ const CustomDrawerContent: React.FC<CustomDrawerContentProps> = ({
 }) => {
 	const { user } = useUser(); // Get current user data
 	const adminUserId = "user_2mW7YxivRkryvJ3m0kEYqWDLRPb"; // Admin user ID
+
+	const downloadCard = () => {
+		generatePDF()
+	}
 
 	return (
 		<View style={styles.container}>
@@ -100,6 +105,19 @@ const CustomDrawerContent: React.FC<CustomDrawerContentProps> = ({
 							/>
 							<ThemedText type="default" style={styles.link}>
 								Profile
+							</ThemedText>
+						</TouchableOpacity>
+						<TouchableOpacity
+							style={styles.menuItem}
+							onPress={downloadCard}
+						>
+							<Ionicons
+								name="cloud-download-sharp"
+								size={20}
+								color="#456B72"
+							/>
+							<ThemedText type="default" style={styles.link}>
+								Download Immunization Card
 							</ThemedText>
 						</TouchableOpacity>
 					</>
