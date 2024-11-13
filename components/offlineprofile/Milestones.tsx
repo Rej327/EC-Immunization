@@ -23,6 +23,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { noData } from "@/assets";
 import { formatAge } from "@/helper/helper";
 import { Milestone, MilestoneData } from "@/types/types";
+import { getMilestonesDAta } from "@/middleware/GetFromLocalStorage";
 
 export default function Milestones() {
 	const [modalVisible, setModalVisible] = useState(false);
@@ -54,34 +55,27 @@ export default function Milestones() {
 		if (!babyId) return; // Ensure babyId is provided
 		setLoading(true); // Start loading spinner
 		try {
-			// Try to fetch from AsyncStorage first
-			const storedMilestones = await AsyncStorage.getItem(`milestones_${babyId}`);
-			if (storedMilestones) {
-				const parsedMilestones: MilestoneData[] = JSON.parse(storedMilestones);
-				setMilestones(parsedMilestones);
-				console.log("Loaded milestones from AsyncStorage:", parsedMilestones);
-				return; // Exit if data is found in storage
-			}
-
-			// Fetch from Firestore if not found in AsyncStorage
-			const milestonesRef = query(
-				collection(db, "milestones"),
-				where("babyId", "==", babyId)
+			const fetchedMilestones: Milestone[] = await getMilestonesDAta(
+				babyId
 			);
-			const querySnapshot = await getDocs(milestonesRef);
-			const fetchedMilestones: MilestoneData[] = [];
 
-			querySnapshot.docs.forEach((doc) => {
-				const milestoneData = doc.data();
-				if (milestoneData.milestone) {
-					fetchedMilestones.push(...milestoneData.milestone);
-				}
-			});
+			// Map fetched milestones to MilestoneData
+			const milestonesData: MilestoneData[] = fetchedMilestones.flatMap(
+				(milestone) =>
+					milestone.milestoneData.map((mData) => {
+						return {
+							ageInMonths: mData.ageInMonths,
+							vaccine: mData.vaccine,
+							expectedDate: mData.expectedDate, // Ensure this is a Date
+							received: mData.received,
+							description: mData.description || "", // Default if necessary
+							updatedAt: mData.updatedAt, // Make sure this is in the correct format
+						};
+					})
+			);
 
-			// Save fetched milestones to AsyncStorage for offline use
-			await AsyncStorage.setItem(`milestones_${babyId}`, JSON.stringify(fetchedMilestones));
-			setMilestones(fetchedMilestones);
-			console.log("Fetched milestones from Firestore:", fetchedMilestones);
+			setMilestones(milestonesData);
+			console.log("Fetched milestones:", milestonesData);
 		} catch (error) {
 			console.error("Error fetching milestones: ", error);
 		} finally {

@@ -88,11 +88,11 @@ const RootLayout = () => {
         <CheckLocalData />
         <ClearData />
       </View> */}
-			<View className="p-4 bg-[#790e0e]">
+			{/* <View className="p-4 bg-[#790e0e]">
 				<ThemedText type="default" className="text-white text-center text-2xl font-bold ">
 					TEST APPLICATION
 				</ThemedText>
-			</View>
+			</View> */}
 		</GestureHandlerRootView>
 	);
 };
