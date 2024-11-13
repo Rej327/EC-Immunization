@@ -6,6 +6,7 @@ import { ThemedText } from "../ThemedText";
 import { Ionicons } from "@expo/vector-icons";
 import Logout from "@/app/LogOut";
 import { generatePDF } from "@/helper/downloadPdf";
+import { Link } from "expo-router";
 
 type CustomDrawerContentProps = {
 	navigation: any; // Adjust to match your type
@@ -18,8 +19,8 @@ const CustomDrawerContent: React.FC<CustomDrawerContentProps> = ({
 	const adminUserId = "user_2mW7YxivRkryvJ3m0kEYqWDLRPb"; // Admin user ID
 
 	const downloadCard = () => {
-		generatePDF()
-	}
+		generatePDF();
+	};
 
 	return (
 		<View style={styles.container}>
@@ -69,7 +70,11 @@ const CustomDrawerContent: React.FC<CustomDrawerContentProps> = ({
 							style={styles.menuItem}
 							onPress={() => navigation.navigate("posts")}
 						>
-							<Ionicons name="add-circle" size={20} color="#456B72" />
+							<Ionicons
+								name="add-circle"
+								size={20}
+								color="#456B72"
+							/>
 							<ThemedText type="default" style={styles.link}>
 								Post Events
 							</ThemedText>
@@ -135,9 +140,18 @@ const CustomDrawerContent: React.FC<CustomDrawerContentProps> = ({
 							<ThemedText type="link" style={styles.footerLink}>
 								Version 1.0.0
 							</ThemedText>
-							<ThemedText type="link" style={styles.footerLink}>
-								check for update
-							</ThemedText>
+							<Link
+								href={
+									"https://drive.google.com/drive/folders/1F2v20pxSYV8LMZ9jGPhawYWSr00CRMwD?usp=sharing"
+								}
+							>
+								<ThemedText
+									type="link"
+									style={styles.footerLink}
+								>
+									check for update
+								</ThemedText>
+							</Link>
 						</View>
 					</View>
 				</View>
