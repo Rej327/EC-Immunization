@@ -60,7 +60,7 @@ export default function StartPage() {
 				>
 					<Image
 						source={babyIcon}
-						style={{ width: 100, height: 100 }}
+						style={{ width: 100, height: 100, marginBottom: 5 }}
 					/>
 					{/* <Text
 						style={{
@@ -78,7 +78,7 @@ export default function StartPage() {
 							fontWeight: "bold",
 						}}
 					>
-						Easy Childhood Immunization App
+						Early Childhood Immunization App
 					</Text>
 					<ActivityIndicator
 						className="mt-4"

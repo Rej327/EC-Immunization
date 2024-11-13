@@ -9,7 +9,7 @@ const DashboardLayout = () => {
 	const router = useRouter(); // Get the router
 
 	const handleBackPress = () => {
-		router.push("/online/(auth)/dashboard"); // Navigate to the Home screen
+		router.push("/online/(admin)/dashboard"); // Navigate to the Home screen
 	};
 
 	return (
@@ -19,6 +19,7 @@ const DashboardLayout = () => {
 					headerStyle: {
 						backgroundColor: "#87b2bd",
 					},
+					headerTintColor: "#456B72",
 					headerShown: true,
 					// headerTintColor: "#456B72", // Set header text color to white
 					// headerBackTitle: "Back",

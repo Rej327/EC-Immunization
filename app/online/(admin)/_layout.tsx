@@ -10,14 +10,7 @@ import { useNavigation } from "expo-router";
 import CustomDrawerContent from "@/components/drawer/CustomDrawerContent";
 
 const DrawerPage = () => {
-	const { isSignedIn } = useAuth();
-	const { user } = useUser(); // Get current user data
-
 	const navigation = useNavigation();
-
-	const openDrawer = () => {
-		navigation.dispatch(DrawerActions.openDrawer()); // Function to open the drawer
-	};
 
 	return (
 		<>
@@ -32,6 +25,7 @@ const DrawerPage = () => {
 					headerTitleStyle: {
 						color: "#456B72",
 						fontWeight: "bold",
+						marginLeft: -15,
 					},
 				}}
 				drawerContent={(props) => <CustomDrawerContent {...props} />}

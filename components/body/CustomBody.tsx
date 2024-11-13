@@ -90,7 +90,12 @@ const CustomBody: React.FC<CustomBodyProps> = ({
 				<TouchableOpacity onPress={handleBackPress}>
 					<View className="flex flex-row items-center gap-2">
 						<Ionicons name="arrow-back" size={24} color="#456B72" />
-						<ThemedText type="navigation">{title}</ThemedText>
+						<ThemedText
+							type="navigation"
+							className="text-[#456B72]"
+						>
+							{title}
+						</ThemedText>
 					</View>
 				</TouchableOpacity>
 				{url ? (

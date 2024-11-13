@@ -30,7 +30,7 @@ export default function Main() {
 				<View style={{ marginBottom: 10, alignItems: "center" }}>
 					<Image
 						source={babyIcon}
-						style={{ width: 100, height: 100 }}
+						style={{ width: 100, height: 100, marginBottom: 5 }}
 					/>
 					{/* <Text
 						style={{
@@ -41,14 +41,14 @@ export default function Main() {
 					>
 						Know More, Care Better!
 					</Text> */}
-						<Text
+					<Text
 						style={{
 							fontSize: 18,
 							color: "#456B72",
 							fontWeight: "bold",
 						}}
 					>
-						Easy Childhood Immunization App
+						Early Childhood Immunization App
 					</Text>
 				</View>
 				<Link href="/offline/(public)/login" asChild>

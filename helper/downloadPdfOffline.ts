@@ -160,7 +160,7 @@ export const generatePDF = async (): Promise<void> => {
         .immunization-table {
           width: 100%;
           border-collapse: collapse;
-          margin-top: 20px;
+          margin-top: 5px;
         }
 
         .immunization-table th {

@@ -19,6 +19,7 @@ const CategoryLayout = () => {
 					headerStyle: {
 						backgroundColor: "#87b2bd",
 					},
+					headerTintColor: "#456B72",
 					headerShown: false,
 					// headerTintColor: "#456B72", // Set header text color to white
 					// headerBackTitle: "Back",

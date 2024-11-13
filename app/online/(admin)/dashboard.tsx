@@ -290,7 +290,6 @@ export default function dashboard() {
 							value={message}
 							onChangeText={setMessage}
 							multiline
-							numberOfLines={4}
 							autoCapitalize="words"
 						/>
 						<StyledButton
@@ -409,20 +408,20 @@ const styles = StyleSheet.create({
 		marginBottom: 10,
 	},
 	input: {
-		height: 40,
 		borderColor: "#ccc",
 		borderWidth: 1,
 		marginBottom: 10,
 		paddingHorizontal: 10,
 		borderRadius: 10,
+		paddingVertical: 5,
 	},
 	textarea: {
-		height: 80,
 		borderColor: "#ccc",
 		borderWidth: 1,
 		marginBottom: 10,
 		paddingHorizontal: 10,
 		borderRadius: 10,
+		paddingVertical: 5,
 	},
 	loadingContainer: {
 		flex: 1,

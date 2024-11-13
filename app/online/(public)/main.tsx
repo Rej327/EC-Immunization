@@ -30,7 +30,7 @@ export default function Main() {
 				<View style={{ marginBottom: 10, alignItems: "center" }}>
 					<Image
 						source={babyIcon}
-						style={{ width: 100, height: 100 }}
+						style={{ width: 100, height: 100, marginBottom: 5 }}
 					/>
 					{/* <Text
 						style={{
@@ -48,7 +48,7 @@ export default function Main() {
 							fontWeight: "bold",
 						}}
 					>
-						Easy Childhood Immunization App
+						Early Childhood Immunization App
 					</Text>
 				</View>
 
