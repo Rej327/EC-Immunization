@@ -96,7 +96,7 @@ export const reminderOnlineDownload = async (
       .map(
         ([age, vaccines]) => `
             <div class="card">
-                <div class="header">${age === "0" ? "At Birth" : `${formatAge(Number(age))} month`}</div>
+                <div class="header">${age === "0" ? "At Birth" : `${formatAge(Number(age))}`}</div>
                 ${vaccines
           .map(
             (vaccine) => `
