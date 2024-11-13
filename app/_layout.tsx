@@ -61,7 +61,7 @@ const RootLayout = () => {
 			try {
 				const { isConnected } = await NetInfo.fetch();
 				setIsOffline(!isConnected);
-				router.replace(isConnected ? "/offline" : "/offline");
+				router.replace(isConnected ? "/online" : "/offline");
 			} catch (error) {
 				console.error("Error checking network status:", error);
 			}
@@ -73,7 +73,7 @@ const RootLayout = () => {
 		// Subscribe to network changes
 		const unsubscribe = NetInfo.addEventListener(({ isConnected }) => {
 			setIsOffline(!isConnected);
-			router.replace(isConnected ? "/offline" : "/offline");
+			router.replace(isConnected ? "/online" : "/offline");
 		});
 
 		// Cleanup listener on unmount
