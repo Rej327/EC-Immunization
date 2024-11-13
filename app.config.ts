@@ -3,7 +3,7 @@ import "dotenv/config"; // This will load the .env file
 export default {
   expo: {
     name: "E.C-Immunization",
-    slug: "E.C-Immunization",
+    slug: "ec-immunization",
     icon: "./assets/icon.png", // Add your icon path here
     android: {
       package: "com.yourname.ecimmune", // Replace this with your desired Android package name
@@ -25,7 +25,7 @@ export default {
     extra: {
       clerkPublishableKey: process.env.EXPO_CLERK_PUBLISHABLE_KEY,
       eas: {
-        projectId: "e2f7ecb5-e040-4dc6-921d-882adbc36bf6", // Add your EAS project ID here
+        projectId: "69bd25ef-65ad-4d27-943c-a89833638dcf", // Add your EAS project ID here
       },
     },
   },
