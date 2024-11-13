@@ -74,7 +74,7 @@ const Profile = () => {
 			<View className="px-4">
 				<ProfileInformation />
 				<MyBaby />
-				<Notification />
+				{/* <Notification /> */}
 				<Milestones />
 				{/* <Logout /> */}
 			</View>

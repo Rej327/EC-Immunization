@@ -84,10 +84,10 @@ const RootLayout = () => {
 		<GestureHandlerRootView style={{ flex: 1 }}>
 			<Slot />
 			<Toaster />
-			{/* <View className="flex flex-row justify-around">
+			<View className="flex flex-row justify-around">
         <CheckLocalData />
         <ClearData />
-      </View> */}
+      </View>
 			{/* <View className="p-4 bg-[#790e0e]">
 				<ThemedText type="default" className="text-white text-center font-bold ">
 					TEST APPLICATION
