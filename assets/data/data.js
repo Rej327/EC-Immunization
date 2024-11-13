@@ -285,3 +285,118 @@ export const barangays = [
 	"Tagbacan Silangan",
 	"Tuhian",
 ];
+
+export const vaccineSchedule = [
+	{
+		id: "bcg",
+		vaccine: "BCG",
+		ageInMonths: 0,
+		received: false,
+		description:
+			"Bacillus Calmette-Guérin (BCG) vaccine protects against tuberculosis (TB), particularly severe forms in children like TB meningitis.",
+	},
+	{
+		id: "hepa",
+		vaccine: "Hepatitis B",
+		ageInMonths: 0,
+		received: false,
+		description:
+			"Prevents Hepatitis B virus (HBV) infection, which can cause chronic liver disease and liver cancer.",
+	},
+	{
+		id: "penta",
+		vaccine: "Pentavalent Vaccine (DPT-HepB-HiB) (1st dose)",
+		ageInMonths: 1.5,
+		received: false,
+		description:
+			"Combines protection against 5 diseases: diphtheria (D), pertussis (P), tetanus (T), hepatitis B (HB), and Haemophilus influenzae type B (Hib).",
+	},
+	{
+		id: "penta",
+		vaccine: "Pentavalent Vaccine (DPT-HepB-HiB) (2nd dose)",
+		ageInMonths: 2.5,
+		received: false,
+		description:
+			"Combines protection against 5 diseases: diphtheria (D), pertussis (P), tetanus (T), hepatitis B (HB), and Haemophilus influenzae type B (Hib).",
+	},
+	{
+		id: "penta",
+		vaccine: "Pentavalent Vaccine (DPT-HepB-HiB) (3rd dose)",
+		ageInMonths: 3.5,
+		received: false,
+		description:
+			"Combines protection against 5 diseases: diphtheria (D), pertussis (P), tetanus (T), hepatitis B (HB), and Haemophilus influenzae type B (Hib).",
+	},
+	{
+		id: "oral",
+		vaccine: "Oral Polio Vaccine (1st dose)",
+		ageInMonths: 1.5,
+		received: false,
+		description:
+			"Oral Polio Vaccine (OPV) protects against poliovirus, which can lead to paralysis.",
+	},
+	{
+		id: "oral",
+		vaccine: "Oral Polio Vaccine (2nd dose)",
+		ageInMonths: 2.5,
+		received: false,
+		description:
+			"Oral Polio Vaccine (OPV) protects against poliovirus, which can lead to paralysis.",
+	},
+	{
+		id: "oral",
+		vaccine: "Oral Polio Vaccine (3rd dose)",
+		ageInMonths: 3.5,
+		received: false,
+		description:
+			"Oral Polio Vaccine (OPV) protects against poliovirus, which can lead to paralysis.",
+	},
+	{
+		id: "polio",
+		vaccine: "Inactivated Polio Vaccine (IPV)",
+		ageInMonths: 3.5,
+		received: false,
+		description:
+			"IPV is an injected polio vaccine that boosts immunity against poliovirus, complementing the oral vaccine.",
+	},
+	{
+		id: "pneumo",
+		vaccine: "Pneumococcal Conjugate Vaccine - 13 (PCV 13) (1st dose)",
+		ageInMonths: 1.5,
+		received: false,
+		description:
+			"First dose of PCV for complete protection against pneumococcal diseases.",
+	},
+	{
+		id: "pneumo",
+		vaccine: "Pneumococcal Conjugate Vaccine - 13 (PCV 13) (2nd dose)",
+		ageInMonths: 2.5,
+		received: false,
+		description:
+			"Second dose of PCV for complete protection against pneumococcal diseases.",
+	},
+	{
+		id: "pneumo",
+		vaccine: "Pneumococcal Conjugate Vaccine - 13 (PCV 13) (3rd dose)",
+		ageInMonths: 3.5,
+		received: false,
+		description:
+			"Third and last dose of PCV for complete protection against pneumococcal diseases.",
+	},
+	{
+		id: "measles",
+		vaccine: "Measles-Containing Vaccine (MCV) MR/MMR (1st dose)",
+		ageInMonths: 9,
+		received: false,
+		description:
+			"First dose of MR vaccine ensures long-lasting protection against measles and rubella.",
+	},
+	{
+		id: "measles",
+		vaccine: "Measles-Containing Vaccine (MCV) MR/MMR (2nd dose)",
+		ageInMonths: 12,
+		received: false,
+		description:
+			"Second and last dose of MR vaccine ensures long-lasting protection against measles and rubella.",
+	},
+];

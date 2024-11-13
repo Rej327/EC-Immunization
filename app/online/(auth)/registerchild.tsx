@@ -17,13 +17,13 @@ import StyledButton from "@/components/StyledButton";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import StepIndicator from "react-native-step-indicator";
 import { Picker } from "@react-native-picker/picker";
-import { barangays } from "@/assets/data/data";
+import { barangays, vaccineSchedule } from "@/assets/data/data";
 import { useRouter } from "expo-router";
 
 interface Card {
 	id: string;
 	vaccineName: string;
-	date: string[]; 
+	date: string[];
 	doses: string;
 	remarks: string[];
 }
@@ -41,7 +41,7 @@ interface Baby {
 	weight: string;
 	gender: string;
 	contact: string;
-	card: Card[]
+	card: Card[];
 }
 
 export default function RegisterChildren() {
@@ -134,7 +134,7 @@ export default function RegisterChildren() {
 				gender: newBaby.gender,
 				contact: newBaby.contact,
 				createdAt: new Date() as Date,
-				card: cards
+				card: cards,
 			});
 
 			console.log("Baby register to Firestore!");
@@ -161,121 +161,6 @@ export default function RegisterChildren() {
 
 	// Function to add vaccination milestones to Firestore
 	const addMilestoneToFirestore = async (babyId: string, newBaby: Baby) => {
-		const vaccineSchedule = [
-			{
-				id: "bcg",
-				vaccine: "BCG",
-				ageInMonths: 0,
-				received: false,
-				description:
-					"Bacillus Calmette-Guérin (BCG) vaccine protects against tuberculosis (TB), particularly severe forms in children like TB meningitis.",
-			},
-			{
-				id: "hepa",
-				vaccine: "Hepatitis B",
-				ageInMonths: 0,
-				received: false,
-				description:
-					"Prevents Hepatitis B virus (HBV) infection, which can cause chronic liver disease and liver cancer.",
-			},
-			{
-				id: "penta",
-				vaccine: "Pentavalent Vaccine (DPT-HepB-HiB) (1st dose)",
-				ageInMonths: 1.5,
-				received: false,
-				description:
-					"Combines protection against 5 diseases: diphtheria (D), pertussis (P), tetanus (T), hepatitis B (HB), and Haemophilus influenzae type B (Hib).",
-			},
-			{
-				id: "penta",
-				vaccine: "Pentavalent Vaccine (DPT-HepB-HiB) (2nd dose)",
-				ageInMonths: 2.5,
-				received: false,
-				description:
-					"Combines protection against 5 diseases: diphtheria (D), pertussis (P), tetanus (T), hepatitis B (HB), and Haemophilus influenzae type B (Hib).",
-			},
-			{
-				id: "penta",
-				vaccine: "Pentavalent Vaccine (DPT-HepB-HiB) (3rd dose)",
-				ageInMonths: 3.5,
-				received: false,
-				description:
-					"Combines protection against 5 diseases: diphtheria (D), pertussis (P), tetanus (T), hepatitis B (HB), and Haemophilus influenzae type B (Hib).",
-			},
-			{
-				id: "oral",
-				vaccine: "Oral Polio Vaccine (1st dose)",
-				ageInMonths: 1.5,
-				received: false,
-				description:
-					"Oral Polio Vaccine (OPV) protects against poliovirus, which can lead to paralysis.",
-			},
-			{
-				id: "oral",
-				vaccine: "Oral Polio Vaccine (2nd dose)",
-				ageInMonths: 2.5,
-				received: false,
-				description:
-					"Oral Polio Vaccine (OPV) protects against poliovirus, which can lead to paralysis.",
-			},
-			{
-				id: "oral",
-				vaccine: "Oral Polio Vaccine (3rd dose)",
-				ageInMonths: 3.5,
-				received: false,
-				description:
-					"Oral Polio Vaccine (OPV) protects against poliovirus, which can lead to paralysis.",
-			},
-			{
-				id: "polio",
-				vaccine: "Inactivated Polio Vaccine (IPV)",
-				ageInMonths: 3.5,
-				received: false,
-				description:
-					"IPV is an injected polio vaccine that boosts immunity against poliovirus, complementing the oral vaccine.",
-			},
-			{
-				id: "pneumo",
-				vaccine: "Pneumococcal Conjugate Vaccine - 13 (PCV 13) (1st dose)",
-				ageInMonths: 1.5,
-				received: false,
-				description:
-					"First dose of PCV for complete protection against pneumococcal diseases.",
-			},
-			{
-				id: "pneumo",
-				vaccine: "Pneumococcal Conjugate Vaccine - 13 (PCV 13) (2nd dose)",
-				ageInMonths: 2.5,
-				received: false,
-				description:
-					"Second dose of PCV for complete protection against pneumococcal diseases.",
-			},
-			{
-				id: "pneumo",
-				vaccine: "Pneumococcal Conjugate Vaccine - 13 (PCV 13) (3rd dose)",
-				ageInMonths: 3.5,
-				received: false,
-				description:
-					"Third and last dose of PCV for complete protection against pneumococcal diseases.",
-			},
-			{
-				id: "measles",
-				vaccine: "Measles-Containing Vaccine (MCV) MR/MMR (1st dose)",
-				ageInMonths: 9,
-				received: false,
-				description:
-					"First dose of MR vaccine ensures long-lasting protection against measles and rubella.",
-			},
-			{
-				id: "measles",
-				vaccine: "Measles-Containing Vaccine (MCV) MR/MMR (2nd dose)",
-				ageInMonths: 12,
-				received: false,
-				description:
-					"Second and last dose of MR vaccine ensures long-lasting protection against measles and rubella.",
-			},
-		];
-
 		const babyBirthday = new Date(newBaby.birthday);
 
 		// Calculate the expected date of each vaccination based on baby's birthday
@@ -322,11 +207,10 @@ export default function RegisterChildren() {
 		}
 	};
 
-
 	// Handle adding a baby (only to Firestore)
 	const handleAddBaby = async () => {
 		// Check if all fields are filled
-		if (!height || !weight || !birthday) {
+		if (!birthday) {
 			// Show an error toast if any field is empty
 			Toast.show({
 				type: "error",
@@ -347,24 +231,18 @@ export default function RegisterChildren() {
 			contact,
 			fatherName,
 			gender,
-			height,
+			height: height ? height : "00",
 			motherName,
-			weight,
+			weight: weight ? weight : "00",
 			birthPlace,
-			card: []
+			card: [],
 		}; // Use the Date object for birthday
 
 		try {
 			// Register Baby to Firestore
 			await addBabyToFirestore(newBaby);
 			resetForm();
-			setCurrentStep(0)
-			// Toast.show({
-			// 	type: "success",
-			// 	text1: "Success",
-			// 	text2: "Baby registered successfully!",
-			// 	position: "top",
-			// });
+			setCurrentStep(0);
 
 			// Navigate to success page only after successful Firestore operation
 			router.push("/online/(auth)/successpage");
@@ -416,20 +294,7 @@ export default function RegisterChildren() {
 
 		// Step 2 validation
 		if (currentStep === 2) {
-			if (!motherName || !fatherName) {
-				Toast.show({
-					type: "error",
-					text1: "Missing Information",
-					text2: "Please fill out all fields.",
-					position: "top",
-				});
-				return;
-			}
-		}
-
-		// Step 3 validation
-		if (currentStep === 3) {
-			if (!height || !weight || !contact) {
+			if (!motherName || !fatherName || !contact) {
 				Toast.show({
 					type: "error",
 					text1: "Missing Information",
@@ -547,7 +412,10 @@ export default function RegisterChildren() {
 						onPress={() => setShowDatePicker(true)}
 						style={styles.input}
 					>
-						<ThemedText type="default" className="my-1 text-[16px] font-semibold">
+						<ThemedText
+							type="default"
+							className="my-1 text-[16px] font-semibold"
+						>
 							{birthday
 								? birthday.toLocaleDateString("en-US")
 								: "Select Birthday"}
