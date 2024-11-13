@@ -5,6 +5,7 @@ import { healthTips } from "@/assets"; // Assuming healthTips is your JSON array
 import { Collapsible } from "@/components/Collapsible";
 import { ThemedText } from "@/components/ThemedText";
 import { healthTipsData } from "@/assets/data/data";
+import { healthPdfDownload } from "@/helper/healthPdfDownload";
 
 // Define a type for health tips data
 interface HealthTip {
@@ -33,14 +34,18 @@ export default function Health() {
 		fetchData();
 	}, []); // Empty dependency array to run effect only once
 
+	const handleDownloadPdf = () => {
+		healthPdfDownload(data, "HealthTips");
+};
+
 	return (
 		<CustomBody
 			backRoute="/offline/(auth)/home"
 			title="Health"
 			headerImage={healthTips}
 			headerImageStyle="absolute w-72 h-72 mx-auto left-[15%]"
-			fileName="Baby Health Tips.pdf"
-			url="https://drive.google.com/uc?export=download&id=1qBQb_IPfNDtu7SX8Q1yoF1YJLO96tlmD"
+			fileName=""
+			onDownloadFunction={handleDownloadPdf}
 		>
 			{loading ? ( // Conditional rendering based on loading state
 				<View className="flex -mt-10 items-center justify-center h-full">

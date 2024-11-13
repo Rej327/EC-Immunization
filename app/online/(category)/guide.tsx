@@ -18,6 +18,7 @@ import {
 } from "@/assets/data/data";
 import { Link } from "expo-router";
 import { FlatList } from "react-native-gesture-handler";
+import { guidePdfDownload } from "@/helper/guidePdfDownload";
 
 // Define a type for health tips data
 interface HealthTip {
@@ -88,14 +89,18 @@ export default function Guide() {
 		</View>
 	);
 
+	const handleDownloadPdf = () => {
+		guidePdfDownload(vaccinationGuide, "Baby_Vaccination_Guide");
+	};
+
 	return (
 		<CustomBody
 			backRoute="/online/(auth)/home"
 			title="Guide"
 			headerImage={guide}
 			headerImageStyle="absolute w-80 h-60 mx-auto left-[10%]"
-			fileName="Baby Vaccination Guide.pdf"
-			url="https://drive.google.com/uc?export=download&id=13MPmCqXxWlWIpp94IOD9iKt2P9emzghg"
+			fileName=""
+			onDownloadFunction={handleDownloadPdf}
 		>
 			{loading ? (
 				<View className="flex -mt-10 items-center justify-center h-full">
