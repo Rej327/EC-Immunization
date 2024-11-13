@@ -36,6 +36,7 @@ import {
 	getMilestonesDAta,
 } from "@/middleware/GetFromLocalStorage";
 import { Milestone, MilestoneData } from "@/types/types";
+import { reminderOfflineDownload } from "@/helper/reminderpdfOffline";
 
 // type MilestoneList = {
 // 	ageInMonths: number;
@@ -110,11 +111,6 @@ export default function Reminder() {
 					})
 			);
 
-			// console.log(
-			// 	"Dataaa",
-			// 	milestonesData.flatMap((data) => data.expectedDate)
-			// );
-
 			setMilestones(milestonesData);
 			console.log("Fetched milestones:", milestonesData);
 		} catch (error) {
@@ -123,89 +119,6 @@ export default function Reminder() {
 			setLoading(false); // Stop loading spinner
 		}
 	};
-
-	// const alertReminder = () => {
-	// 	if (milestones.length > 0) {
-	// 		const vaccinesDueToday: string[] = [];
-	// 		const vaccinesDueTomorrow: string[] = [];
-	// 		const vaccinesPastDue: string[] = []; // Array for overdue vaccines
-
-	// 		milestones.forEach((milestone) => {
-	// 			// Determine the expectedDate type and parse accordingly
-	// 			let expectedDate: Date;
-
-	// 			if (milestone.expectedDate instanceof Timestamp) {
-	// 				expectedDate = milestone.expectedDate.toDate(); // Convert Timestamp to Date
-	// 			} else if (typeof milestone.expectedDate === "string") {
-	// 				expectedDate = new Date(milestone.expectedDate); // Convert ISO string to Date
-	// 			} else {
-	// 				expectedDate = milestone.expectedDate; // It should already be a Date
-	// 			}
-
-	// 			// Check if the expectedDate is valid
-	// 			if (!isNaN(expectedDate.getTime()) && !milestone.received) {
-	// 				const today = new Date();
-	// 				const tomorrow = new Date(today);
-	// 				tomorrow.setDate(today.getDate() + 1);
-
-	// 				// Check if expectedDate is today, tomorrow, or overdue
-	// 				if (expectedDate.toDateString() === today.toDateString()) {
-	// 					vaccinesDueToday.push(milestone.vaccine);
-	// 				} else if (
-	// 					expectedDate.toDateString() === tomorrow.toDateString()
-	// 				) {
-	// 					vaccinesDueTomorrow.push(milestone.vaccine);
-	// 				} else if (expectedDate < today) {
-	// 					// Overdue check
-	// 					vaccinesPastDue.push(milestone.vaccine);
-	// 				}
-	// 			}
-	// 		});
-
-	// 		// Build the reminder message
-	// 		let message = "";
-
-	// 		// Add overdue vaccines
-	// 		if (vaccinesPastDue.length > 0) {
-	// 			message +=
-	// 				formatVaccineList(vaccinesPastDue, "overdue") + "\n\n";
-	// 		}
-
-	// 		// Add today's due vaccines
-	// 		if (vaccinesDueToday.length > 0) {
-	// 			message +=
-	// 				formatVaccineList(vaccinesDueToday, "due today") + "\n\n";
-	// 		}
-
-	// 		// Add tomorrow's due vaccines
-	// 		if (vaccinesDueTomorrow.length > 0) {
-	// 			message +=
-	// 				formatVaccineList(vaccinesDueTomorrow, "due tomorrow") +
-	// 				"\n\n";
-	// 		}
-
-	// 		// Set the reminder message if there's any due
-	// 		if (message.trim()) {
-	// 			setReminderMessage(message.trim());
-	// 			setShowModal(true); // Show the modal
-	// 		}
-	// 	}
-	// };
-
-	// useEffect(() => {
-	// 	const fetchDataAndAlert = async () => {
-	// 		if (milestones.length > 0) {
-	// 			// Wait for some time or any asynchronous operation if necessary
-	// 			await new Promise((resolve) => setTimeout(resolve, 1000)); // Wait for 1 second
-
-	// 			alertReminder();
-	// 		}
-	// 	};
-
-	// 	fetchDataAndAlert(); // Call the async function
-
-	// 	// Optional: cleanup if needed, or any dependencies you want to track
-	// }, [milestones]);
 
 	useEffect(() => {
 		fetchBabyId();
@@ -230,119 +143,10 @@ export default function Reminder() {
 		}, {} as Record<number, MilestoneData[]>)
 	).sort(([ageA], [ageB]) => Number(ageA) - Number(ageB));
 
-	// Generate PDF
-	// const generatePDF = async (): Promise<void> => {
-	// 	const htmlContent = `
-	//     <html>
-	//     <head>
-	//         <style>
-	//             body {
-	//                 font-family: Arial, sans-serif;
-	//                 margin: 20px;
-	//                 padding: 10px;
-	//             }
-	//             h1 {
-	//                 text-align: center;
-	//                 margin-bottom: 10px;
-	//             }
-	//             h3 {
-	//                 margin-bottom: 20px;
-	//             }
-	//             .card {
-	//                 border: 1px solid #d6d6d6;
-	//                 padding: 15px;
-	//                 margin-bottom: 10px;
-	//                 border-radius: 5px;
-	//             }
-	//             .header {
-	//                 font-size: 18px;
-	//                 font-weight: bold;
-	//                 margin-bottom: 10px;
-	//             }
-	//             .bold {
-	//                 font-weight: bold;
-	//             }
-	//             .vaccineData {
-	//                 margin-bottom: 25px;
-	//             }
-	//             .vaccineData .list {
-	//                 line-height: .7;
-	//             }
-	//         </style>
-	//     </head>
-	//     <body>
-	//         <h1>Baby Vaccination Reminders</h1>
-	// 				<h3>Name: ${babyDetails?.firstName} ${babyDetails?.lastName}</h3>
 
-	//         ${Object.entries(groupedMilestones)
-	// 			.map(
-	// 				([age, vaccines]) => `
-	//               <div class="card">
-	//                   <div class="header">${
-	// 					age === "0" ? "At Birth" : `${age} month's`
-	// 				}</div>
-	//                   ${vaccines
-	// 					.map(
-	// 						(vaccine) => `
-	//                       <div class="vaccineData">
-	//                           <p class="list"><span class="bold">Vaccine:</span> ${
-	// 							vaccine.vaccine
-	// 						}</p>
-	//                           <p class="list"><span class="bold">Expected Date:</span> ${formatDate(
-	// 							vaccine.expectedDate
-	// 						)}</p>
-	//                           <p class="list"><span class="bold">Received:</span> ${
-	// 							vaccine.received ? "✅" : "❌"
-	// 						}</p>
-	//                       </div>
-	//                       `
-	// 					)
-	// 					.join("")}
-	//               </div>
-	//               `
-	// 			)
-	// 			.join("")}
-	//     </body>
-	//     </html>
-	//   `;
-
-	// 	// Create PDF
-	// 	const { uri } = await Print.printToFileAsync({ html: htmlContent });
-	// 	console.log("PDF generated at:", uri);
-
-	// 	// Share PDF
-	// 	await Sharing.shareAsync(uri);
-	// };
-
-	const ReminderModal = () => (
-		<Modal
-			animationType="fade"
-			transparent={true}
-			visible={showModal}
-			onRequestClose={() => setShowModal(false)}
-		>
-			<View style={styles.modalOverlay}>
-				<View style={styles.modalContent}>
-					<View className="mx-auto mb-2">
-						<Ionicons
-							name="calendar-outline"
-							size={40}
-							color={"#456B72"}
-						/>
-					</View>
-					<ThemedText type="cardHeader" style={styles.modalText}>
-						{reminderMessage}
-					</ThemedText>
-					<TouchableOpacity
-						style={styles.okButton}
-						onPress={() => setShowModal(false)}
-					>
-						<ThemedText style={styles.okButtonText}>OK</ThemedText>
-					</TouchableOpacity>
-				</View>
-			</View>
-		</Modal>
-	);
+	const handleDownloadPdf = () => {
+		reminderOfflineDownload(babyDetails ?? undefined, groupedMilestones);
+	};
 
 	return (
 		<CustomBody
@@ -351,7 +155,7 @@ export default function Reminder() {
 			headerImage={reminder}
 			headerImageStyle="absolute w-64 left-[14%] h-64 mx-auto"
 			fileName=""
-			// onDownloadFunction={generatePDF}
+			onDownloadFunction={handleDownloadPdf}
 		>
 			{/* {showModal && <ReminderModal />} */}
 
