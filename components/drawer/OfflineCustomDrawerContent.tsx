@@ -8,6 +8,7 @@ import Logout from "@/app/LogOut";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import OfflineProfileAvatar from "@/app/OfflineProfileAvatar";
 import OfflineLogout from "@/app/OfflineLogout";
+import { generatePDF } from "@/helper/downloadPdfOffline";
 
 type CustomDrawerContentProps = {
 	navigation: any; // Adjust to match your type
@@ -16,6 +17,9 @@ type CustomDrawerContentProps = {
 const OfflineCustomDrawerContent: React.FC<CustomDrawerContentProps> = ({
 	navigation,
 }) => {
+	const downloadCard = () => {
+		generatePDF();
+	};
 	return (
 		<View style={styles.container}>
 			<LinearGradient
@@ -43,6 +47,21 @@ const OfflineCustomDrawerContent: React.FC<CustomDrawerContentProps> = ({
 					<Ionicons name="person-sharp" size={20} color="#456B72" />
 					<ThemedText type="default" style={styles.link}>
 						Profile
+					</ThemedText>
+				</TouchableOpacity>
+
+				{/* Download Item */}
+				<TouchableOpacity
+					style={styles.menuItem}
+					onPress={downloadCard}
+				>
+					<Ionicons
+						name="cloud-download-sharp"
+						size={20}
+						color="#456B72"
+					/>
+					<ThemedText type="default" style={styles.link}>
+						Download Immunization Card
 					</ThemedText>
 				</TouchableOpacity>
 
@@ -112,7 +131,7 @@ const styles = StyleSheet.create({
 		paddingVertical: 12,
 	},
 	activeMenuItem: {
-		backgroundColor: "#d0e3e3", 
+		backgroundColor: "#d0e3e3",
 		borderRadius: 4,
 	},
 	footer: {

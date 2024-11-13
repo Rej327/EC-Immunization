@@ -45,14 +45,30 @@ export interface AppointmentsByStatus {
 	upcoming: Appointment[];
 	history: Appointment[];
 }
+export interface Card {
+	id: string;
+	vaccineName: string,
+	date: string[];
+	doses: string;
+	remarks: string[];
+}
 
 export interface Baby {
-	id: string;
 	parentId: string;
+	id: string;
 	firstName: string;
 	lastName: string;
-	birthday: Date;
-	createdAt: Date;
+	gender: string;
+	birthday: Date; // Update to Timestamp
+	birthPlace: string;
+	height: string;
+	weight: string;
+	motherName: string;
+	fatherName: string;
+	contact: string;
+	address: string;
+	addressInfo: string;
+	card: Card[];
 }
 
 export interface Notification {
@@ -73,6 +89,6 @@ export interface Feed {
 	subject: string;
 	description: string;
 	date: Date | null;
-	offlineCreatedAt: string
+	offlineCreatedAt: string;
 	createdAt: Date;
 }

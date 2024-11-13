@@ -3,6 +3,7 @@ import { formatNotificationDate } from "@/helper/helper";
 import {
 	Appointment,
 	Baby,
+	Card,
 	Feed,
 	Milestone,
 	MilestoneData,
@@ -122,19 +123,41 @@ export const saveForOffline = async (userId: any) => {
 			where("parentId", "==", userId)
 		);
 		const babiesSnapshot = await getDocs(babiesRef);
+
 		const babies = babiesSnapshot.docs.map((doc) => {
 			const data = doc.data();
 
+			// Ensure card is an array of Card objects
+			const card: Card[] = (data.card || []).map((cardData: any) => ({
+				id: cardData.id,
+				vaccineName: cardData.vaccineName,
+				date: cardData.date || [], // Default to empty array if date is not available
+				doses: cardData.doses, // Default to empty string if doses is not available
+				remarks: cardData.remarks || [], // Default to empty array if remarks is not available
+			}));
+
+			// Return the formatted baby object
 			return {
 				id: doc.id,
 				parentId: data.parentId,
 				firstName: data.firstName,
 				lastName: data.lastName,
-				birthday: data.birthday.toDate(),
-				createdAt: data.createdAt.toDate(),
+				birthday: data.birthday?.toDate(), // Ensure date is valid
+				birthPlace: data.birthplace,
+				address: data.address,
+				addressInfo: data.addresInfo,
+				contact: data.contact,
+				fatherName: data.fatherName,
+				gender: data.gender,
+				height: data.height,
+				motherName: data.motherName,
+				weight: data.weight,
+				createdAt: data.createdAt?.toDate(), // Ensure date is valid
+				card, // Return the formatted card
 			} as Baby;
 		});
 
+		// Store babies in AsyncStorage
 		await AsyncStorage.setItem("babies", JSON.stringify(babies));
 
 		// 5 Fetch notifications based on userId

@@ -4,10 +4,11 @@ import * as Sharing from "expo-sharing";
 import { todoLigtasLogo } from "./todoLigtasBase64";
 import { dohLogo } from "./dohBase64";
 import { f1Logo } from "./f1LogoBase64";
-import { getFirestore, doc, getDoc, Timestamp } from "firebase/firestore"; // Import Firestore methods
-import { db } from "@/db/firebaseConfig";
 import { formatDate } from "./helper";
+import { Card } from "@/types/types";
+import { getBabiesData } from "@/middleware/GetFromLocalStorage";
 
+// Function to generate the immunization PDF
 export const generatePDF = async (): Promise<void> => {
 	try {
 		// Step 1: Retrieve the selected baby ID from local storage
@@ -17,17 +18,20 @@ export const generatePDF = async (): Promise<void> => {
 			return;
 		}
 
-		// Step 2: Fetch baby data based on selectedBabyId from Firestore
-		const babyData = await fetchBabyData(selectedBabyId);
-		if (!babyData) {
+		// Step 2: Fetch babies data from local storage
+		const babiesData = await getBabiesData();
+		const selectedBaby = babiesData.find(
+			(baby) => baby.id === selectedBabyId
+		);
+		if (!selectedBaby) {
 			console.log("No baby data found for the selected ID.");
 			return;
 		}
 
 		// Step 3: Map the baby data to populate the immunization card
-		const immunizationRows = babyData.card
+		const immunizationRows = selectedBaby.card
 			.map(
-				(vaccine: { vaccineName: any; doses: any; date: any[], remarks: any[] }) => `
+				(vaccine: Card) => `
       <tr>
         <td>${vaccine.vaccineName}</td>
         <td>${vaccine.doses}</td>
@@ -228,38 +232,44 @@ export const generatePDF = async (): Promise<void> => {
 
             <div class="rightInfoContainer">
               <div class="leftInfo">
-                <p>NAME: <span class="info-text">${babyData.firstName} ${
-			babyData.lastName
+                <p>NAME: <span class="info-text">${selectedBaby.firstName} ${
+			selectedBaby.lastName
 		}</span></p>
-                <p>SEX: <span class="info-text">${babyData.gender}</span></p>
-          <p>DATE OF BIRTH: <span class="info-text">${formatDate(
-				babyData.birthday
-			)}</span></p>
-
-
-
+                <p>SEX: <span class="info-text">${
+					selectedBaby.gender
+				}</span></p>
+                <p>DATE OF BIRTH: <span class="info-text">${new Date(
+					selectedBaby.birthday
+				).toLocaleDateString("en-US", {
+					month: "long",
+					day: "2-digit",
+					year: "numeric",
+				})}
+        
+        	
+        </span></p>
                 <p>PLACE OF BIRTH: <span class="info-text">${
-					babyData.birthPlace
+					selectedBaby.birthPlace
 				}</span></p>
                 <p>ADDRESS: <span class="info-text">${
-					babyData.address
+					selectedBaby.address
 				}</span></p>
               </div>
               <div class="rightInfo">
                 <p>MOTHER'S NAME: <span class="info-text">${
-					babyData.motherName
+					selectedBaby.motherName
 				}</span></p>
                 <p>FATHER'S NAME: <span class="info-text">${
-					babyData.fatherName
+					selectedBaby.fatherName
 				}</span></p>
                 <p>BIRTH HEIGHT: <span class="info-text">${
-					babyData.height
+					selectedBaby.height
 				}</span></p>
                 <p>BIRTH WEIGHT: <span class="info-text">${
-					babyData.weight
+					selectedBaby.weight
 				}</span></p>
                 <p>CONTACT: <span class="info-text">${
-					babyData.contact
+					selectedBaby.contact
 				}</span></p>
               </div>
             </div>
@@ -291,18 +301,5 @@ export const generatePDF = async (): Promise<void> => {
 		await Sharing.shareAsync(uri);
 	} catch (error) {
 		console.error("Error generating PDF:", error);
-	}
-};
-
-// Function to fetch baby data from Firestore
-const fetchBabyData = async (id: string) => {
-	const babyRef = doc(db, "babies", id); // Adjust 'babies' to your actual collection name
-	const babySnap = await getDoc(babyRef);
-
-	if (babySnap.exists()) {
-		return babySnap.data(); // Returns the baby data object
-	} else {
-		console.error("No such document!");
-		return null;
 	}
 };
