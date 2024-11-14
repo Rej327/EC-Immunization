@@ -1,16 +1,25 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Stack } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { TouchableOpacity } from "react-native";
 import { useRouter } from "expo-router"; // Import useRouter for navigation
 import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { useAuth } from "@clerk/clerk-expo";
 
 const CategoryLayout = () => {
-	const router = useRouter(); // Get the router
+	const { isSignedIn } = useAuth();
+	const router = useRouter();
 
 	const handleBackPress = () => {
 		router.push("/online/(auth)/home"); // Navigate to the Home screen
 	};
+
+	useEffect(() => {
+		if (!isSignedIn) {
+			// Redirect to the sign-in page if the user is not signed in
+			router.replace("/online/(public)/login");
+		}
+	}, [isSignedIn]);
 
 	return (
 		<GestureHandlerRootView style={{ flex: 1 }}>

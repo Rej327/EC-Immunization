@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { View, FlatList, StyleSheet, Image } from "react-native";
+import { View, FlatList, StyleSheet, Image, ActivityIndicator } from "react-native";
 import { db } from "@/db/firebaseConfig";
 import { collection, query, onSnapshot } from "firebase/firestore";
 import { ThemedText } from "@/components/ThemedText";
@@ -18,30 +18,49 @@ type Post = {
 
 export default function EventsShort() {
 	const [posts, setPosts] = useState<Post[]>([]);
+	const [loading, setLoading] = useState(false);
 
 	useEffect(() => {
 		const fetchPosts = () => {
-			const q = query(collection(db, "feeds"));
-			const unsubscribe = onSnapshot(q, (snapshot) => {
-				const postData = snapshot.docs.map((doc) => ({
-					id: doc.id,
-					...doc.data(),
-					date: doc.data().date?.toDate(),
-					createdAt: doc.data().createdAt.toDate(),
-				})) as Post[];
+			setLoading(true); // Set loading to true at the start of the fetch
 
-				// Sort by createdAt in descending order
-				const sortedPosts = postData.sort(
-					(a, b) => b.createdAt.getTime() - a.createdAt.getTime()
+			try {
+				const q = query(collection(db, "feeds"));
+				const unsubscribe = onSnapshot(
+					q,
+					(snapshot) => {
+						const postData = snapshot.docs.map((doc) => ({
+							id: doc.id,
+							...doc.data(),
+							date: doc.data().date?.toDate(),
+							createdAt: doc.data().createdAt.toDate(),
+						})) as Post[];
+
+						// Sort by createdAt in descending order
+						const sortedPosts = postData.sort(
+							(a, b) =>
+								b.createdAt.getTime() - a.createdAt.getTime()
+						);
+						setPosts(sortedPosts);
+					},
+					(error) => {
+						console.error("Error fetching posts:", error); // Handle the error
+					}
 				);
-				setPosts(sortedPosts);
-			});
-			return unsubscribe;
+				return unsubscribe;
+			} catch (error) {
+				console.error("Error setting up snapshot listener:", error);
+			} finally {
+				setLoading(false); // Set loading to false once the function completes
+			}
 		};
 
-		fetchPosts();
-	}, []);
+		const unsubscribe = fetchPosts();
 
+		return () => {
+			if (unsubscribe) unsubscribe(); // Cleanup on component unmount
+		};
+	}, []);
 	const formatCreatedAt = (date: Date) => {
 		if (!date) return "Unknown Date"; // Fallback if date is not valid
 		const now = new Date();
@@ -108,15 +127,29 @@ export default function EventsShort() {
 
 	return (
 		<View>
-			{posts.length > 0 ? (
-				<>{posts.slice(0, 3).map((item) => renderItem(item))}</>
-			) : (
-				<View style={styles.emptyContainer}>
-					<Image source={noData} className="w-16 h-20 mb-2" />
-					<ThemedText type="default" style={styles.emptyText}>
-						No Data Available
-					</ThemedText>
+			{loading ? (
+				<View
+					style={{
+						flex: 1,
+						justifyContent: "center",
+						alignItems: "center",
+					}}
+				>
+					<ActivityIndicator size="large" color="#456B72" className="mt-4" />
 				</View>
+			) : (
+				<>
+					{posts.length > 0 ? (
+						<>{posts.slice(0, 3).map((item) => renderItem(item))}</>
+					) : (
+						<View style={styles.emptyContainer}>
+							<Image source={noData} className="w-16 h-20 mb-2" />
+							<ThemedText type="default" style={styles.emptyText}>
+								No Data Available
+							</ThemedText>
+						</View>
+					)}
+				</>
 			)}
 		</View>
 	);

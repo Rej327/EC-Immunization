@@ -6,11 +6,21 @@ import { StatusBar } from "expo-status-bar";
 import { HomeRightHeader } from "@/components/HomeRightHeader";
 import Logout from "@/app/LogOut";
 import { DrawerActions } from "@react-navigation/native";
-import { useNavigation } from "expo-router";
+import { useNavigation, useRouter } from "expo-router";
 import CustomDrawerContent from "@/components/drawer/CustomDrawerContent";
+import { useEffect } from "react";
 
 const DrawerPage = () => {
 	const navigation = useNavigation();
+	const { isSignedIn } = useAuth();
+	const router = useRouter();
+
+	useEffect(() => {
+		if (!isSignedIn) {
+			// Redirect to the sign-in page if the user is not signed in
+			router.replace("/online/(public)/login");
+		}
+	}, [isSignedIn]);
 
 	return (
 		<>
@@ -35,18 +45,21 @@ const DrawerPage = () => {
 					options={{
 						headerTitle: "Dashboard",
 					}}
+					redirect={!isSignedIn}
 				/>
 				<Drawer.Screen
 					name="events"
 					options={{
 						headerTitle: "Events",
 					}}
+					redirect={!isSignedIn}
 				/>
 				<Drawer.Screen
 					name="posts"
 					options={{
 						headerTitle: "Posts",
 					}}
+					redirect={!isSignedIn}
 				/>
 			</Drawer>
 		</>
