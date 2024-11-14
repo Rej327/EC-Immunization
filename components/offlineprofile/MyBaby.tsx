@@ -13,6 +13,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { noData } from "@/assets";
 import { useRouter } from "expo-router";
 import Toast from "react-native-toast-message";
+import { getBabiesData } from "@/middleware/GetFromLocalStorage";
 
 // Define the Baby interface if not already defined
 interface Baby {
@@ -26,18 +27,6 @@ const MyBaby = () => {
 	const [babies, setBabies] = useState<Baby[]>([]);
 	const [selectedBaby, setSelectedBaby] = useState<Baby | null>(null);
 	const [showDropdown, setShowDropdown] = useState(false);
-	const router = useRouter();
-
-	// Fetch babies from AsyncStorage
-	const getBabiesData = async (): Promise<Baby[]> => {
-		try {
-			const babiesData = await AsyncStorage.getItem("babies");
-			return babiesData ? JSON.parse(babiesData) : [];
-		} catch (error) {
-			console.error("Error fetching babies from AsyncStorage: ", error);
-			return [];
-		}
-	};
 
 	// Load babies from AsyncStorage when the component mounts
 	useEffect(() => {

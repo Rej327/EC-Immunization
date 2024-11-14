@@ -75,7 +75,7 @@ export default function Milestones() {
 			);
 
 			setMilestones(milestonesData);
-			console.log("Fetched milestones:", milestonesData);
+	
 		} catch (error) {
 			console.error("Error fetching milestones: ", error);
 		} finally {

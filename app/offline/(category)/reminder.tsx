@@ -112,7 +112,7 @@ export default function Reminder() {
 			);
 
 			setMilestones(milestonesData);
-			console.log("Fetched milestones:", milestonesData);
+	
 		} catch (error) {
 			console.error("Error fetching milestones: ", error);
 		} finally {

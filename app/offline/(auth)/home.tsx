@@ -61,12 +61,6 @@ const Home = () => {
 	const [showModal, setShowModal] = useState(false); // Modal visibility state
 	const [reminderMessage, setReminderMessage] = useState<string | null>(null); // Store reminder message
 
-	// const onRefresh = async () => {
-	// 	setRefreshing(true);
-
-	// 	setRefreshing(false);
-	// };
-
 	const route = useRouter();
 
 	const checkOrFetchBabies = async () => {
@@ -107,16 +101,8 @@ const Home = () => {
 
 	const fetchBabies = async () => {
 		try {
-			const babiesData = await AsyncStorage.getItem("babies");
-
-			// Parse the stored data, if present
-			if (babiesData) {
-				const babyList: Baby[] = JSON.parse(babiesData);
-				setBabies(babyList);
-				return babyList;
-			}
-
-			return [];
+			const babiesData = await getBabiesData();
+			setBabies(babiesData);
 		} catch (error) {
 			console.error("Error fetching babies from AsyncStorage:", error);
 			return [];
@@ -221,25 +207,20 @@ const Home = () => {
 		}
 	};
 
-	// useEffect(() =>{
-	// 	fetchMilestones(selectedBabyId)
-	// },[selectedBabyId])
-
-	// useEffect(() => {
-	// 	const fetchDataAndAlert = async () => {
-	// 		if (milestones.length > 0) {
-	// 			// Wait for some time or any asynchronous operation if necessary
-	// 			// await new Promise((resolve) => setTimeout(resolve, 1000)); // Wait for 1 second
-	// 			alertReminder();
-	// 		}
-	// 	};
-
-	// 	fetchDataAndAlert(); // Call the async function
-
-	// 	// Optional: cleanup if needed, or any dependencies you want to track
-	// }, [milestones]);
+	useEffect(() => {
+		fetchMilestones(selectedBabyId);
+	}, [selectedBabyId]);
 
 	useEffect(() => {
+		const fetchDataAndAlert = async () => {
+			if (milestones.length > 0) {
+				// Wait for some time or any asynchronous operation if necessary
+				await new Promise((resolve) => setTimeout(resolve, 1000)); // Wait for 1 second
+				alertReminder();
+			}
+		};
+
+		fetchDataAndAlert();
 		checkOrFetchBabies();
 	}, []);
 
@@ -260,17 +241,6 @@ const Home = () => {
 
 	const openBottomSheetHandler = (type: string) => {
 		setOpenBottomSheet(type);
-	};
-
-	const getViewAllStyle = (index: number, totalItems: number) => {
-		return {
-			backgroundColor: "white",
-			padding: 16,
-			borderBottomWidth: index === totalItems - 1 ? 0 : 1, // No border for the last item
-			borderTopWidth: index === 0 ? 1 : 0, // Border for the first item
-			borderColor: "#d6d6d6",
-			marginBottom: 8,
-		};
 	};
 
 	const ReminderModal = () => (
