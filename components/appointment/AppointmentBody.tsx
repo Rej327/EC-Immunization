@@ -94,6 +94,7 @@ const AppointmentBody = () => {
 		pending: [],
 		history: [],
 	});
+	const [formLoad, setFormLoad] = useState(false);
 
 	const handleDateChange = (event: any, selectedDate?: Date) => {
 		const currentDate = selectedDate || appointmentDate;
@@ -140,7 +141,7 @@ const AppointmentBody = () => {
 
 	// Fetch milestones for selected baby
 	const fetchMilestones = useCallback(async (babyId: string) => {
-		setComponentLoad(true); // Start loading spinner
+		setFormLoad(true); // Start loading spinner
 		try {
 			const milestonesCollection = collection(db, "milestones");
 			const q = query(
@@ -203,7 +204,7 @@ const AppointmentBody = () => {
 				position: "top",
 			});
 		} finally {
-			setComponentLoad(false); // Stop loading spinner
+			setFormLoad(false); // Stop loading spinner
 		}
 	}, []);
 
@@ -216,78 +217,77 @@ const AppointmentBody = () => {
 
 	// Handle setting appointment
 	const handleSetAppointment = async () => {
-    if (selectedBaby && appointmentDate && vaccineName && vaccineId) {
-        const appointmentData: AppointmentData = {
-            parentId: user?.id || "",
-            parentName: user?.firstName + " " + user?.lastName,
-            babyFirstName: selectedBaby.firstName,
-            babyLastName: selectedBaby.lastName,
-            babyId: selectedBaby.id,
-            vaccine: vaccineName,
-            vaccineId: vaccineId,
-            scheduleDate: appointmentDate,
-            status: "pending",
-            createdAt: new Date(),
-            updatedAt: new Date(),
-        };
+		if (selectedBaby && appointmentDate && vaccineName && vaccineId) {
+			const appointmentData: AppointmentData = {
+				parentId: user?.id || "",
+				parentName: user?.firstName + " " + user?.lastName,
+				babyFirstName: selectedBaby.firstName,
+				babyLastName: selectedBaby.lastName,
+				babyId: selectedBaby.id,
+				vaccine: vaccineName,
+				vaccineId: vaccineId,
+				scheduleDate: appointmentDate,
+				status: "pending",
+				createdAt: new Date(),
+				updatedAt: new Date(),
+			};
 
-        try {
-            // Check for existing appointments
-            const q = query(
-                collection(db, "appointments"),
-                where("babyId", "==", selectedBaby.id),
-                where("vaccine", "==", vaccineName),
-            );
+			try {
+				// Check for existing appointments
+				const q = query(
+					collection(db, "appointments"),
+					where("babyId", "==", selectedBaby.id),
+					where("vaccine", "==", vaccineName)
+				);
 
-            const querySnapshot = await getDocs(q);
+				const querySnapshot = await getDocs(q);
 
-            if (!querySnapshot.empty) {
-                // An appointment with the same babyId, vaccineId, and scheduleDate already exists
-                Toast.show({
-                    type: "error",
-                    text1: "Duplicate Appointment",
-                    text2: "An appointment with the same details already exists.",
-                    position: "top",
-                });
-                return;
-            }
+				if (!querySnapshot.empty) {
+					// An appointment with the same babyId, vaccineId, and scheduleDate already exists
+					Toast.show({
+						type: "error",
+						text1: "Duplicate Appointment",
+						text2: "An appointment with the same details already exists.",
+						position: "top",
+					});
+					return;
+				}
 
-            // If no duplicate is found, add the new appointment
-            await addDoc(collection(db, "appointments"), appointmentData);
-            Toast.show({
-                type: "success",
-                text1: "Appointment Set",
-                text2: `Vaccine ${vaccineName} scheduled for ${appointmentDate}.`,
-                position: "top",
-            });
-        } catch (error) {
-            console.error("Error setting appointment:", error);
-            Toast.show({
-                type: "error",
-                text1: "Error",
-                text2: "Failed to set appointment.",
-                position: "top",
-            });
-        }
-    } else {
-        Toast.show({
-            type: "error",
-            text1: "Missing Information",
-            text2: "Please fill in all fields.",
-            position: "top",
-        });
-        console.warn("Please fill in all fields.");
-    }
+				// If no duplicate is found, add the new appointment
+				await addDoc(collection(db, "appointments"), appointmentData);
+				Toast.show({
+					type: "success",
+					text1: "Appointment Set",
+					text2: `Vaccine ${vaccineName} scheduled for ${appointmentDate}.`,
+					position: "top",
+				});
+			} catch (error) {
+				console.error("Error setting appointment:", error);
+				Toast.show({
+					type: "error",
+					text1: "Error",
+					text2: "Failed to set appointment.",
+					position: "top",
+				});
+			}
+		} else {
+			Toast.show({
+				type: "error",
+				text1: "Missing Information",
+				text2: "Please fill in all fields.",
+				position: "top",
+			});
+			console.warn("Please fill in all fields.");
+		}
 
-    // Reset state
-    setVaccineName("");
-    setSelectedBaby(null);
-    setAppointmentDate(undefined);
-    setSelectedMilestoneIndex(null);
-    setMilestones([]);
-    fetchAppointments();
-};
-
+		// Reset state
+		setVaccineName("");
+		setSelectedBaby(null);
+		setAppointmentDate(undefined);
+		setSelectedMilestoneIndex(null);
+		setMilestones([]);
+		fetchAppointments();
+	};
 
 	const closeBottomSheetHandler = useCallback(() => {
 		setOpenBottomSheet(null);
@@ -391,7 +391,7 @@ const AppointmentBody = () => {
 	}, [fetchBabies]);
 
 	const handleDeleteAppointment = async (appointmentId: string) => {
-		setComponentLoad(true);
+		// setComponentLoad(true);
 		try {
 			await deleteDoc(doc(db, "appointments", appointmentId)); // Delete the appointment document
 			Toast.show({
@@ -411,7 +411,7 @@ const AppointmentBody = () => {
 			});
 		} finally {
 			fetchAppointments();
-			setComponentLoad(false);
+			// setComponentLoad(false);
 		}
 	};
 
@@ -503,7 +503,7 @@ const AppointmentBody = () => {
 								source={noData}
 								className="w-12 mx-auto h-16 mb-2 opacity-40"
 							/>
-							<ThemedText type="default" className="text-center">
+							<ThemedText type="default" style={styles.emptyText}>
 								No pending schedule
 							</ThemedText>
 						</View>
@@ -545,7 +545,7 @@ const AppointmentBody = () => {
 								source={noData}
 								className="w-12 mx-auto h-16 mb-2 opacity-40"
 							/>
-							<ThemedText type="default" className="text-center">
+							<ThemedText type="default" style={styles.emptyText}>
 								No upcoming schedule
 							</ThemedText>
 						</View>
@@ -624,9 +624,15 @@ const AppointmentBody = () => {
 				title="Pending Appointments"
 			>
 				{appointments.pending.length === 0 ? (
-					<ThemedText type="default" className="text-center">
-						No pending schedule
-					</ThemedText>
+					<View>
+						<Image
+							source={noData}
+							className="w-12 mx-auto mt-2 h-16 mb-2 opacity-40"
+						/>
+						<ThemedText type="default" style={styles.emptyText}>
+							No pending schedule
+						</ThemedText>
+					</View>
 				) : (
 					appointments.pending.map((appointment, index) => (
 						<View
@@ -673,9 +679,15 @@ const AppointmentBody = () => {
 				title="Upcoming Appointments"
 			>
 				{appointments.upcoming.length === 0 ? (
-					<ThemedText type="default" className="text-center">
-						No upcoming schedule
-					</ThemedText>
+				<View>
+				<Image
+					source={noData}
+					className="w-12 mx-auto mt-2 h-16 mb-2 opacity-40"
+				/>
+				<ThemedText type="default" style={styles.emptyText}>
+					No upcoming schedule
+				</ThemedText>
+			</View>
 				) : (
 					appointments.upcoming.map((appointment, index) => (
 						<View
@@ -708,9 +720,15 @@ const AppointmentBody = () => {
 				title="History"
 			>
 				{appointments.history.length === 0 ? (
-					<ThemedText type="default" className="text-center">
-						No history
-					</ThemedText>
+			<View>
+			<Image
+				source={noData}
+				className="w-12 mx-auto mt-2 h-16 mb-2 opacity-40"
+			/>
+			<ThemedText type="default" style={styles.emptyText}>
+				No history
+			</ThemedText>
+		</View>
 				) : (
 					appointments.history.map((appointment, index) => (
 						<View
@@ -745,138 +763,173 @@ const AppointmentBody = () => {
 				onCloseSubmit={handleSetAppointment}
 			>
 				{/* Select Baby Dropdown */}
-				<ThemedText type="default" className="font-bold">
-					Your Children
-				</ThemedText>
-				<TouchableOpacity
-					onPress={() => setShowDropdown(!showDropdown)}
-					style={styles.input}
-				>
-					<View style={styles.dropdownHeader}>
-						<ThemedText type="default" style={styles.dropdownText}>
-							{selectedBaby
-								? `${selectedBaby.firstName} ${selectedBaby.lastName}`
-								: "None"}
-						</ThemedText>
-						<Ionicons
-							name={showDropdown ? "chevron-up" : "chevron-down"}
-							size={20}
-							color="#456B72"
-						/>
+				{formLoad ? (
+					<View
+						style={{
+							flex: 1,
+							justifyContent: "center",
+							alignItems: "center",
+							marginVertical: 30,
+						}}
+					>
+						<ActivityIndicator size="small" color="#456B72" />
 					</View>
-				</TouchableOpacity>
-				{/* Dropdown List of Babies */}
-				{showDropdown && (
-					<View style={styles.dropdown}>
-						{babies.length > 0 ? (
-							babies.map((baby, index) => (
-								<TouchableOpacity
-									key={baby.id}
-									onPress={() => handleSelectBaby(baby)}
-									style={[
-										styles.dropdownItem,
-										index === babies.length - 1 &&
-											styles.dropdownLastItem, // Correct condition for last item
-									]}
+				) : (
+					<>
+						<ThemedText type="default" className="font-bold">
+							Your Children
+						</ThemedText>
+						<TouchableOpacity
+							onPress={() => setShowDropdown(!showDropdown)}
+							style={styles.input}
+						>
+							<View style={styles.dropdownHeader}>
+								<ThemedText
+									type="default"
+									style={styles.dropdownText}
 								>
-									<ThemedText type="default">
-										{baby.firstName} {baby.lastName}
+									{selectedBaby
+										? `${selectedBaby.firstName} ${selectedBaby.lastName}`
+										: "None"}
+								</ThemedText>
+								<Ionicons
+									name={
+										showDropdown
+											? "chevron-up"
+											: "chevron-down"
+									}
+									size={20}
+									color="#456B72"
+								/>
+							</View>
+						</TouchableOpacity>
+						{/* Dropdown List of Babies */}
+						{showDropdown && (
+							<View style={styles.dropdown}>
+								{babies.length > 0 ? (
+									babies.map((baby, index) => (
+										<TouchableOpacity
+											key={baby.id}
+											onPress={() =>
+												handleSelectBaby(baby)
+											}
+											style={[
+												styles.dropdownItem,
+												index === babies.length - 1 &&
+													styles.dropdownLastItem, // Correct condition for last item
+											]}
+										>
+											<ThemedText type="default">
+												{baby.firstName} {baby.lastName}
+											</ThemedText>
+											<ThemedText type="default">
+												{baby.birthday.toLocaleDateString(
+													"en-US"
+												)}
+											</ThemedText>
+										</TouchableOpacity>
+									))
+								) : (
+									<ThemedText
+										type="default"
+										style={styles.noBabiesText}
+									>
+										No babies found. Please register your
+										children first.
 									</ThemedText>
-									<ThemedText type="default">
-										{baby.birthday.toLocaleDateString(
+								)}
+							</View>
+						)}
+
+						{/* Appointment Date Input */}
+						{/* Update the TouchableOpacity for appointment date selection */}
+						<ThemedText type="default" className="font-bold mt-2">
+							Select Date
+						</ThemedText>
+						<TouchableOpacity
+							onPress={() => setShowDatePicker(true)} // Show date picker on press
+							style={styles.input}
+						>
+							<ThemedText type="default">
+								{appointmentDate
+									? appointmentDate.toLocaleDateString(
 											"en-US"
-										)}
-									</ThemedText>
+									  ) // Format the date to a readable string
+									: "Pick Date"}
+								{/* Placeholder text when no date is selected */}
+							</ThemedText>
+						</TouchableOpacity>
+						{/* Use the DateTimePicker component */}
+						{showDatePicker && (
+							<DateTimePicker
+								value={
+									appointmentDate
+										? appointmentDate
+										: new Date()
+								} // Set the default date to the current date if no date is selected
+								mode="date"
+								display="default"
+								onChange={handleDateChange} // Update the state with the selected date
+							/>
+						)}
+						{/* Vaccine Selection */}
+						<ThemedText type="default" style={styles.sectionHeader}>
+							Select Vaccine
+						</ThemedText>
+						{milestones.length > 0 ? (
+							milestones.map((milestone, index) => (
+								<TouchableOpacity
+									key={index}
+									style={[
+										styles.milestoneItem,
+										milestone.received &&
+											styles.disabledMilestone,
+										selectedMilestoneIndex === index &&
+											styles.selectedMilestone, // Apply selected style
+									]}
+									disabled={milestone.received}
+									onPress={() => {
+										setVaccineName(milestone.vaccine);
+										setVaccineId(milestone.vaccineId);
+										setSelectedMilestoneIndex(index); // Set the selected milestone index
+									}}
+								>
+									<View style={styles.milestoneInfo}>
+										<ThemedText type="default">
+											{milestone.vaccine}
+										</ThemedText>
+										<ThemedText
+											type="default"
+											style={styles.expectedDate}
+										>
+											Expected: {milestone.expectedDate}
+										</ThemedText>
+									</View>
+									{selectedMilestoneIndex === index ? ( // Check if this milestone is selected
+										<Ionicons
+											name="checkmark-circle"
+											size={20}
+											color="#456B72"
+										/>
+									) : (
+										<Ionicons
+											name="ellipse-outline"
+											size={20}
+											color="#aaaaaa"
+										/>
+									)}
 								</TouchableOpacity>
 							))
 						) : (
 							<ThemedText
 								type="default"
-								style={styles.noBabiesText}
+								style={styles.noMilestonesText}
 							>
-								No babies found. Please register your children
-								first.
+								No available vaccines. Select your children
+								first
 							</ThemedText>
 						)}
-					</View>
-				)}
-
-				{/* Appointment Date Input */}
-				{/* Update the TouchableOpacity for appointment date selection */}
-				<ThemedText type="default" className="font-bold mt-2">
-					Select Date
-				</ThemedText>
-				<TouchableOpacity
-					onPress={() => setShowDatePicker(true)} // Show date picker on press
-					style={styles.input}
-				>
-					<ThemedText type="default">
-						{appointmentDate
-							? appointmentDate.toLocaleDateString("en-US") // Format the date to a readable string
-							: "Pick Date"}
-						{/* Placeholder text when no date is selected */}
-					</ThemedText>
-				</TouchableOpacity>
-				{/* Use the DateTimePicker component */}
-				{showDatePicker && (
-					<DateTimePicker
-						value={appointmentDate ? appointmentDate : new Date()} // Set the default date to the current date if no date is selected
-						mode="date"
-						display="default"
-						onChange={handleDateChange} // Update the state with the selected date
-					/>
-				)}
-				{/* Vaccine Selection */}
-				<ThemedText type="default" style={styles.sectionHeader}>
-					Select Vaccine
-				</ThemedText>
-				{milestones.length > 0 ? (
-					milestones.map((milestone, index) => (
-						<TouchableOpacity
-							key={index}
-							style={[
-								styles.milestoneItem,
-								milestone.received && styles.disabledMilestone,
-								selectedMilestoneIndex === index &&
-									styles.selectedMilestone, // Apply selected style
-							]}
-							disabled={milestone.received}
-							onPress={() => {
-								setVaccineName(milestone.vaccine);
-								setVaccineId(milestone.vaccineId);
-								setSelectedMilestoneIndex(index); // Set the selected milestone index
-							}}
-						>
-							<View style={styles.milestoneInfo}>
-								<ThemedText type="default">
-									{milestone.vaccine}
-								</ThemedText>
-								<ThemedText
-									type="default"
-									style={styles.expectedDate}
-								>
-									Expected: {milestone.expectedDate}
-								</ThemedText>
-							</View>
-							{selectedMilestoneIndex === index ? ( // Check if this milestone is selected
-								<Ionicons
-									name="checkmark-circle"
-									size={20}
-									color="#456B72"
-								/>
-							) : (
-								<Ionicons
-									name="ellipse-outline"
-									size={20}
-									color="#aaaaaa"
-								/>
-							)}
-						</TouchableOpacity>
-					))
-				) : (
-					<ThemedText type="default" style={styles.noMilestonesText}>
-						No available vaccines. Select your children first
-					</ThemedText>
+					</>
 				)}
 			</CustomBottomSheet>
 
@@ -1091,5 +1144,10 @@ const styles = StyleSheet.create({
 		padding: 10,
 		borderRadius: 5,
 		alignItems: "center",
+	},
+	emptyText: {
+		color: "#888",
+		fontSize: 13,
+		textAlign: 'center'
 	},
 });

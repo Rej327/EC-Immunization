@@ -9,6 +9,7 @@ import {
 	TouchableOpacity,
 	Modal,
 	Pressable,
+	ActivityIndicator,
 } from "react-native";
 import React, { useCallback, useEffect, useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -88,11 +89,13 @@ const Home = () => {
 	const [milestones, setMilestones] = useState<MilestoneList[]>([]);
 	const [showModal, setShowModal] = useState(false);
 	const [reminderMessage, setReminderMessage] = useState<string | null>(null);
+	const [loading, setLoading] = useState(false);
 
 	const { user } = useUser();
 	const route = useRouter();
 
 	const checkOrFetchBabies = async () => {
+		setLoading(true);
 		try {
 			const storedBabyId = await AsyncStorage.getItem("selectedBabyId");
 			console.log("Stored Baby ID:", storedBabyId);
@@ -124,10 +127,13 @@ const Home = () => {
 			}
 		} catch (error) {
 			console.error("Error fetching or setting baby data:", error);
+		} finally {
+			setLoading(false);
 		}
 	};
 
 	const fetchMilestones = async (babyId: any) => {
+		setLoading(true);
 		const milestonesRef = query(
 			collection(db, "milestones"),
 			where("babyId", "==", babyId)
@@ -145,9 +151,10 @@ const Home = () => {
 			});
 
 			setMilestones(fetchedMilestones);
-			console.log("Alert triggered");
 		} catch (error) {
 			console.error("Error fetching milestones: ", error);
+		} finally {
+			setLoading(false);
 		}
 	};
 
@@ -241,22 +248,13 @@ const Home = () => {
 		}
 	};
 
-	// UNCOMMENT THIS BEFORE DEPLOY
-	useEffect(() => {
-		const fetchDataAndAlert = async () => {
-			if (milestones.length > 0) {
-				await new Promise((resolve) => setTimeout(resolve, 1000)); // Wait for 1 second
-				alertReminder();
-			}
-		};
-
-		checkOrFetchBabies();
-		fetchDataAndAlert();
-	}, []);
-
-	useEffect(() => {
-		fetchMilestones(selectedBabyId);
-	}, [selectedBabyId]);
+	const fetchDataAndAlert = async () => {
+		if (milestones.length > 0) {
+			await new Promise((resolve) => setTimeout(resolve, 1000)); // Wait for 1 second
+			alertReminder();
+			console.log("Alert triggered");
+		}
+	};
 
 	const fetchBabies = async (): Promise<BabyData[]> => {
 		if (user?.id) {
@@ -301,15 +299,27 @@ const Home = () => {
 	};
 
 	useEffect(() => {
+		fetchDataAndAlert();
+		checkOrFetchBabies();
+	}, []);
+
+	useEffect(() => {
+		fetchMilestones(selectedBabyId);
+		setLoading(false);
+	}, [selectedBabyId]);
+
+	useEffect(() => {
 		fetchData();
 		saveUserToParents();
 	}, [user]);
 
 	const onRefresh = async () => {
-		setRefreshing(true);
-		// clearLocalStorage();
-		fetchData();
-		setRefreshing(false);
+		setLoading(true);
+		await fetchDataAndAlert();
+		await checkOrFetchBabies();
+		await fetchMilestones(selectedBabyId);
+		await fetchData();
+		setLoading(false);
 	};
 
 	const handleBabySelection = async (babyId: string) => {
@@ -329,17 +339,6 @@ const Home = () => {
 	const handleRouteRegister = () => {
 		route.navigate("/online/(auth)/registerchild");
 		setShowBabySelectionModal(false);
-	};
-
-	const getViewAllStyle = (index: number, totalItems: number) => {
-		return {
-			backgroundColor: "white",
-			padding: 16,
-			borderBottomWidth: index === totalItems - 1 ? 0 : 1, // No border for the last item
-			borderTopWidth: index === 0 ? 1 : 0, // Border for the first item
-			borderColor: "#d6d6d6",
-			marginBottom: 8,
-		};
 	};
 
 	const ReminderModal = () => (
@@ -371,6 +370,20 @@ const Home = () => {
 			</View>
 		</Modal>
 	);
+
+	if (loading) {
+		return (
+			<View
+				style={{
+					flex: 1,
+					justifyContent: "center",
+					alignItems: "center",
+				}}
+			>
+				<ActivityIndicator size="large" color="#456B72" />
+			</View>
+		);
+	}
 
 	return (
 		<View style={{ flex: 1, backgroundColor: "#f5f4f7" }}>
