@@ -1,6 +1,6 @@
 import { Tabs, useNavigation } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import { View, Image, Pressable } from "react-native";
+import { View, Image, Pressable, ActivityIndicator } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useEffect, useState } from "react";
 import { babyIcon } from "@/assets";
@@ -38,7 +38,17 @@ const TabsPage = () => {
 
 	// Show a loading indicator or return null if isActive is still null
 	if (isActive === null) {
-		return null; // or replace with a loading indicator component
+		return (
+			<View
+				style={{
+					flex: 1,
+					justifyContent: "center",
+					alignItems: "center",
+				}}
+			>
+				<ActivityIndicator size="large" color="#456B72" />
+			</View>
+		); // or replace with a loading indicator component
 	}
 
 	return (

@@ -8,6 +8,7 @@ import {
 	StyleSheet,
 	TouchableOpacity,
 	Modal,
+	ActivityIndicator,
 } from "react-native";
 import React, { useCallback, useEffect, useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -60,6 +61,7 @@ const Home = () => {
 	const [milestones, setMilestones] = useState<MilestoneData[]>([]);
 	const [showModal, setShowModal] = useState(false); // Modal visibility state
 	const [reminderMessage, setReminderMessage] = useState<string | null>(null); // Store reminder message
+	const [loading, setLoading] = useState(false);
 
 	const route = useRouter();
 
@@ -133,7 +135,6 @@ const Home = () => {
 			);
 
 			setMilestones(milestonesData);
-			console.log("Alert Triggered");
 		} catch (error) {
 			console.error("Error fetching milestones: ", error);
 		}
@@ -217,6 +218,7 @@ const Home = () => {
 				// Wait for some time or any asynchronous operation if necessary
 				await new Promise((resolve) => setTimeout(resolve, 1000)); // Wait for 1 second
 				alertReminder();
+				console.log("Alert Triggered");
 			}
 		};
 
