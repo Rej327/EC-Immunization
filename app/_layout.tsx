@@ -18,9 +18,9 @@ const RootLayout = () => {
 	const segments = useSegments();
 
 	useEffect(() => {
-		const currentPath = '/' + segments.join('/');
+		const currentPath = "/" + segments.join("/");
 		console.log("Current Path:", currentPath); // Logs the current path like `/online/(auth)/home`
-}, [segments]);
+	}, [segments]);
 
 	// Load fonts and manage splash screen
 	// useEffect(() => {
@@ -45,7 +45,7 @@ const RootLayout = () => {
 	// }, []);
 
 	// Check network status
-	
+
 	useEffect(() => {
 		const loadFonts = async () => {
 			await SplashScreen.preventAutoHideAsync();
@@ -70,7 +70,7 @@ const RootLayout = () => {
 			try {
 				const { isConnected } = await NetInfo.fetch();
 				setIsOffline(!isConnected);
-				router.replace(isConnected ? "/offline" : "/offline");
+				router.replace(isConnected ? "/online" : "/offline");
 			} catch (error) {
 				console.error("Error checking network status:", error);
 			}
@@ -82,7 +82,7 @@ const RootLayout = () => {
 		// Subscribe to network changes
 		const unsubscribe = NetInfo.addEventListener(({ isConnected }) => {
 			setIsOffline(!isConnected);
-			router.replace(isConnected ? "/offline" : "/offline");
+			router.replace(isConnected ? "/online" : "/offline");
 		});
 
 		// Cleanup listener on unmount
