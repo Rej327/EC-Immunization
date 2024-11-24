@@ -84,8 +84,9 @@ export default function ScheduleByStatus() {
 				collection(db, "appointments"),
 				where("status", "==", scheduleByStats) // Query based on the status
 			);
-
+	
 			const querySnapshot = await getDocs(appointmentsQuery);
+	
 			const fetchedAppointments: AppointmentData[] =
 				querySnapshot.docs.map((doc) => ({
 					id: doc.id, // Store the document ID for updating
@@ -93,15 +94,21 @@ export default function ScheduleByStatus() {
 					scheduleDate: doc.data().scheduleDate.toDate(), // Convert Firestore timestamp to JS Date
 					updatedAt: doc.data().updatedAt.toDate(), // Convert updatedAt to JS Date
 				})) as AppointmentData[];
-
-			setAppointments(fetchedAppointments);
-			setFilteredAppointments(fetchedAppointments); // Set filteredAppointments initially
+	
+			// Sort by updatedAt in descending order
+			const sortedAppointments = fetchedAppointments.sort(
+				(a, b) => b.updatedAt.getTime() - a.updatedAt.getTime()
+			);
+	
+			setAppointments(sortedAppointments);
+			setFilteredAppointments(sortedAppointments); // Set filteredAppointments initially
 		} catch (error) {
 			console.error("Error fetching appointments:", error);
 		} finally {
 			setLoading(false);
 		}
 	};
+	
 
 	useEffect(() => {
 		fetchAppointments();
