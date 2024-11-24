@@ -301,7 +301,7 @@ const Home = () => {
 	useEffect(() => {
 		fetchDataAndAlert();
 		checkOrFetchBabies();
-	}, []);
+	}, [milestones]);
 
 	useEffect(() => {
 		fetchMilestones(selectedBabyId);

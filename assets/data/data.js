@@ -410,12 +410,11 @@ export const termsAndConditions = [
 	{
 		title: "App Purpose",
 		content:
-			"The Early Childhood Immunization App is designed to assist parents in managing their children's vaccination schedules, appointments, health reminders, and milestones.",
+			"The Early Childhood Immunization App is designed to assist parents in managing their children's vaccination schedules, appointments, health tips, guide, and milestones.",
 	},
 	{
 		title: "User Responsibilities",
-		content: `
-You agree to:
+		content: `You agree to:
 1. Provide accurate and truthful information when registering and using the app.
 2. Keep your account credentials confidential and secure.
 3. Use the app only for personal, non-commercial purposes.
@@ -423,14 +422,13 @@ You agree to:
 	},
 	{
 		title: "Data Collection and Privacy",
-		content: `
-1. Your data is securely stored in Firebase.
-2. We do not share personal information without your consent, except as required by law.`,
+		content: `1. Your data is securely stored in Firebase and Clerk.
+2. We do not share personal information without your consent, except as required by law.
+3. For detailed privacy practices, refer to our Privacy Policy.`,
 	},
 	{
 		title: "Limitations of Liability",
-		content: `
-1. The app provides general vaccination schedules based on public health guidelines but does not guarantee accuracy.
+		content: `1. The app provides general vaccination schedules based on public health guidelines but does not guarantee accuracy.
 2. We are not liable for missed vaccinations or decisions based on app information.`,
 	},
 	{
@@ -451,11 +449,60 @@ You agree to:
 	{
 		title: "Third-Party Services",
 		content:
-			"The app may integrate third-party services (e.g., Firebase) for functionality. We are not responsible for issues arising from these services.",
+			"The app may integrate third-party services (e.g., Firebase and Clerk) for functionality. We are not responsible for issues arising from these services.",
 	},
 	{
 		title: "Contact Information",
 		content:
-			"For questions or concerns regarding these terms, please contact our support team through the app or email us at support@ecimmunation.com.",
+			"For questions or concerns regarding these terms, please contact our support team through the app or email us at immuneec@gmail.com.",
+	},
+];
+
+
+export const privacyAndPolicy = [
+	{
+		title: "Information We Collect",
+		content:
+			"We collect personal information such as your name, email, and child-related data to provide and improve our services.",
+	},
+	{
+		title: "How We Use Your Information",
+		content:
+			"We use your data to manage vaccination schedules, send reminders, and enhance your app experience.",
+	},
+	{
+		title: "How We Protect Your Information",
+		content:
+			"We implement encryption and secure authentication to safeguard your data.",
+	},
+	{
+		title: "Sharing Your Information",
+		content:
+			"We do not sell your data. We may share data with trusted service providers or to comply with legal requirements.",
+	},
+	{
+		title: "Data Retention",
+		content:
+			"We retain your data as long as your account is active. You can request deletion at any time.",
+	},
+	{
+		title: "Your Rights",
+		content:
+			"You can access, correct, or delete your data and withdraw consent for its use.",
+	},
+	{
+		title: "Children’s Privacy",
+		content:
+			"This app is for parents or guardians. We do not knowingly collect children’s data without consent.",
+	},
+	{
+		title: "Changes to This Privacy Policy",
+		content:
+			"We may update this policy periodically. Updates will be notified within the app.",
+	},
+	{
+		title: "Contact Us",
+		content:
+			"For questions, contact us at immuneec@gmail.com or call +123456789.",
 	},
 ];

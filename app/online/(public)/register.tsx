@@ -21,6 +21,7 @@ import Toast from "react-native-toast-message";
 import CustomInputPassword from "@/components/CustomInputPassword";
 import { Checkbox } from "react-native-paper"; // Import Checkbox
 import TermsAndConditionsModal from "@/app/TermsAndConditionsModal ";
+import PrivacyPolicyModal from "@/app/PrivacyPolicyModal";
 
 const Register = () => {
 	const { isLoaded, signUp, setActive } = useSignUp();
@@ -36,8 +37,7 @@ const Register = () => {
 	const [isTermsChecked, setIsTermsChecked] = useState(false);
 	const [isInfoChecked, setIsInfoChecked] = useState(false);
 	const [isModalVisible, setIsModalVisible] = useState(false);
-
-	const openTermsModal = () => setIsModalVisible(true);
+	const [isPrivacyModalVisible, setIsPrivacyModalVisible] = useState(false);
 
 	// Create the user and send the verification email
 	const sanitizeUsername = (username: string) => {
@@ -48,7 +48,7 @@ const Register = () => {
 	};
 
 	const onSignUpPress = async () => {
-		if (!isLoaded || !isTermsChecked || !isInfoChecked) {
+		if (!isLoaded || !isTermsChecked || isInfoChecked) {
 			Toast.show({
 				type: "error",
 				text1: "Error",
@@ -186,6 +186,11 @@ const Register = () => {
 							visible={isModalVisible}
 							onClose={() => setIsModalVisible(false)}
 						/>
+						<PrivacyPolicyModal
+							visible={isPrivacyModalVisible}
+							onClose={() => setIsPrivacyModalVisible(false)}
+						/>
+
 						<View style={styles.checkboxContainer}>
 							<Checkbox
 								status={
@@ -197,28 +202,31 @@ const Register = () => {
 									setIsTermsChecked(!isTermsChecked)
 								}
 							/>
+							<ThemedText type="default" style={styles.termsSize}>
+								I agree to the{" "}
+							</ThemedText>
+							<Pressable onPress={() => setIsModalVisible(true)}>
+								<ThemedText
+									type="link"
+									style={styles.termsSize}
+								>
+									Terms of Service{" "}
+								</ThemedText>
+							</Pressable>
+							<ThemedText type="default" style={styles.termsSize}>
+								and{" "}
+							</ThemedText>
 							<Pressable
-								onPress={() => setIsModalVisible(true)}
+								onPress={() => setIsPrivacyModalVisible(true)}
 							>
-								<ThemedText type="link">
-									I agree to the Terms and Conditions
+								<ThemedText
+									type="link"
+									style={styles.termsSize}
+								>
+									Privacy Policy
 								</ThemedText>
 							</Pressable>
 						</View>
-
-						{/* Information Checkbox */}
-						{/* <View style={styles.checkboxContainer}>
-							<Checkbox
-								status={isInfoChecked ? "checked" : "unchecked"}
-								onPress={() =>
-									setIsInfoChecked(!isInfoChecked)
-								}
-							/>
-							<ThemedText>
-								The information I provided is true
-							</ThemedText>
-						</View> */}
-
 						<StyledButton
 							onPress={onSignUpPress}
 							title="Sign up"
@@ -291,12 +299,16 @@ const styles = StyleSheet.create({
 	checkboxContainer: {
 		flexDirection: "row",
 		alignItems: "center",
-		marginTop: -10,
+		marginTop: -25,
+		marginBottom: 5,
 	},
 	modalContainer: {
 		flex: 1,
 		padding: 20,
 		backgroundColor: "#fff",
+	},
+	termsSize: {
+		fontSize: 12,
 	},
 });
 

@@ -1,13 +1,7 @@
 import { termsAndConditions } from "@/assets/data/data";
+import { ThemedText } from "@/components/ThemedText";
 import React from "react";
-import {
-	Modal,
-	View,
-	Text,
-	Button,
-	StyleSheet,
-	ScrollView,
-} from "react-native";
+import { Modal, View, Button, StyleSheet, ScrollView } from "react-native";
 
 const TermsAndConditionsModal = ({
 	visible,
@@ -18,27 +12,26 @@ const TermsAndConditionsModal = ({
 }) => {
 	return (
 		<Modal
-			animationType="slide"
+			animationType="fade"
 			transparent={true}
 			visible={visible}
 			onRequestClose={onClose}
 		>
 			<View style={styles.modalOverlay}>
 				<View style={styles.modalContainer}>
+					<ThemedText style={styles.modalTitle}>
+						Terms of Service
+					</ThemedText>
 					<ScrollView>
-						<Text style={styles.modalTitle}>
-							Terms and Conditions
-						</Text>
-
 						{/* Render Terms and Conditions dynamically */}
 						{termsAndConditions.map((item, index) => (
 							<View key={index} style={styles.section}>
-								<Text style={styles.sectionTitle}>
+								<ThemedText style={styles.sectionTitle}>
 									{item.title}
-								</Text>
-								<Text style={styles.sectionContent}>
+								</ThemedText>
+								<ThemedText style={styles.sectionContent}>
 									{item.content}
-								</Text>
+								</ThemedText>
 							</View>
 						))}
 						<Button
@@ -68,7 +61,7 @@ const styles = StyleSheet.create({
 		borderRadius: 10,
 	},
 	modalTitle: {
-		fontSize: 24,
+		fontSize: 18,
 		fontWeight: "bold",
 		marginBottom: 20,
 		textAlign: "center",
@@ -78,10 +71,10 @@ const styles = StyleSheet.create({
 	},
 	sectionTitle: {
 		fontWeight: "bold",
-		fontSize: 18,
+		fontSize: 16,
 	},
 	sectionContent: {
-		fontSize: 16,
+		fontSize: 14,
 		marginBottom: 5,
 	},
 });

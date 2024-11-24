@@ -224,7 +224,7 @@ const Home = () => {
 
 		fetchDataAndAlert();
 		checkOrFetchBabies();
-	}, []);
+	}, [milestones]);
 
 	const handleBabySelection = async (babyId: string) => {
 		setSelectedBabyId(babyId);
