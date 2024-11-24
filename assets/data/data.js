@@ -454,7 +454,7 @@ export const termsAndConditions = [
 	{
 		title: "Contact Information",
 		content:
-			"For questions or concerns regarding these terms, please contact our support team through the app or email us at immuneec@gmail.com.",
+			"For questions or concerns regarding these terms, please contact us at immuneec@gmail.com or call (+63)-920-382-9102.",
 	},
 ];
 
@@ -503,6 +503,6 @@ export const privacyAndPolicy = [
 	{
 		title: "Contact Us",
 		content:
-			"For questions, contact us at immuneec@gmail.com or call +123456789.",
+			"For questions, contact us at immuneec@gmail.com or call (+63)-920-382-9102.",
 	},
 ];

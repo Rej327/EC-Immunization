@@ -10,6 +10,8 @@ import OfflineProfileAvatar from "@/app/OfflineProfileAvatar";
 import OfflineLogout from "@/app/OfflineLogout";
 import { generatePDF } from "@/helper/downloadPdfOffline";
 import { Link } from "expo-router";
+import TermsAndConditionsModal from "@/app/TermsAndConditionsModal ";
+import PrivacyPolicyModal from "@/app/PrivacyPolicyModal";
 
 type CustomDrawerContentProps = {
 	navigation: any; // Adjust to match your type
@@ -18,11 +20,22 @@ type CustomDrawerContentProps = {
 const OfflineCustomDrawerContent: React.FC<CustomDrawerContentProps> = ({
 	navigation,
 }) => {
+	const [isModalVisible, setIsModalVisible] = useState(false);
+	const [isPrivacyModalVisible, setIsPrivacyModalVisible] = useState(false);
+
 	const downloadCard = () => {
 		generatePDF();
 	};
 	return (
 		<View style={styles.container}>
+			<TermsAndConditionsModal
+				visible={isModalVisible}
+				onClose={() => setIsModalVisible(false)}
+			/>
+			<PrivacyPolicyModal
+				visible={isPrivacyModalVisible}
+				onClose={() => setIsPrivacyModalVisible(false)}
+			/>
 			<LinearGradient
 				colors={["#456B72", "#5b7e8a", "#3B5A64"]}
 				style={styles.header}
@@ -92,6 +105,22 @@ const OfflineCustomDrawerContent: React.FC<CustomDrawerContentProps> = ({
 								</ThemedText>
 							</Link>
 						</View>
+					</View>
+					<View className="flex flex-row justify-center gap-4">
+						<TouchableOpacity
+							onPress={() => setIsModalVisible(true)}
+						>
+							<ThemedText type="link" style={styles.footerLink}>
+								Terms of Service
+							</ThemedText>
+						</TouchableOpacity>
+						<TouchableOpacity
+							onPress={() => setIsPrivacyModalVisible(true)}
+						>
+							<ThemedText type="link" style={styles.footerLink}>
+								Privacy Policy
+							</ThemedText>
+						</TouchableOpacity>
 					</View>
 				</View>
 			</View>

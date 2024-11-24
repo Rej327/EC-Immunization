@@ -1,5 +1,5 @@
 import { useUser } from "@clerk/clerk-expo";
-import React from "react";
+import React, { useState } from "react";
 import { View, Image, StyleSheet, TouchableOpacity } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { ThemedText } from "../ThemedText";
@@ -7,6 +7,8 @@ import { Ionicons } from "@expo/vector-icons";
 import Logout from "@/app/LogOut";
 import { generatePDF } from "@/helper/downloadPdf";
 import { Link } from "expo-router";
+import TermsAndConditionsModal from "@/app/TermsAndConditionsModal ";
+import PrivacyPolicyModal from "@/app/PrivacyPolicyModal";
 
 type CustomDrawerContentProps = {
 	navigation: any; // Adjust to match your type
@@ -15,6 +17,9 @@ type CustomDrawerContentProps = {
 const CustomDrawerContent: React.FC<CustomDrawerContentProps> = ({
 	navigation,
 }) => {
+	const [isModalVisible, setIsModalVisible] = useState(false);
+	const [isPrivacyModalVisible, setIsPrivacyModalVisible] = useState(false);
+	
 	const { user } = useUser(); // Get current user data
 	const adminUserId = "user_2mW7YxivRkryvJ3m0kEYqWDLRPb"; // Admin user ID
 
@@ -24,6 +29,14 @@ const CustomDrawerContent: React.FC<CustomDrawerContentProps> = ({
 
 	return (
 		<View style={styles.container}>
+			<TermsAndConditionsModal
+				visible={isModalVisible}
+				onClose={() => setIsModalVisible(false)}
+			/>
+			<PrivacyPolicyModal
+				visible={isPrivacyModalVisible}
+				onClose={() => setIsPrivacyModalVisible(false)}
+			/>
 			<LinearGradient
 				colors={["#456B72", "#5b7e8a", "#3B5A64"]}
 				style={styles.header}
@@ -153,6 +166,22 @@ const CustomDrawerContent: React.FC<CustomDrawerContentProps> = ({
 								</ThemedText>
 							</Link>
 						</View>
+					</View>
+					<View className="flex flex-row justify-center gap-4">
+						<TouchableOpacity
+							onPress={() => setIsModalVisible(true)}
+						>
+							<ThemedText type="link" style={styles.footerLink}>
+								Terms of Service
+							</ThemedText>
+						</TouchableOpacity>
+						<TouchableOpacity
+							onPress={() => setIsPrivacyModalVisible(true)}
+						>
+							<ThemedText type="link" style={styles.footerLink}>
+								Privacy Policy
+							</ThemedText>
+						</TouchableOpacity>
 					</View>
 				</View>
 			</View>
