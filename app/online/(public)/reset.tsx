@@ -7,6 +7,7 @@ import StyledButton from "@/components/StyledButton";
 import CustomHeadFoot from "@/components/CustomHeadFoot";
 import { babyIcon } from "@/assets";
 import { ThemedText } from "@/components/ThemedText";
+import CustomInputPassword from "@/components/CustomInputPassword";
 
 const PwReset = () => {
 	const [emailAddress, setEmailAddress] = useState("");
@@ -95,7 +96,7 @@ const PwReset = () => {
 								placeholder="Enter your code"
 								onChangeText={setCode}
 							/>
-							<CustomInput
+							<CustomInputPassword
               label="New Password"
 								placeholder="Enter your new password"
 								value={password}

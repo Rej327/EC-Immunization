@@ -400,3 +400,62 @@ export const vaccineSchedule = [
 			"Second and last dose of MR vaccine ensures long-lasting protection against measles and rubella.",
 	},
 ];
+
+export const termsAndConditions = [
+	{
+		title: "Acceptance of Terms",
+		content:
+			"By registering, accessing, or using our services, you confirm that you are using the app to manage and track your child's vaccination schedule and have the legal capacity to enter into this agreement.",
+	},
+	{
+		title: "App Purpose",
+		content:
+			"The Early Childhood Immunization App is designed to assist parents in managing their children's vaccination schedules, appointments, health reminders, and milestones.",
+	},
+	{
+		title: "User Responsibilities",
+		content: `
+You agree to:
+1. Provide accurate and truthful information when registering and using the app.
+2. Keep your account credentials confidential and secure.
+3. Use the app only for personal, non-commercial purposes.
+4. Comply with all applicable laws and regulations.`,
+	},
+	{
+		title: "Data Collection and Privacy",
+		content: `
+1. Your data is securely stored in Firebase.
+2. We do not share personal information without your consent, except as required by law.`,
+	},
+	{
+		title: "Limitations of Liability",
+		content: `
+1. The app provides general vaccination schedules based on public health guidelines but does not guarantee accuracy.
+2. We are not liable for missed vaccinations or decisions based on app information.`,
+	},
+	{
+		title: "Modification of Terms",
+		content:
+			"We reserve the right to update these terms and conditions at any time. Continued use of the app signifies your acceptance of any changes.",
+	},
+	{
+		title: "Termination of Use",
+		content:
+			"We reserve the right to suspend or terminate your account if you violate these terms and conditions or engage in unlawful activities.",
+	},
+	{
+		title: "Copyright and Intellectual Property",
+		content:
+			"All app content, including graphics, logos, and software, is owned by the developers and protected by copyright laws. Unauthorized reproduction is prohibited.",
+	},
+	{
+		title: "Third-Party Services",
+		content:
+			"The app may integrate third-party services (e.g., Firebase) for functionality. We are not responsible for issues arising from these services.",
+	},
+	{
+		title: "Contact Information",
+		content:
+			"For questions or concerns regarding these terms, please contact our support team through the app or email us at support@ecimmunation.com.",
+	},
+];

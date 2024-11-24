@@ -5,6 +5,8 @@ import {
 	StyleSheet,
 	Image,
 	Pressable,
+	Modal,
+	ScrollView,
 } from "react-native";
 import { useSignUp } from "@clerk/clerk-expo";
 import Spinner from "react-native-loading-spinner-overlay";
@@ -16,6 +18,9 @@ import CustomHeadFoot from "@/components/CustomHeadFoot";
 import { babyIcon } from "@/assets";
 import StyledButton from "@/components/StyledButton";
 import Toast from "react-native-toast-message";
+import CustomInputPassword from "@/components/CustomInputPassword";
+import { Checkbox } from "react-native-paper"; // Import Checkbox
+import TermsAndConditionsModal from "@/app/TermsAndConditionsModal ";
 
 const Register = () => {
 	const { isLoaded, signUp, setActive } = useSignUp();
@@ -28,6 +33,11 @@ const Register = () => {
 	const [pendingVerification, setPendingVerification] = useState(false);
 	const [code, setCode] = useState("");
 	const [loading, setLoading] = useState(false);
+	const [isTermsChecked, setIsTermsChecked] = useState(false);
+	const [isInfoChecked, setIsInfoChecked] = useState(false);
+	const [isModalVisible, setIsModalVisible] = useState(false);
+
+	const openTermsModal = () => setIsModalVisible(true);
 
 	// Create the user and send the verification email
 	const sanitizeUsername = (username: string) => {
@@ -38,7 +48,12 @@ const Register = () => {
 	};
 
 	const onSignUpPress = async () => {
-		if (!isLoaded) {
+		if (!isLoaded || !isTermsChecked || !isInfoChecked) {
+			Toast.show({
+				type: "error",
+				text1: "Error",
+				text2: "Please agree to all terms and conditions.",
+			});
 			return;
 		}
 		setLoading(true);
@@ -157,7 +172,7 @@ const Register = () => {
 							onChangeText={setEmailAddress}
 							keyboardType="default"
 						/>
-						<CustomInput
+						<CustomInputPassword
 							label="Password"
 							placeholder="Enter your password"
 							autoCapitalize="none"
@@ -165,6 +180,44 @@ const Register = () => {
 							onChangeText={setPassword}
 							secureTextEntry
 						/>
+
+						{/* Terms and Conditions Checkbox */}
+						<TermsAndConditionsModal
+							visible={isModalVisible}
+							onClose={() => setIsModalVisible(false)}
+						/>
+						<View style={styles.checkboxContainer}>
+							<Checkbox
+								status={
+									isTermsChecked ? "checked" : "unchecked"
+								}
+								color="#456B72"
+								uncheckedColor="#456B72"
+								onPress={() =>
+									setIsTermsChecked(!isTermsChecked)
+								}
+							/>
+							<Pressable
+								onPress={() => setIsModalVisible(true)}
+							>
+								<ThemedText type="link">
+									I agree to the Terms and Conditions
+								</ThemedText>
+							</Pressable>
+						</View>
+
+						{/* Information Checkbox */}
+						{/* <View style={styles.checkboxContainer}>
+							<Checkbox
+								status={isInfoChecked ? "checked" : "unchecked"}
+								onPress={() =>
+									setIsInfoChecked(!isInfoChecked)
+								}
+							/>
+							<ThemedText>
+								The information I provided is true
+							</ThemedText>
+						</View> */}
 
 						<StyledButton
 							onPress={onSignUpPress}
@@ -235,18 +288,15 @@ const styles = StyleSheet.create({
 		justifyContent: "center",
 		padding: 20,
 	},
-	inputField: {
-		marginVertical: 4,
-		height: 50,
-		borderWidth: 1,
-		borderColor: "#6c47ff",
-		borderRadius: 4,
-		padding: 10,
-		backgroundColor: "#fff",
-	},
-	button: {
-		margin: 8,
+	checkboxContainer: {
+		flexDirection: "row",
 		alignItems: "center",
+		marginTop: -10,
+	},
+	modalContainer: {
+		flex: 1,
+		padding: 20,
+		backgroundColor: "#fff",
 	},
 });
 

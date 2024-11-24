@@ -9,6 +9,7 @@ import { View, StyleSheet, Pressable, Image } from "react-native";
 import Spinner from "react-native-loading-spinner-overlay";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Toast from "react-native-toast-message";
+import CustomInputPassword from "@/components/CustomInputPassword";
 
 const Login = () => {
 	const [emailAddress, setEmailAddress] = useState("");
@@ -107,7 +108,7 @@ const Login = () => {
 						value={emailAddress}
 						onChangeText={setEmailAddress}
 					/>
-					<CustomInput
+					<CustomInputPassword
 						label="Password"
 						placeholder="Enter your password"
 						value={password}

@@ -2,6 +2,7 @@ import Logout from "@/app/LogOut";
 import { babyIcon, botField, topField } from "@/assets";
 import CustomHeadFoot from "@/components/CustomHeadFoot";
 import CustomInput from "@/components/CustomInput";
+import CustomInputPassword from "@/components/CustomInputPassword";
 import StyledButton from "@/components/StyledButton";
 import { ThemedText } from "@/components/ThemedText";
 // import TopBg from "@/components/TopBg";
@@ -99,7 +100,7 @@ const Login = () => {
 						value={emailAddress}
 						onChangeText={setEmailAddress}
 					/>
-					<CustomInput
+					<CustomInputPassword
 						label="Password"
 						placeholder="Enter your password"
 						value={password}
