@@ -4,6 +4,7 @@ import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { ThemedText } from "@/components/ThemedText";
 import AppointmentBody from "@/components/appointment/AppointmentBody";
+import AppointmentNewBody from "@/components/appointment/AppointmentNewBody";
 
 const Appointment = () => {
 	const router = useRouter();
@@ -26,7 +27,8 @@ const Appointment = () => {
 			</View>
 
 			{/* BODY */}
-			<AppointmentBody />
+			{/* <AppointmentBody /> */}
+			<AppointmentNewBody />
 		</View>
 	);
 };
