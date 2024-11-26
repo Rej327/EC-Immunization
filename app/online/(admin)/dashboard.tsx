@@ -21,6 +21,7 @@ import { countBaby, countParent, noData } from "@/assets";
 import ScheduleList from "@/components/dashboard/ScheduleList";
 import Toast from "react-native-toast-message";
 import { useDebounce } from "@/helper/helper";
+import ScheduleListNew from "@/components/dashboard/ScheduleListNew";
 
 export default function dashboard() {
 	const [parents, setParents] = useState<any[]>([]); // State to store parents data
@@ -215,7 +216,8 @@ export default function dashboard() {
 			</View>
 
 			{/* Schedule section */}
-			<ScheduleList />
+			{/* <ScheduleList /> */}
+			<ScheduleListNew />
 
 			{/* List for accounts */}
 			<View className="mx-[20px]">

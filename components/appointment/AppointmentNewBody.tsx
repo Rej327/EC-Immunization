@@ -31,6 +31,7 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import { events, milestones as miles } from "@/assets/data/data";
 import { noData, vaccine } from "@/assets";
 import { formatDate } from "@/helper/helper";
+import SetAppointment from "./SetAppointment";
 
 // Define interfaces
 interface SelectedBaby {
@@ -310,22 +311,16 @@ const AppointmentNewBody = () => {
 				scrollEnabled={!openBottomSheet}
 			>
 				{/* Button to open bottom sheet */}
-
-
-				{/* UPCOMING SCHEDULE HEADER */}
-        <View className="flex flex-row gap-2 justify-between my-4">
-					<View className="border-b-[1px] border-[#d6d6d6] shadow-xl w-[25%] mb-2"></View>
-					<ThemedText type="cardHeader">Upcomming Schedule</ThemedText>
-					<View className="border-b-[1px] border-[#d6d6d6] shadow-xl w-[25%] mb-2"></View>
-				</View>
-
+				<SetAppointment />
 				{/* STATUS HEADER */}
-        <View className="flex flex-row gap-2 justify-between mb-4">
+				<View className="flex flex-row gap-2 justify-between mb-4">
 					<View className="border-b-[1px] border-[#d6d6d6] shadow-xl w-[25%] mb-2"></View>
-					<ThemedText type="cardHeader">Appointment Status</ThemedText>
+					<ThemedText type="cardHeader">
+						Appointment Status
+					</ThemedText>
 					<View className="border-b-[1px] border-[#d6d6d6] shadow-xl w-[25%] mb-2"></View>
 				</View>
-        
+
 				{/* PENDING SECTION */}
 				<View>
 					<View style={styles.header}>
@@ -518,15 +513,15 @@ const AppointmentNewBody = () => {
 				title="Upcoming Appointments"
 			>
 				{appointments.upcoming.length === 0 ? (
-				<View>
-				<Image
-					source={noData}
-					className="w-12 mx-auto mt-2 h-16 mb-2 opacity-40"
-				/>
-				<ThemedText type="default" style={styles.emptyText}>
-					No upcoming schedule
-				</ThemedText>
-			</View>
+					<View>
+						<Image
+							source={noData}
+							className="w-12 mx-auto mt-2 h-16 mb-2 opacity-40"
+						/>
+						<ThemedText type="default" style={styles.emptyText}>
+							No upcoming schedule
+						</ThemedText>
+					</View>
 				) : (
 					appointments.upcoming.map((appointment, index) => (
 						<View
@@ -559,15 +554,15 @@ const AppointmentNewBody = () => {
 				title="History"
 			>
 				{appointments.history.length === 0 ? (
-			<View>
-			<Image
-				source={noData}
-				className="w-12 mx-auto mt-2 h-16 mb-2 opacity-40"
-			/>
-			<ThemedText type="default" style={styles.emptyText}>
-				No history
-			</ThemedText>
-		</View>
+					<View>
+						<Image
+							source={noData}
+							className="w-12 mx-auto mt-2 h-16 mb-2 opacity-40"
+						/>
+						<ThemedText type="default" style={styles.emptyText}>
+							No history
+						</ThemedText>
+					</View>
 				) : (
 					appointments.history.map((appointment, index) => (
 						<View
@@ -741,6 +736,6 @@ const styles = StyleSheet.create({
 	emptyText: {
 		color: "#888",
 		fontSize: 13,
-		textAlign: 'center'
+		textAlign: "center",
 	},
 });

@@ -98,7 +98,7 @@ const CustomBottomSheet: React.FC<CustomBottomSheetProps> = ({
 							<ActivityIndicator color="#fff" />
 						) : (
 							<ThemedText style={styles.buttonText}>
-								Set Appointment
+								Set Schedule
 							</ThemedText>
 						)}
 					</TouchableOpacity>

@@ -51,6 +51,12 @@ const DashboardLayout = () => {
 						title: "Appointment Schedules",
 					}}
 				/>
+				<Stack.Screen
+					name="setSchedule" // Route for the Guide page
+					options={{
+						title: "Vaccine Schedules",
+					}}
+				/>
 			</Stack>
 		</GestureHandlerRootView>
 	);
