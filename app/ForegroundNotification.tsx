@@ -54,7 +54,7 @@ export default function ForegroundNotification() {
 		const notificationsRef = collection(db, "notifications");
 		const notificationsQuery = query(
 			notificationsRef,
-			where("receiverId", "==", userData.id),
+			where("receiverId", "in", [userData.id, 'all']),
 			where("isRead", "==", false) // Filter for unread notifications only
 		);
 		const unsubscribe = onSnapshot(notificationsQuery, (snapshot) => {
@@ -78,9 +78,9 @@ export default function ForegroundNotification() {
 					});
 					// Mark notification as read and add it to processed notifications
 					try {
-						// await updateDoc(doc(db, "notifications", change.doc.id), {
-						//   isRead: true,
-						// });
+						await updateDoc(doc(db, "notifications", change.doc.id), {
+						  isRead: true,
+						});
 						// Update processed notifications list
 						const updatedProcessedNotifications = [
 							...processedNotifications,

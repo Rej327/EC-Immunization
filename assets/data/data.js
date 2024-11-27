@@ -289,6 +289,7 @@ export const barangays = [
 export const vaccineSchedule = [
 	{
 		id: "bcg",
+		targetId: 'bcg',
 		vaccine: "BCG",
 		ageInMonths: 0,
 		received: false,
@@ -297,6 +298,7 @@ export const vaccineSchedule = [
 	},
 	{
 		id: "hepa",
+		targetId: 'hep_b',
 		vaccine: "Hepatitis B",
 		ageInMonths: 0,
 		received: false,
@@ -305,6 +307,7 @@ export const vaccineSchedule = [
 	},
 	{
 		id: "penta",
+		targetId: 'pentavalent_1',
 		vaccine: "Pentavalent Vaccine (DPT-HepB-HiB) (1st dose)",
 		ageInMonths: 1.5,
 		received: false,
@@ -313,6 +316,7 @@ export const vaccineSchedule = [
 	},
 	{
 		id: "penta",
+		targetId: 'pentavalent_2',
 		vaccine: "Pentavalent Vaccine (DPT-HepB-HiB) (2nd dose)",
 		ageInMonths: 2.5,
 		received: false,
@@ -321,6 +325,7 @@ export const vaccineSchedule = [
 	},
 	{
 		id: "penta",
+		targetId: 'pentavalent_3',
 		vaccine: "Pentavalent Vaccine (DPT-HepB-HiB) (3rd dose)",
 		ageInMonths: 3.5,
 		received: false,
@@ -329,6 +334,7 @@ export const vaccineSchedule = [
 	},
 	{
 		id: "oral",
+		targetId: 'opv_1',
 		vaccine: "Oral Polio Vaccine (1st dose)",
 		ageInMonths: 1.5,
 		received: false,
@@ -337,6 +343,7 @@ export const vaccineSchedule = [
 	},
 	{
 		id: "oral",
+		targetId: 'opv_2',
 		vaccine: "Oral Polio Vaccine (2nd dose)",
 		ageInMonths: 2.5,
 		received: false,
@@ -345,6 +352,7 @@ export const vaccineSchedule = [
 	},
 	{
 		id: "oral",
+		targetId: 'opv_3',
 		vaccine: "Oral Polio Vaccine (3rd dose)",
 		ageInMonths: 3.5,
 		received: false,
@@ -353,6 +361,7 @@ export const vaccineSchedule = [
 	},
 	{
 		id: "polio",
+		targetId: 'ipv',
 		vaccine: "Inactivated Polio Vaccine (IPV)",
 		ageInMonths: 3.5,
 		received: false,
@@ -361,6 +370,7 @@ export const vaccineSchedule = [
 	},
 	{
 		id: "pneumo",
+		targetId: 'pcv_1',
 		vaccine: "Pneumococcal Conjugate Vaccine - 13 (PCV 13) (1st dose)",
 		ageInMonths: 1.5,
 		received: false,
@@ -369,6 +379,7 @@ export const vaccineSchedule = [
 	},
 	{
 		id: "pneumo",
+		targetId: 'pcv_2',
 		vaccine: "Pneumococcal Conjugate Vaccine - 13 (PCV 13) (2nd dose)",
 		ageInMonths: 2.5,
 		received: false,
@@ -377,6 +388,7 @@ export const vaccineSchedule = [
 	},
 	{
 		id: "pneumo",
+		targetId: 'pcv_3',
 		vaccine: "Pneumococcal Conjugate Vaccine - 13 (PCV 13) (3rd dose)",
 		ageInMonths: 3.5,
 		received: false,
@@ -396,6 +408,93 @@ export const vaccineSchedule = [
 		vaccine: "Measles-Containing Vaccine (MCV) MR/MMR (2nd dose)",
 		ageInMonths: 12,
 		received: false,
+		description:
+			"Second and last dose of MR vaccine ensures long-lasting protection against measles and rubella.",
+	},
+];
+
+export const vaccines = [
+	{
+		id: "bcg",
+		name: "BCG",
+		description:
+			"Bacillus Calmette-Guérin (BCG) vaccine protects against tuberculosis (TB), particularly severe forms in children like TB meningitis.",
+	},
+	{
+		id: "hep_b",
+		name: "Hepatitis B",
+		description:
+			"Prevents Hepatitis B virus (HBV) infection, which can cause chronic liver disease and liver cancer.",
+	},
+	{
+		id: "pentavalent_1",
+		name: "Pentavalent Vaccine (1st dose)",
+		description:
+			"Combines protection against 5 diseases: diphtheria (D), pertussis (P), tetanus (T), hepatitis B (HB), and Haemophilus influenzae type B (Hib).",
+	},
+	{
+		id: "pentavalent_2",
+		name: "Pentavalent Vaccine (2nd dose)",
+		description:
+			"Combines protection against 5 diseases: diphtheria (D), pertussis (P), tetanus (T), hepatitis B (HB), and Haemophilus influenzae type B (Hib).",
+	},
+	{
+		id: "pentavalent_3",
+		name: "Pentavalent Vaccine (3rd dose)",
+		description:
+			"Combines protection against 5 diseases: diphtheria (D), pertussis (P), tetanus (T), hepatitis B (HB), and Haemophilus influenzae type B (Hib).",
+	},
+	{
+		id: "opv_1",
+		name: "Oral Polio Vaccine (1st dose)",
+		description:
+			"Oral Polio Vaccine (OPV) protects against poliovirus, which can lead to paralysis.",
+	},
+	{
+		id: "opv_2",
+		name: "Oral Polio Vaccine (2nd dose)",
+		description:
+			"Oral Polio Vaccine (OPV) protects against poliovirus, which can lead to paralysis.",
+	},
+	{
+		id: "opv_3",
+		name: "Oral Polio Vaccine (3rd dose)",
+		description:
+			"Oral Polio Vaccine (OPV) protects against poliovirus, which can lead to paralysis.",
+	},
+	{
+		id: "ipv",
+		name: "Inactivated Polio Vaccine (IPV)",
+		description:
+			"IPV is an injected polio vaccine that boosts immunity against poliovirus, complementing the oral vaccine.",
+	},
+	{
+		id: "pcv_1",
+		name: "PCV 13 (1st dose)",
+		description:
+			"First dose of PCV for complete protection against pneumococcal diseases.",
+	},
+	{
+		id: "pcv_2",
+		name: "PCV 13 (2nd dose)",
+		description:
+			"Second dose of PCV for complete protection against pneumococcal diseases.",
+	},
+	{
+		id: "pcv_3",
+		name: "PCV 13 (3rd dose)",
+		description:
+			"Third and last dose of PCV for complete protection against pneumococcal diseases.",
+	},
+	{
+		id: "mcv_1",
+		name: "(MCV) MR/MMR (1st dose)",
+		description:
+			"First dose of MR vaccine ensures long-lasting protection against measles and rubella.",
+	},
+	{
+		id: "mcv_2",
+		name: "(MCV) MR/MMR (2nd dose)",
 		description:
 			"Second and last dose of MR vaccine ensures long-lasting protection against measles and rubella.",
 	},

@@ -46,7 +46,7 @@ export const HomeRightHeader = () => {
 			const unsubscribe = onSnapshot(
 				query(
 					collection(db, "notifications"),
-					where("receiverId", "==", user?.id)
+					where("receiverId", "in", [user?.id, 'all'])
 				),
 				(snapshot) => {
 					const notificationsData: NotificationType[] =

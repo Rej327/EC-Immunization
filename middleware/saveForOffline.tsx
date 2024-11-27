@@ -164,7 +164,7 @@ export const saveForOffline = async (userId: any) => {
 
 		const notificationsRef = query(
 			collection(db, "notifications"),
-			where("receiverId", "==", userId)
+			where("receiverId", "in", [userId, 'all'])
 		);
 		const notificationsSnapshot = await getDocs(notificationsRef);
 
