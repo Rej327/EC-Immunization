@@ -5,6 +5,7 @@ import {
 	TouchableOpacity,
 	TextInput,
 	Platform,
+	Button,
 } from "react-native";
 import React, { useCallback, useState } from "react";
 import { ThemedText } from "@/components/ThemedText";
@@ -168,7 +169,7 @@ const setSchedule = () => {
 	);
 	return (
 		<View style={styles.container}>
-			<View className="flex flex-row gap-2 justify-between mt-2">
+			<View className="flex flex-row gap-2 justify-between my-2">
 				<View className="border-b-[1px] border-[#d6d6d6] shadow-xl w-[25%] mb-2"></View>
 				<ThemedText
 					type="cardHeader"
@@ -178,13 +179,16 @@ const setSchedule = () => {
 				</ThemedText>
 				<View className="border-b-[1px] border-[#d6d6d6] shadow-xl w-[25%] mb-2"></View>
 			</View>
-			<StyledButton
-				title="Set Schedule"
-				onPress={() => openBottomSheetHandler("setup")}
-				borderRadius={12}
-				fontSize={14}
-			/>
+			
 			<ScheduleData />
+
+			<TouchableOpacity
+				onPress={() => openBottomSheetHandler("setup")}
+				style={styles.floatingButton}
+			>
+				<Ionicons name="add-outline" style={styles.iconText} />
+			</TouchableOpacity>
+
 			{openBottomSheet && <View style={styles.overlay} />}
 			<CustomBottomSheet
 				isOpen={openBottomSheet === "setup"}
@@ -312,5 +316,25 @@ const styles = StyleSheet.create({
 		backgroundColor: "#4CAF50",
 		alignItems: "center",
 		borderRadius: 8,
+	},
+	buttonContainer: {
+		flex: 1,
+		justifyContent: "center",
+		alignItems: "center",
+	},
+	floatingButton: {
+		position: "absolute",
+		bottom: 20,
+		right: 20,
+		width: 50,
+		height: 50,
+		borderRadius: 30, // Make it circular
+		backgroundColor: "#456B72", // Set your desired background color
+		justifyContent: "center",
+		alignItems: "center",
+	},
+	iconText: {
+		fontSize: 25,
+		color: "white", // Set the color for the "+" icon
 	},
 });

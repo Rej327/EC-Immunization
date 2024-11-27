@@ -242,9 +242,16 @@ export default function Events() {
 
 	return (
 		<View style={styles.container}>
-			<ThemedText type="cardHeader" className="ml-4 pb-2">
-				Event List
-			</ThemedText>
+		<View className="flex flex-row gap-2 justify-between mb-2">
+				<View className="border-b-[1px] border-[#d6d6d6] shadow-xl w-[40%] mb-2"></View>
+				<ThemedText
+					type="cardHeader"
+					className="first-letter:capitalize"
+				>
+					Events
+				</ThemedText>
+				<View className="border-b-[1px] border-[#d6d6d6] shadow-xl w-[40%] mb-2"></View>
+			</View>
 
 			<FlatList
 				data={posts}
