@@ -332,7 +332,7 @@ export default function ScheduleByStatus() {
 				Schedule Date: {formatDate(item.scheduleDate)}
 			</ThemedText>
 			<ThemedText type="default" className="capitalize">
-				Status: {item.status}
+				Status: {item.status === 'history' ? 'Vaccinated' : 'Upcoming'}
 			</ThemedText>
 			<View>
 				<ThemedText className="absolute bottom-1 right-1">

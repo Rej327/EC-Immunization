@@ -8,6 +8,9 @@ import {
 	TextInput,
 	TouchableOpacity,
 	Platform,
+	Image,
+	ActivityIndicator,
+	RefreshControl,
 } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import {
@@ -23,10 +26,21 @@ import { ThemedText } from "../ThemedText";
 import { Picker } from "@react-native-picker/picker";
 import { barangays } from "@/assets/data/data";
 import { Ionicons } from "@expo/vector-icons";
+import { noData, vaccineDone, vaccineUp } from "@/assets";
+import Toast from "react-native-toast-message";
 
-const ScheduleData = () => {
+const ScheduleData = ({
+	scheduleItems,
+	setScheduleItems,
+	reFetch,
+	loading,
+}: {
+	scheduleItems: any[];
+	setScheduleItems: React.Dispatch<React.SetStateAction<any[]>>;
+	reFetch: () => void; // Expecting the function to refetch the schedules
+	loading: boolean;
+}) => {
 	const [schedules, setSchedules] = useState<any[]>([]); // Store schedules
-	const [loading, setLoading] = useState<boolean>(true);
 	const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
 	const [selectedSchedule, setSelectedSchedule] = useState<any>(null);
 	const [address, setAddress] = useState<string>("");
@@ -35,28 +49,34 @@ const ScheduleData = () => {
 	const [date, setDate] = useState<Date>(new Date());
 	const [completed, setCompleted] = useState<boolean>(false); // false = Upcoming, true = Completed
 	const [vaccines, setVaccines] = useState<any[]>([]);
+	const [refreshing, setRefreshing] = useState(false);
+	const [buttonUpdateLoading, setButtonUpdateLoading] = useState(false);
+	const [buttonDeleteLoading, setButtonDeleteLoading] = useState(false);
+	const [expanded, setExpanded] = useState<string | null>(null);
 
-	// Fetch data from Firestore
+	const handleToggle = (id: string) => {
+		// If the clicked item is already expanded, collapse it; otherwise, expand it
+		setExpanded(expanded === id ? null : id);
+	};
+
+	const handleReFetch = () => {
+		reFetch(); // Calling the passed reFetch function
+	};
+
 	const fetchSchedules = async () => {
-		setLoading(true);
-		try {
-			const scheduleCollection = collection(db, "schedules");
-			const scheduleSnapshot = await getDocs(scheduleCollection);
-			const scheduleList = scheduleSnapshot.docs.map((doc) => ({
-				id: doc.id,
-				...doc.data(),
-			}));
-			setSchedules(scheduleList);
-		} catch (error) {
-			console.error("Error fetching schedules: ", error);
-		} finally {
-			setLoading(false);
-		}
+		setSchedules(scheduleItems);
+	};
+
+	const handleRefresh = async () => {
+		setRefreshing(true);
+		handleReFetch();
+		setRefreshing(false);
 	};
 
 	useEffect(() => {
 		fetchSchedules();
-	}, []);
+		console.log("Fetch");
+	}, [scheduleItems]);
 
 	const openModal = (schedule: any) => {
 		setSelectedSchedule(schedule);
@@ -87,6 +107,7 @@ const ScheduleData = () => {
 
 	const handleUpdate = async () => {
 		if (selectedSchedule) {
+			setButtonUpdateLoading(true);
 			try {
 				const scheduleRef = doc(db, "schedules", selectedSchedule.id);
 
@@ -98,10 +119,11 @@ const ScheduleData = () => {
 					when: when ? Timestamp.fromDate(new Date(when)) : null,
 					completed,
 					vaccines,
+					updatedAt: Timestamp.now(),
 				});
 
 				// Refresh the schedule list
-				setSchedules((prevSchedules) =>
+				setScheduleItems((prevSchedules) =>
 					prevSchedules.map((schedule) =>
 						schedule.id === selectedSchedule.id
 							? {
@@ -115,39 +137,75 @@ const ScheduleData = () => {
 					)
 				);
 
+				Toast.show({
+					type: "success",
+					text1: "Update Successful",
+					text2: "The vaccine schedule has been updated successfully.",
+				});
+
 				closeModal();
 			} catch (error) {
-				console.error("Error updating schedule: ", error);
+				// console.error("Error updating schedule: ", error);
+				Toast.show({
+					type: "error",
+					text1: "Update Failed",
+					text2: "There was an issue updating the vaccine schedule. Please try again.",
+				});
 			} finally {
-				fetchSchedules();
+				setButtonUpdateLoading(false);
+				handleReFetch();
 			}
 		}
 	};
 
 	const handleDelete = async () => {
 		if (selectedSchedule) {
+			setButtonDeleteLoading(true);
 			try {
 				const scheduleRef = doc(db, "schedules", selectedSchedule.id);
 				await deleteDoc(scheduleRef);
 
 				// Refresh the schedule list after deletion
-				setSchedules((prevSchedules) =>
+				setScheduleItems((prevSchedules) =>
 					prevSchedules.filter(
 						(schedule) => schedule.id !== selectedSchedule.id
 					)
 				);
+				Toast.show({
+					type: "success",
+					text1: "Deleted Successfully",
+					text2: "The vaccine schedule has been deleted successfully.",
+				});
 
 				closeModal();
 			} catch (error) {
 				console.error("Error deleting schedule: ", error);
+				Toast.show({
+					type: "error",
+					text1: "Delete Failed",
+					text2: "There was an issue deleting the vaccine schedule. Please try again.",
+				});
+			} finally {
+				setButtonDeleteLoading(false);
+				handleReFetch();
 			}
 		}
 	};
 
+	const getImageForType = (completed: boolean) => {
+		return completed ? vaccineDone : vaccineUp;
+	};
+
 	if (loading) {
 		return (
-			<View style={styles.container}>
-				<Text>Loading...</Text>
+			<View
+				style={{
+					flex: 1,
+					justifyContent: "center",
+					alignItems: "center",
+				}}
+			>
+				<ActivityIndicator size="large" color="#456B72" />
 			</View>
 		);
 	}
@@ -156,47 +214,74 @@ const ScheduleData = () => {
 		<View style={styles.container}>
 			{schedules.length > 0 ? (
 				<FlatList
+					refreshControl={
+						<RefreshControl
+							refreshing={refreshing}
+							onRefresh={handleRefresh}
+						/>
+					}
 					data={schedules}
 					keyExtractor={(item) => item.id}
 					renderItem={({ item }) => (
 						<TouchableOpacity onPress={() => openModal(item)}>
 							<View style={styles.scheduleItem}>
-								<ThemedText type="default">
-									Address: {item.address}
-								</ThemedText>
-								<ThemedText type="default">
-									Date:{" "}
-									{item.when
-										? item.when instanceof Timestamp
-											? item.when
-													.toDate()
-													.toLocaleDateString(
-														"en-US",
-														{
-															year: "numeric",
-															month: "long",
-															day: "numeric",
-														}
-													)
-											: new Date(
-													item.when
-											  ).toLocaleDateString("en-US", {
-													year: "numeric",
-													month: "long",
-													day: "numeric",
-											  })
-										: "Select Date"}
-								</ThemedText>
-								<ThemedText type="default">
-									Status:{" "}
-									{item.completed ? "Completed" : "Upcoming"}
-								</ThemedText>
+								<View className="flex flex-row justify-start gap-2 items-center">
+									<Image
+										source={getImageForType(item.completed)} // Dynamic image based on item.type
+										style={styles.img}
+									/>
+									<View>
+										<ThemedText type="default">
+											Address: {item.address}
+										</ThemedText>
+										<ThemedText type="default">
+											Date:{" "}
+											{item.when
+												? item.when instanceof Timestamp
+													? item.when
+															.toDate()
+															.toLocaleDateString(
+																"en-US",
+																{
+																	year: "numeric",
+																	month: "long",
+																	day: "numeric",
+																}
+															)
+													: new Date(
+															item.when
+													  ).toLocaleDateString(
+															"en-US",
+															{
+																year: "numeric",
+																month: "long",
+																day: "numeric",
+															}
+													  )
+												: "Select Date"}
+										</ThemedText>
+										<ThemedText type="default">
+											Status:{" "}
+											{item.completed
+												? "Completed"
+												: "Upcoming"}
+										</ThemedText>
+									</View>
+								</View>
 							</View>
 						</TouchableOpacity>
 					)}
 				/>
 			) : (
-				<Text>No schedules available</Text>
+				<View>
+					<Image
+						source={noData}
+						className="w-12 mx-auto mt-2 h-16 mb-2 opacity-40"
+					/>
+					<ThemedText type="default" style={styles.emptyText}>
+						No vaccine schedules
+					</ThemedText>
+				</View>
 			)}
 
 			{/* Modal for viewing and editing schedule */}
@@ -326,19 +411,41 @@ const ScheduleData = () => {
 								onPress={handleUpdate}
 								style={[styles.button, styles.updateButton]}
 							>
-								<Text style={styles.buttonText}>Update</Text>
+								{!buttonUpdateLoading ? (
+									<ThemedText style={styles.buttonText}>
+										Update
+									</ThemedText>
+								) : (
+									<ActivityIndicator
+										size="small"
+										color="white"
+										className="mt-[1px]"
+									/>
+								)}
 							</TouchableOpacity>
 							<TouchableOpacity
 								onPress={handleDelete}
 								style={[styles.button, styles.deleteButton]}
 							>
-								<Text style={styles.buttonText}>Delete</Text>
+								{!buttonDeleteLoading ? (
+									<ThemedText style={styles.buttonText}>
+										Delete
+									</ThemedText>
+								) : (
+									<ActivityIndicator
+										size="small"
+										color="white"
+										className="mt-[1px]"
+									/>
+								)}
 							</TouchableOpacity>
 							<TouchableOpacity
 								onPress={closeModal}
 								style={styles.button}
 							>
-								<Text style={styles.buttonText}>Cancel</Text>
+								<ThemedText style={styles.buttonText}>
+									Cancel
+								</ThemedText>
 							</TouchableOpacity>
 						</View>
 					</View>
@@ -358,6 +465,10 @@ const styles = StyleSheet.create({
 		backgroundColor: "white",
 		borderRadius: 8,
 	},
+	img: {
+		width: 50,
+		height: 51,
+	},
 	modalContainer: {
 		flex: 1,
 		justifyContent: "center",
@@ -371,7 +482,7 @@ const styles = StyleSheet.create({
 		width: "90%",
 	},
 	input: {
-		borderBlockColor: 'none',
+		borderBlockColor: "none",
 		backgroundColor: "#ebebeb",
 		padding: 10,
 		marginBottom: 10,
@@ -411,7 +522,11 @@ const styles = StyleSheet.create({
 		borderColor: "#456B72",
 		backgroundColor: "#456B72",
 	},
-
+	emptyText: {
+		color: "#888",
+		fontSize: 13,
+		textAlign: "center",
+	},
 	button: {
 		backgroundColor: "#456B72",
 		padding: 10,

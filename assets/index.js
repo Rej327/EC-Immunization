@@ -32,6 +32,9 @@ export { default as announcementPost } from "./icon/announcementPost.png";
 export { default as noticePost } from "./icon/noticePost.png";
 export { default as tipsPost } from "./icon/tipsPost.png";
 
+export { default as vaccineDone } from "./icon/vaccineDone.png";
+export { default as vaccineUp } from "./icon/vaccineUp.png";
+
 
 
 // OBJECTS

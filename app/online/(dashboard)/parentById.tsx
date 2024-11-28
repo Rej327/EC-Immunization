@@ -317,8 +317,8 @@ export default function ParentById() {
 							<ThemedText>
 								Status:{" "}
 								{milestone.received
-									? "Received ✅"
-									: "Not Received ❌"}
+									? "Vaccinated ✅"
+									: "Not Vaccinated ❌"}
 							</ThemedText>
 							<View>
 								<ThemedText className="absolute bottom-1 right-1">

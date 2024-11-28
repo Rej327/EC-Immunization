@@ -6,8 +6,9 @@ import {
 	TextInput,
 	Platform,
 	Button,
+	ActivityIndicator,
 } from "react-native";
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { ThemedText } from "@/components/ThemedText";
 import StyledButton from "@/components/StyledButton";
 import CustomBottomSheet from "@/components/CustomBottomSheet";
@@ -16,7 +17,7 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import { Picker } from "@react-native-picker/picker";
 import { Ionicons } from "@expo/vector-icons";
 import Toast from "react-native-toast-message";
-import { addDoc, collection, Timestamp } from "firebase/firestore";
+import { addDoc, collection, getDocs, Timestamp } from "firebase/firestore";
 import { db } from "@/db/firebaseConfig";
 import ScheduleData from "@/components/dashboard/ScheduleData";
 
@@ -26,9 +27,44 @@ const setSchedule = () => {
 	const [showDatePicker, setShowDatePicker] = useState<boolean>(false);
 	const [date, setDate] = useState<Date>(new Date());
 	const [when, setWhen] = useState<Date | null>(null);
+	const [schedules, setSchedules] = useState<any[]>([]); // Store schedules
+	const [loading, setLoading] = useState<boolean>(true);
 	const [vaccineCounts, setVaccineCounts] = useState<Record<string, number>>(
 		{}
 	);
+
+	const fetchSchedules = async () => {
+		setLoading(true);
+		try {
+			const scheduleCollection = collection(db, "schedules");
+			const scheduleSnapshot = await getDocs(scheduleCollection);
+
+			const scheduleList = scheduleSnapshot.docs.map((doc) => {
+				const data = doc.data();
+				return {
+					id: doc.id,
+					...data,
+					updatedAt: data.updatedAt.toDate(), // Convert Firestore Timestamp to JavaScript Date
+				};
+			});
+	
+			const sortedScheduleList = scheduleList.sort(
+				(a, b) => b.updatedAt.getTime() - a.updatedAt.getTime()
+			);
+
+			setSchedules(sortedScheduleList);
+
+			// Log the fetched data here
+		} catch (error) {
+			console.error("Error fetching schedules: ", error);
+		} finally {
+			setLoading(false);
+		}
+	};
+
+	useEffect(() => {
+		fetchSchedules();
+	}, []);
 
 	const handleDateChange = (event: unknown, selectedDate?: Date) => {
 		if (event === undefined) return;
@@ -126,6 +162,8 @@ const setSchedule = () => {
 				text1: "Error",
 				text2: "Something went wrong.",
 			});
+		} finally {
+			fetchSchedules()
 		}
 	};
 
@@ -167,6 +205,7 @@ const setSchedule = () => {
 			</View>
 		</View>
 	);
+
 	return (
 		<View style={styles.container}>
 			<View className="flex flex-row gap-2 justify-between my-2">
@@ -179,8 +218,13 @@ const setSchedule = () => {
 				</ThemedText>
 				<View className="border-b-[1px] border-[#d6d6d6] shadow-xl w-[25%] mb-2"></View>
 			</View>
-			
-			<ScheduleData />
+
+			<ScheduleData
+				scheduleItems={schedules}
+				setScheduleItems={setSchedules}
+				reFetch= {fetchSchedules}
+				loading={loading}
+			/>
 
 			<TouchableOpacity
 				onPress={() => openBottomSheetHandler("setup")}

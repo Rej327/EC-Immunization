@@ -44,7 +44,28 @@ export default function CreatePost() {
 				type,
 			};
 
+			const formattedDate = date
+			? date.toLocaleDateString("en-US", {
+					year: "numeric",
+					month: "long",
+					day: "numeric",
+				})
+			: null;
+
+			const addInNotifications = {
+				receiverId: "all",
+				firstName: "All",
+				lastName: "Users",
+				isRead: false,
+				subject: subject,
+				message: date
+					? `${description} on ${formattedDate}`
+					: description,
+				createdAt: Timestamp.now(),
+			};
+
 			await addDoc(collection(db, "feeds"), newPost);
+			await addDoc(collection(db, "notifications"), addInNotifications);
 
 			Toast.show({
 				type: "success",
