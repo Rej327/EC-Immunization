@@ -31,7 +31,7 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import { events, milestones as miles } from "@/assets/data/data";
 import { noData, vaccine } from "@/assets";
 import { formatDate } from "@/helper/helper";
-import SetAppointment from "./SetAppointment";
+import { SetAppointment } from "./SetAppointment";
 
 // Define interfaces
 interface SelectedBaby {

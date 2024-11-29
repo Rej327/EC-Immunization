@@ -1,11 +1,20 @@
 import React, { useEffect, useState } from "react";
-import { View, FlatList, StyleSheet, Image, ActivityIndicator } from "react-native";
+import {
+	View,
+	FlatList,
+	StyleSheet,
+	Image,
+	ActivityIndicator,
+	TouchableOpacity,
+} from "react-native";
 import { db } from "@/db/firebaseConfig";
 import { collection, query, onSnapshot } from "firebase/firestore";
 import { ThemedText } from "@/components/ThemedText";
 import { announcementPost, noData, noticePost, tipsPost } from "@/assets";
 import { format, formatDistanceToNow } from "date-fns";
 import { Ionicons } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage"; // Import AsyncStorage
+import { useRouter } from "expo-router";
 
 type Post = {
 	id: string;
@@ -19,10 +28,11 @@ type Post = {
 export default function EventsShort() {
 	const [posts, setPosts] = useState<Post[]>([]);
 	const [loading, setLoading] = useState(false);
+	const route = useRouter();
 
 	useEffect(() => {
 		const fetchPosts = () => {
-			setLoading(true); // Set loading to true at the start of the fetch
+			setLoading(true);
 
 			try {
 				const q = query(collection(db, "feeds"));
@@ -36,7 +46,6 @@ export default function EventsShort() {
 							createdAt: doc.data().createdAt.toDate(),
 						})) as Post[];
 
-						// Sort by createdAt in descending order
 						const sortedPosts = postData.sort(
 							(a, b) =>
 								b.createdAt.getTime() - a.createdAt.getTime()
@@ -44,34 +53,33 @@ export default function EventsShort() {
 						setPosts(sortedPosts);
 					},
 					(error) => {
-						console.error("Error fetching posts:", error); // Handle the error
+						console.error("Error fetching posts:", error);
 					}
 				);
 				return unsubscribe;
 			} catch (error) {
 				console.error("Error setting up snapshot listener:", error);
 			} finally {
-				setLoading(false); // Set loading to false once the function completes
+				setLoading(false);
 			}
 		};
 
 		const unsubscribe = fetchPosts();
 
 		return () => {
-			if (unsubscribe) unsubscribe(); // Cleanup on component unmount
+			if (unsubscribe) unsubscribe();
 		};
 	}, []);
+
 	const formatCreatedAt = (date: Date) => {
-		if (!date) return "Unknown Date"; // Fallback if date is not valid
+		if (!date) return "Unknown Date";
 		const now = new Date();
 		const secondsDiff = Math.floor((now.getTime() - date.getTime()) / 1000);
 
-		// If less than a week ago, show relative time
 		if (secondsDiff < 604800) {
 			return formatDistanceToNow(date, { addSuffix: true });
 		}
 
-		// If older than a week, show the actual date
 		return format(date, "PPPP");
 	};
 
@@ -96,11 +104,48 @@ export default function EventsShort() {
 		}
 	};
 
+	// Extract last sentence after 'in' from subject
+	const extractBrgy = (subject: string) => {
+		const prefix = "Babies Vaccination in "; // The string we want to find
+		const indexOfPrefix = subject.indexOf(prefix);
+	
+		if (indexOfPrefix !== -1) {
+			// Extract everything after the "Babies Vaccination in" part
+			const extractedText = subject.slice(indexOfPrefix + prefix.length).trim();
+			return extractedText; // Return the extracted part
+		}
+	
+		return ""; // If the prefix is not found, return an empty string
+	};
+
+	// Handle action when a post is pressed
+	const handleAction = async (item: Post) => {
+		if (
+			item.type === "announcement" &&
+			item.subject === "Vaccination Schedule"
+		) {
+			const selectedBrgy = extractBrgy(item.description);
+
+			if (selectedBrgy) {
+				// Save the extracted sentence into AsyncStorage
+				await AsyncStorage.setItem("selectedBrgy", selectedBrgy);
+				console.log("Last Sentence", selectedBrgy);
+
+				// Navigate to the appropriate route
+				route.push("/online/(category)/appointment");
+			}
+		}
+	};
+
 	const renderItem = (item: Post) => {
 		const typeImage = getImageForType(item.type);
 
 		return (
-			<View key={item.id} style={styles.postContainer}>
+			<TouchableOpacity
+				key={item.id}
+				style={styles.postContainer}
+				onPress={() => handleAction(item)} // Handle post press
+			>
 				{typeImage && <Image source={typeImage} style={styles.img} />}
 				<View style={styles.textContainer}>
 					<ThemedText type="default" style={styles.subject}>
@@ -114,14 +159,21 @@ export default function EventsShort() {
 							When: {formatDate(item.date)}
 						</ThemedText>
 					) : null}
-					<View className="flex flex-row w-fit justify-end items-center mt-2 gap-1">
+					<View
+						style={{
+							flexDirection: "row",
+							justifyContent: "flex-end",
+							alignItems: "center",
+							marginTop: 8,
+						}}
+					>
 						<Ionicons name="calendar" color="#888" />
 						<ThemedText type="date" style={styles.date}>
 							{formatCreatedAt(item.createdAt)}
 						</ThemedText>
 					</View>
 				</View>
-			</View>
+			</TouchableOpacity>
 		);
 	};
 
@@ -135,7 +187,11 @@ export default function EventsShort() {
 						alignItems: "center",
 					}}
 				>
-					<ActivityIndicator size="large" color="#456B72" className="mt-4" />
+					<ActivityIndicator
+						size="large"
+						color="#456B72"
+						className="mt-4"
+					/>
 				</View>
 			) : (
 				<>

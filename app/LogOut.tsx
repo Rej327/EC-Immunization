@@ -35,6 +35,7 @@ export default function Logout() {
 			await AsyncStorage.removeItem("selectedBabyId");
 			await AsyncStorage.removeItem("reminders");
 			await AsyncStorage.removeItem("babyDetails");
+			await AsyncStorage.removeItem("selectedBrgy");
 
 			await AsyncStorage.removeItem("lastNotificationTapped");
 			await AsyncStorage.removeItem("processedNotifications");

@@ -1,11 +1,20 @@
 import React, { useEffect, useState } from "react";
-import { View, FlatList, StyleSheet, Image, ActivityIndicator } from "react-native";
+import {
+	View,
+	FlatList,
+	StyleSheet,
+	Image,
+	ActivityIndicator,
+	TouchableOpacity,
+} from "react-native";
 import { db } from "@/db/firebaseConfig";
 import { collection, query, onSnapshot } from "firebase/firestore";
 import { ThemedText } from "@/components/ThemedText";
 import { announcementPost, noData, noticePost, tipsPost } from "@/assets";
 import { format, formatDistanceToNow } from "date-fns";
 import { Ionicons } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useRouter } from "expo-router";
 
 type Post = {
 	id: string;
@@ -19,6 +28,8 @@ type Post = {
 export default function Events() {
 	const [posts, setPosts] = useState<Post[]>([]);
 	const [loading, setLoading] = useState(false);
+
+	const route = useRouter();
 
 	useEffect(() => {
 		const fetchPosts = () => {
@@ -97,11 +108,44 @@ export default function Events() {
 		}
 	};
 
+		// Extract last sentence after 'in' from subject
+		const extractBrgy = (subject: string) => {
+			const prefix = "Babies Vaccination in "; // The string we want to find
+			const indexOfPrefix = subject.indexOf(prefix);
+		
+			if (indexOfPrefix !== -1) {
+				// Extract everything after the "Babies Vaccination in" part
+				const extractedText = subject.slice(indexOfPrefix + prefix.length).trim();
+				return extractedText; // Return the extracted part
+			}
+		
+			return ""; // If the prefix is not found, return an empty string
+		};
+	
+		// Handle action when a post is pressed
+		const handleAction = async (item: Post) => {
+			if (
+				item.type === "announcement" &&
+				item.subject === "Vaccination Schedule"
+			) {
+				const selectedBrgy = extractBrgy(item.description);
+	
+				if (selectedBrgy) {
+					// Save the extracted sentence into AsyncStorage
+					await AsyncStorage.setItem("selectedBrgy", selectedBrgy);
+					console.log("Last Sentence", selectedBrgy);
+	
+					// Navigate to the appropriate route
+					route.push("/online/(category)/appointment");
+				}
+			}
+		};
+
 	const renderItem = (item: Post) => {
 		const typeImage = getImageForType(item.type);
 
 		return (
-			<View key={item.id} style={styles.postContainer}>
+			<TouchableOpacity onPress={() => handleAction(item)}  key={item.id} style={styles.postContainer}>
 				{typeImage && <Image source={typeImage} style={styles.img} />}
 				<View style={styles.textContainer}>
 					<ThemedText type="default" style={styles.subject}>
@@ -122,7 +166,7 @@ export default function Events() {
 						</ThemedText>
 					</View>
 				</View>
-			</View>
+			</TouchableOpacity>
 		);
 	};
 
