@@ -5,6 +5,7 @@ import {
 	StyleSheet,
 	Modal,
 	Button,
+	Pressable,
 } from "react-native";
 import { ThemedText } from "../ThemedText";
 import { barangays } from "@/assets/data/data";
@@ -15,6 +16,8 @@ import {
 	getDocs,
 	Timestamp,
 	addDoc,
+	doc,
+	updateDoc,
 } from "firebase/firestore";
 import { db } from "@/db/firebaseConfig";
 import { Picker } from "@react-native-picker/picker";
@@ -45,6 +48,23 @@ interface SelectedBaby {
 	firstName: string;
 	lastName: string;
 	birthday: Date;
+	address: string;
+}
+
+interface AppointmentData {
+	id?: string;
+	babyId: string;
+	vaccineId: string;
+	parentId: string;
+	parentName: string;
+	babyFirstName: string;
+	address: string;
+	babyLastName: string;
+	vaccine: string;
+	scheduleDate: Date | null;
+	status: string;
+	createdAt: Date;
+	updatedAt: Date;
 }
 
 export const SetAppointment = () => {
@@ -57,6 +77,8 @@ export const SetAppointment = () => {
 	const [babies, setBabies] = useState<SelectedBaby[]>([]);
 	const [showDropdown, setShowDropdown] = useState(false);
 	const [selectedBaby, setSelectedBaby] = useState<SelectedBaby | null>(null);
+	const [isDisabled, setIsDisabled] = useState<boolean>(false);
+	const [buttonLabel, setSetButtonLabel] = useState<string>("");
 
 	const { user } = useUser();
 	// Fetch babies for the logged-in user
@@ -77,6 +99,7 @@ export const SetAppointment = () => {
 					id: doc.id,
 					firstName: data.firstName,
 					lastName: data.lastName,
+					address: data.address,
 					birthday:
 						data.birthday instanceof Date
 							? data.birthday
@@ -95,18 +118,6 @@ export const SetAppointment = () => {
 			});
 		}
 	}, [user?.id]);
-
-	useEffect(() => {
-		fetchBabies();
-		console.log("Trigger fetch babies");
-	}, []);
-
-	useEffect(() => {
-		if (babies.length === 1) {
-			setSelectedBaby(babies[0]);
-			console.log("Automatically selected baby:", babies[0]);
-		}
-	}, [babies]);
 
 	const fetchSchedules = async (selectedAddress: string) => {
 		setLoading(true);
@@ -137,6 +148,110 @@ export const SetAppointment = () => {
 	const handleSelectBaby = async (baby: SelectedBaby) => {
 		setSelectedBaby(baby);
 		setShowDropdown(false); // Close dropdown after selection
+	};
+
+	const handleSubmit = async () => {
+		setLoading(true)
+		try {
+			// Find the selected schedule, ensure it's not undefined
+			const selectedSchedule = schedules.find(
+				(schedule) => schedule.when
+			);
+
+			// If no selected schedule is found, show an error and return
+			if (!selectedSchedule) {
+				console.error("No schedule selected.");
+				Toast.show({
+					type: "error",
+					text1: "Error",
+					text2: "No schedule selected.",
+				});
+				return;
+			}
+
+			// Validate: Ensure the selected vaccine is available in the selected schedule
+			const selectedVaccineDetails = selectedSchedule.vaccines.find(
+				(vaccine) => vaccine.id === selectedVaccine.id
+			);
+
+			if (!selectedVaccineDetails) {
+				console.error("Vaccine not found in the selected schedule.");
+				Toast.show({
+					type: "error",
+					text1: "Error",
+					text2: "Vaccine not found in the selected schedule.",
+				});
+				return;
+			}
+
+			if (selectedBaby?.address !== address) {
+				Toast.show({
+					type: "error",
+					text1: "Invalid Address",
+					text2: `You can set appointment only in ${selectedBaby?.address}`,
+				});
+				return;
+			}
+
+			// Check if the `taken` is equal to `count`
+			if (selectedVaccineDetails.taken >= selectedVaccineDetails.count) {
+				Toast.show({
+					type: "error",
+					text1: "Invalid Slot",
+					text2: "Vaccine is not available or all doses are already been taken",
+				});
+				return;
+			}
+
+			// Prepare the appointment data
+			const appointmentData: AppointmentData = {
+				parentId: user?.id || "",
+				parentName: `${user?.firstName} ${user?.lastName}`.trim(),
+				babyFirstName: selectedBaby?.firstName || "",
+				babyLastName: selectedBaby?.lastName || "",
+				babyId: selectedBaby?.id || "",
+				vaccine: selectedVaccine.name,
+				vaccineId: selectedVaccine.id,
+				address: address,
+				scheduleDate: selectedSchedule?.when || null,
+				status: "upcoming",
+				createdAt: new Date(),
+				updatedAt: new Date(),
+			};
+
+			// Save the appointment to Firestore
+			await addDoc(collection(db, "appointments"), appointmentData);
+
+			// Update the taken count for the selected vaccine
+			const scheduleDocRef = doc(db, "schedules", selectedSchedule.id);
+			await updateDoc(scheduleDocRef, {
+				vaccines: selectedSchedule.vaccines.map((vaccine) => {
+					if (vaccine.id === selectedVaccine.id) {
+						vaccine.taken += 1; // Increment taken count by 1
+					}
+					return vaccine;
+				}),
+			});
+
+			// Show success toast
+			Toast.show({
+				type: "success",
+				text1: "Appointment Submitted",
+				text2: "The appointment has been successfully scheduled.",
+			});
+
+			console.log("Appointment submitted:", appointmentData);
+		} catch (error) {
+			console.error("Error submitting appointment:", error);
+			Toast.show({
+				type: "error",
+				text1: "Error",
+				text2: "An error occurred while submitting the appointment.",
+			});
+		} finally {
+			setLoading(false)
+			setModalVisible(false)
+		}
 	};
 
 	const renderMasonryCards = (vaccines: Vaccine[]) => {
@@ -319,16 +434,31 @@ export const SetAppointment = () => {
 							)}
 
 							<View style={styles.buttonContainer}>
-								<Button
-									title="Set Appointment"
-									// onPress={handleSetAppointment}
-									color="#456B72"
-								/>
-								<Button
-									title="Close"
+								{/* Custom Button with Pressable */}
+								<TouchableOpacity
+									onPress={handleSubmit}
+									disabled={isDisabled}
+									style={[
+										styles.button,
+										isDisabled
+											? styles.disabledButton
+											: styles.enabledButton,
+									]}
+								>
+									<ThemedText style={styles.buttonText}>
+										{buttonLabel}
+									</ThemedText>
+								</TouchableOpacity>
+
+								{/* Default Button for "Close" */}
+								<TouchableOpacity
 									onPress={() => setModalVisible(false)}
-									color="#ccc"
-								/>
+									style={[styles.button, styles.closeButton]}
+								>
+									<ThemedText style={styles.closeButtonText}>
+										Close
+									</ThemedText>
+								</TouchableOpacity>
 							</View>
 						</View>
 					</View>
@@ -372,6 +502,45 @@ export const SetAppointment = () => {
 		setIsExpanded(!isExpanded);
 	};
 
+	const buttonDisable = async (id: string): Promise<boolean> => {
+		try {
+			const milestonesRef = collection(db, "milestones");
+			const q = query(milestonesRef, where("parentId", "==", user?.id)); // Match by user ID
+			const querySnapshot = await getDocs(q);
+
+			for (const doc of querySnapshot.docs) {
+				const data = doc.data();
+				// Check if milestone array contains the provided id
+				const milestone = data.milestone.find(
+					(m: { targetId: string; received: boolean }) =>
+						m.targetId === id
+				);
+
+				if (milestone) {
+					return milestone.received; // Return 'received' status if found
+				}
+			}
+
+			return false; // Default to false if no match is found
+		} catch (error) {
+			console.error("Error fetching milestone:", error);
+			return false; // Default to false in case of an error
+		}
+	};
+
+	useEffect(() => {
+		fetchBabies();
+		console.log("Trigger fetch babies");
+		console.log("Selected Baby Address", selectedBaby?.address);
+	}, []);
+
+	useEffect(() => {
+		if (babies.length === 1) {
+			setSelectedBaby(babies[0]);
+			console.log("Automatically selected baby:", babies[0]);
+		}
+	}, [babies]);
+
 	// const handleSetAppointment = async () => {
 	//   if (!selectedVaccine) return;
 
@@ -396,6 +565,56 @@ export const SetAppointment = () => {
 	//     console.log("Error", "Failed to set appointment.");
 	//   }
 	// };
+
+	useEffect(() => {
+		const updateButtonState = async () => {
+			if (!selectedVaccine || !selectedBaby || !schedules) return;
+
+			const selectedSchedule = schedules.find(
+				(schedule) => schedule.when
+			);
+			if (!selectedSchedule) return;
+
+			try {
+				// Check for existing appointment
+				const appointmentsRef = collection(db, "appointments");
+				const appointmentQuery = query(
+					appointmentsRef,
+					where("parentId", "==", user?.id),
+					where("babyId", "==", selectedBaby.id),
+					where("vaccineId", "==", selectedVaccine.id),
+					where("scheduleDate", "==", selectedSchedule.when),
+					where("address", "==", address)
+				);
+
+				const querySnapshot = await getDocs(appointmentQuery);
+
+				if (!querySnapshot.empty) {
+					const appointment = querySnapshot.docs[0].data();
+
+					// Update based on appointment status
+					const isVaccinated = appointment.status === "history";
+					setSetButtonLabel(
+						isVaccinated ? "Vaccinated" : "Already Set"
+					);
+					setIsDisabled(true); // Disable button
+					return;
+				}
+
+				// Check vaccine's received status
+				const isReceived = await buttonDisable(selectedVaccine.id);
+
+				setSetButtonLabel(
+					isReceived ? "Vaccinated" : "Set Appointment"
+				);
+				setIsDisabled(isReceived); // Disable if received
+			} catch (error) {
+				console.error("Error updating button state:", error);
+			}
+		};
+
+		updateButtonState();
+	}, [selectedVaccine, selectedBaby, schedules, user]);
 
 	useEffect(() => {
 		const loadSelectedBrgy = async () => {
@@ -592,9 +811,6 @@ const styles = StyleSheet.create({
 		fontWeight: "bold",
 		marginBottom: 8,
 	},
-	buttonContainer: {
-		marginTop: 16,
-	},
 	dropdownHeader: {
 		flexDirection: "row",
 		justifyContent: "space-between",
@@ -624,5 +840,36 @@ const styles = StyleSheet.create({
 		padding: 10,
 		textAlign: "center",
 		color: "#757575",
+	},
+
+	buttonContainer: {
+		justifyContent: "space-between",
+	},
+	button: {
+		paddingVertical: 10,
+		paddingHorizontal: 20,
+		borderRadius: 5,
+		marginVertical: 5,
+		alignItems: "center",
+		justifyContent: "center",
+	},
+	enabledButton: {
+		backgroundColor: "#456B72",
+	},
+	disabledButton: {
+		backgroundColor: "#A9A9A9", // Gray for disabled state
+	},
+	closeButton: {
+		backgroundColor: "#86b3bc",
+	},
+	buttonText: {
+		fontSize: 16,
+		color: "#FFFFFF",
+		fontWeight: "bold",
+	},
+	closeButtonText: {
+		fontSize: 16,
+		color: "#FFFFFF",
+		fontWeight: "bold",
 	},
 });

@@ -289,7 +289,7 @@ export const barangays = [
 export const vaccineSchedule = [
 	{
 		id: "bcg",
-		targetId: 'bcg',
+		targetId: "bcg",
 		vaccine: "BCG",
 		ageInMonths: 0,
 		received: false,
@@ -298,7 +298,7 @@ export const vaccineSchedule = [
 	},
 	{
 		id: "hepa",
-		targetId: 'hep_b',
+		targetId: "hep_b",
 		vaccine: "Hepatitis B",
 		ageInMonths: 0,
 		received: false,
@@ -307,7 +307,7 @@ export const vaccineSchedule = [
 	},
 	{
 		id: "penta",
-		targetId: 'pentavalent_1',
+		targetId: "pentavalent_1",
 		vaccine: "Pentavalent Vaccine (DPT-HepB-HiB) (1st dose)",
 		ageInMonths: 1.5,
 		received: false,
@@ -316,7 +316,7 @@ export const vaccineSchedule = [
 	},
 	{
 		id: "penta",
-		targetId: 'pentavalent_2',
+		targetId: "pentavalent_2",
 		vaccine: "Pentavalent Vaccine (DPT-HepB-HiB) (2nd dose)",
 		ageInMonths: 2.5,
 		received: false,
@@ -325,7 +325,7 @@ export const vaccineSchedule = [
 	},
 	{
 		id: "penta",
-		targetId: 'pentavalent_3',
+		targetId: "pentavalent_3",
 		vaccine: "Pentavalent Vaccine (DPT-HepB-HiB) (3rd dose)",
 		ageInMonths: 3.5,
 		received: false,
@@ -334,7 +334,7 @@ export const vaccineSchedule = [
 	},
 	{
 		id: "oral",
-		targetId: 'opv_1',
+		targetId: "opv_1",
 		vaccine: "Oral Polio Vaccine (1st dose)",
 		ageInMonths: 1.5,
 		received: false,
@@ -343,7 +343,7 @@ export const vaccineSchedule = [
 	},
 	{
 		id: "oral",
-		targetId: 'opv_2',
+		targetId: "opv_2",
 		vaccine: "Oral Polio Vaccine (2nd dose)",
 		ageInMonths: 2.5,
 		received: false,
@@ -352,7 +352,7 @@ export const vaccineSchedule = [
 	},
 	{
 		id: "oral",
-		targetId: 'opv_3',
+		targetId: "opv_3",
 		vaccine: "Oral Polio Vaccine (3rd dose)",
 		ageInMonths: 3.5,
 		received: false,
@@ -361,7 +361,7 @@ export const vaccineSchedule = [
 	},
 	{
 		id: "polio",
-		targetId: 'ipv',
+		targetId: "ipv",
 		vaccine: "Inactivated Polio Vaccine (IPV)",
 		ageInMonths: 3.5,
 		received: false,
@@ -370,7 +370,7 @@ export const vaccineSchedule = [
 	},
 	{
 		id: "pneumo",
-		targetId: 'pcv_1',
+		targetId: "pcv_1",
 		vaccine: "Pneumococcal Conjugate Vaccine - 13 (PCV 13) (1st dose)",
 		ageInMonths: 1.5,
 		received: false,
@@ -379,7 +379,7 @@ export const vaccineSchedule = [
 	},
 	{
 		id: "pneumo",
-		targetId: 'pcv_2',
+		targetId: "pcv_2",
 		vaccine: "Pneumococcal Conjugate Vaccine - 13 (PCV 13) (2nd dose)",
 		ageInMonths: 2.5,
 		received: false,
@@ -388,7 +388,7 @@ export const vaccineSchedule = [
 	},
 	{
 		id: "pneumo",
-		targetId: 'pcv_3',
+		targetId: "pcv_3",
 		vaccine: "Pneumococcal Conjugate Vaccine - 13 (PCV 13) (3rd dose)",
 		ageInMonths: 3.5,
 		received: false,
@@ -397,6 +397,7 @@ export const vaccineSchedule = [
 	},
 	{
 		id: "measles",
+		targetId: "mcv_1",
 		vaccine: "Measles-Containing Vaccine (MCV) MR/MMR (1st dose)",
 		ageInMonths: 9,
 		received: false,
@@ -405,6 +406,7 @@ export const vaccineSchedule = [
 	},
 	{
 		id: "measles",
+		targetId: "mcv_2",
 		vaccine: "Measles-Containing Vaccine (MCV) MR/MMR (2nd dose)",
 		ageInMonths: 12,
 		received: false,
@@ -556,7 +558,6 @@ export const termsAndConditions = [
 			"For questions or concerns regarding these terms, please contact us at immuneec@gmail.com or call (+63)-920-382-9102.",
 	},
 ];
-
 
 export const privacyAndPolicy = [
 	{

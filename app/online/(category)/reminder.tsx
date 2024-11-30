@@ -125,93 +125,28 @@ export default function Reminder() {
 		}, {} as Record<number, MilestoneList[]>)
 	).sort(([ageA], [ageB]) => Number(ageA) - Number(ageB));
 
-	// const generatePDF = async (): Promise<void> => {
-	// 	const htmlContent = `
-	//     <html>
-	//     <head>
-	//         <style>
-	//             body {
-	//                 font-family: Arial, sans-serif;
-	//                 margin: 20px;
-	//                 padding: 10px;
-	//             }
-	//             h1 {
-	//                 text-align: center;
-	//                 margin-bottom: 10px;
-	//             }
-	//             h3 {
-	//                 margin-bottom: 20px;
-	//             }
-	//             .card {
-	//                 border: 1px solid #d6d6d6;
-	//                 padding: 15px;
-	//                 margin-bottom: 10px;
-	//                 border-radius: 5px;
-	//             }
-	//             .header {
-	//                 font-size: 18px;
-	//                 font-weight: bold;
-	//                 margin-bottom: 10px;
-	//             }
-	//             .bold {
-	//                 font-weight: bold;
-	//             }
-	//             .vaccineData {
-	//                 margin-bottom: 25px;
-	//             }
-	//             .vaccineData .list {
-	//                 line-height: .7;
-	//             }
-	//         </style>
-	//     </head>
-	//     <body>
-	//         <h1>Baby Vaccination Reminders</h1>
-	// 				<h3>Name: ${babyDetails?.firstName} ${babyDetails?.lastName}</h3>
-
-	//         ${groupedMilestones
-	// 			.map(
-	// 				([age, vaccines]) => `
-	//               <div class="card">
-	//                   <div class="header">${
-	// 					age === "0"
-	// 						? "At Birth"
-	// 						: `${formatAge(Number(age))} month's`
-	// 				}</div>
-	//                   ${vaccines
-	// 					.map(
-	// 						(vaccine) => `
-	//                       <div class="vaccineData">
-	//                           <p class="list"><span class="bold">Vaccine:</span> ${
-	// 							vaccine.vaccine
-	// 						}</p>
-	//                           <p class="list"><span class="bold">Expected Date:</span> ${formatDate(
-	// 							vaccine.expectedDate
-	// 						)}</p>
-	//                           <p class="list"><span class="bold">Received:</span> ${
-	// 							vaccine.received ? "✅" : "❌"
-	// 						}</p>
-	//                       </div>
-	//                       `
-	// 					)
-	// 					.join("")}
-	//               </div>
-	//               `
-	// 			)
-	// 			.join("")}
-	//     </body>
-	//     </html>
-	//   `;
-
-	// 	// Create PDF
-	// 	const { uri } = await Print.printToFileAsync({ html: htmlContent });
-	// 	console.log("PDF generated at:", uri);
-
-	// 	// Share PDF
-	// 	await Sharing.shareAsync(uri);
-	// };
-
 	const handleDownloadPdf = () => {
 		reminderOnlineDownload(babyDetails ?? undefined, groupedMilestones);
+	};
+
+	const NoDataComponent = () => {
+		return (
+			<View className="mx-2 mt-[20%] flex justify-center items-center">
+				<Image source={noData} className="w-36 h-44 mb-2" />
+				<ThemedText type="default" className="text-base">
+					No reminders available.
+				</ThemedText>
+
+				<ThemedText type="default" className="text-base">
+					<ThemedText type="link" className="text-base underline">
+						<Link href={"/online/(auth)/profile"}>
+							Register or set{" "}
+						</Link>
+					</ThemedText>
+					first your children in your account.
+				</ThemedText>
+			</View>
+		);
 	};
 
 	return (
@@ -227,86 +162,76 @@ export default function Reminder() {
 
 			<View className="px-5 pb-5">
 				{selectedBabyId == null ? (
-					<View className="mx-2 mt-[20%] flex justify-center items-center">
-						<Image source={noData} className="w-36 h-44 mb-2" />
-						<ThemedText type="default" className="text-base">
-							No reminders available.
-						</ThemedText>
-
-						<ThemedText type="default" className="text-base">
-							<ThemedText
-								type="link"
-								className="text-base underline"
-							>
-								<Link href={"/online/(auth)/profile"}>
-									Register or set{" "}
-								</Link>
-							</ThemedText>
-							first your children in your account.
-						</ThemedText>
-					</View>
+					<NoDataComponent />
 				) : loading ? (
 					<View className="flex mt-[50%] items-center justify-center">
 						<ActivityIndicator size="large" color="#456B72" />
 					</View>
 				) : (
 					<>
-						{groupedMilestones.map(([age, vaccines]) => (
-							<CustomCard key={age}>
-								<ThemedText
-									type="cardHeader"
-									className="border-b-[1px] pb-3 border-[#d6d6d6]"
-								>
-									{formatAge(Number(age))}
-								</ThemedText>
-								{vaccines.map((vaccine, index) => (
-									<View
-										key={index}
-										className={`mx-2 mt-2 ${
-											index !== vaccines.length - 1
-												? "border-b-[1px] border-[#d6d6d6] pb-2"
-												: ""
-										}`}
-									>
-										<ThemedText type="default">
-											<ThemedText
-												type="default"
-												className="font-bold"
-											>
-												Vaccine:{" "}
-											</ThemedText>
-											{vaccine.vaccine}
+						{groupedMilestones.length > 0 ? (
+							<>
+								{groupedMilestones.map(([age, vaccines]) => (
+									<CustomCard key={age}>
+										<ThemedText
+											type="cardHeader"
+											className="border-b-[1px] pb-3 border-[#d6d6d6]"
+										>
+											{formatAge(Number(age))}
 										</ThemedText>
-										<View className="flex flex-row justify-between">
-											<ThemedText type="default">
-												<ThemedText
-													type="default"
-													className="font-bold"
-												>
-													Expected Date:{" "}
+										{vaccines.map((vaccine, index) => (
+											<View
+												key={index}
+												className={`mx-2 mt-2 ${
+													index !==
+													vaccines.length - 1
+														? "border-b-[1px] border-[#d6d6d6] pb-2"
+														: ""
+												}`}
+											>
+												<ThemedText type="default">
+													<ThemedText
+														type="default"
+														className="font-bold"
+													>
+														Vaccine:{" "}
+													</ThemedText>
+													{vaccine.vaccine}
 												</ThemedText>
-												{formatDate(
-													vaccine.expectedDate
-												)}
-											</ThemedText>
-											{vaccine.received ? (
-												<Ionicons
-													name="checkmark-circle"
-													size={20}
-													color="#4CAF50"
-												/>
-											) : (
-												<Ionicons
-													name="close-circle"
-													size={20}
-													color="#F44336"
-												/>
-											)}
-										</View>
-									</View>
+												<View className="flex flex-row justify-between">
+													<ThemedText type="default">
+														<ThemedText
+															type="default"
+															className="font-bold"
+														>
+															Expected Date:{" "}
+														</ThemedText>
+														{formatDate(
+															vaccine.expectedDate
+														)}
+													</ThemedText>
+													{vaccine.received ? (
+														<Ionicons
+															name="checkmark-circle"
+															size={20}
+															color="#4CAF50"
+														/>
+													) : (
+														<Ionicons
+															name="close-circle"
+															size={20}
+															color="#F44336"
+														/>
+													)}
+												</View>
+											</View>
+										))}
+									</CustomCard>
 								))}
-							</CustomCard>
-						))}
+							</>
+						) : (
+							<NoDataComponent />
+						)}
 					</>
 				)}
 			</View>

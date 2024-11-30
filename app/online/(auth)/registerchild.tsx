@@ -183,6 +183,7 @@ export default function RegisterChildren() {
 
 			return {
 				id: vaccine.id,
+				targetId: vaccine.targetId,
 				vaccine: vaccine.vaccine,
 				ageInMonths: vaccine.ageInMonths,
 				expectedDate: expectedDate, // Store as a date string
