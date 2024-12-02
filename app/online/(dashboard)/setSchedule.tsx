@@ -47,7 +47,7 @@ const setSchedule = () => {
 					updatedAt: data.updatedAt.toDate(), // Convert Firestore Timestamp to JavaScript Date
 				};
 			});
-	
+
 			const sortedScheduleList = scheduleList.sort(
 				(a, b) => b.updatedAt.getTime() - a.updatedAt.getTime()
 			);
@@ -102,6 +102,7 @@ const setSchedule = () => {
 			const selectedVaccines = vaccines.map((vaccine) => ({
 				id: vaccine.id,
 				name: vaccine.name,
+				cardId: vaccine.cardId,
 				description: vaccine.description,
 				count: vaccineCounts[vaccine.id] || 0,
 				taken: 0,
@@ -163,7 +164,7 @@ const setSchedule = () => {
 				text2: "Something went wrong.",
 			});
 		} finally {
-			fetchSchedules()
+			fetchSchedules();
 		}
 	};
 
@@ -222,7 +223,7 @@ const setSchedule = () => {
 			<ScheduleData
 				scheduleItems={schedules}
 				setScheduleItems={setSchedules}
-				reFetch= {fetchSchedules}
+				reFetch={fetchSchedules}
 				loading={loading}
 			/>
 

@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import { Link } from "expo-router";
 import StyledButton from "@/components/StyledButton";
 import { babyIcon, mainBottom, mainTop } from "@/assets"; // Adjusted to match the barrel export
+import { StatusBar } from "expo-status-bar";
 
 export default function StartPage() {
 	const [loading, setLoading] = useState(true);

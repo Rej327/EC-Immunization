@@ -95,7 +95,7 @@ const Home = () => {
 	const route = useRouter();
 
 	const checkOrFetchBabies = async () => {
-		setLoading(true);
+		// setLoading(true);
 		try {
 			const storedBabyId = await AsyncStorage.getItem("selectedBabyId");
 			console.log("Stored Baby ID:", storedBabyId);
@@ -128,12 +128,12 @@ const Home = () => {
 		} catch (error) {
 			console.error("Error fetching or setting baby data:", error);
 		} finally {
-			setLoading(false);
+			// setLoading(false);
 		}
 	};
 
 	const fetchMilestones = async (babyId: any) => {
-		setLoading(true);
+		// setLoading(true);
 		const milestonesRef = query(
 			collection(db, "milestones"),
 			where("babyId", "==", babyId)
@@ -154,7 +154,7 @@ const Home = () => {
 		} catch (error) {
 			console.error("Error fetching milestones: ", error);
 		} finally {
-			setLoading(false);
+			// setLoading(false);
 		}
 	};
 

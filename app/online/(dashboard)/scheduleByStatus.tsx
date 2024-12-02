@@ -40,6 +40,7 @@ import { format } from "date-fns";
 interface AppointmentData {
 	id: string;
 	vaccineId: string;
+	cardId: string,
 	babyId: string;
 	parentId: string;
 	babyFirstName: string;
@@ -205,7 +206,7 @@ export default function ScheduleByStatus() {
 				const babyData = babyDocSnap.data();
 
 				// Step 2: Find the card with the matching vaccineId
-				const vaccineId = selectedAppointment.vaccineId;
+				const vaccineId = selectedAppointment.cardId;
 				const cardIndex = babyData.card.findIndex(
 					(card: any) => card.id === vaccineId
 				);
@@ -222,7 +223,7 @@ export default function ScheduleByStatus() {
 					}
 
 					// Step 4: Add formatted date if status is "upcoming"
-					if (selectedStatus === "upcoming") {
+					if (selectedStatus === "history") {
 						const currentDate =
 							selectedAppointment.scheduleDate instanceof
 							Timestamp

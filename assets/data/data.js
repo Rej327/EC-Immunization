@@ -422,84 +422,98 @@ export const vaccineSchedule = [
 export const vaccines = [
 	{
 		id: "bcg",
+		cardId: "bcg",
 		name: "BCG",
 		description:
 			"Bacillus Calmette-Guérin (BCG) vaccine protects against tuberculosis (TB), particularly severe forms in children like TB meningitis.",
 	},
 	{
 		id: "hep_b",
+		cardId: "hepa",
 		name: "Hepatitis B",
 		description:
 			"Prevents Hepatitis B virus (HBV) infection, which can cause chronic liver disease and liver cancer.",
 	},
 	{
 		id: "pentavalent_1",
+		cardId: "penta",
 		name: "Pentavalent Vaccine (1st dose)",
 		description:
 			"Combines protection against 5 diseases: diphtheria (D), pertussis (P), tetanus (T), hepatitis B (HB), and Haemophilus influenzae type B (Hib).",
 	},
 	{
 		id: "pentavalent_2",
+		cardId: "penta",
 		name: "Pentavalent Vaccine (2nd dose)",
 		description:
 			"Combines protection against 5 diseases: diphtheria (D), pertussis (P), tetanus (T), hepatitis B (HB), and Haemophilus influenzae type B (Hib).",
 	},
 	{
 		id: "pentavalent_3",
+		cardId: "penta",
 		name: "Pentavalent Vaccine (3rd dose)",
 		description:
 			"Combines protection against 5 diseases: diphtheria (D), pertussis (P), tetanus (T), hepatitis B (HB), and Haemophilus influenzae type B (Hib).",
 	},
 	{
 		id: "opv_1",
+		cardId: "oral",
 		name: "Oral Polio Vaccine (1st dose)",
 		description:
 			"Oral Polio Vaccine (OPV) protects against poliovirus, which can lead to paralysis.",
 	},
 	{
 		id: "opv_2",
+		cardId: "oral",
 		name: "Oral Polio Vaccine (2nd dose)",
 		description:
 			"Oral Polio Vaccine (OPV) protects against poliovirus, which can lead to paralysis.",
 	},
 	{
 		id: "opv_3",
+		cardId: "oral",
 		name: "Oral Polio Vaccine (3rd dose)",
 		description:
 			"Oral Polio Vaccine (OPV) protects against poliovirus, which can lead to paralysis.",
 	},
 	{
 		id: "ipv",
+		cardId: "polio",
 		name: "Inactivated Polio Vaccine (IPV)",
 		description:
 			"IPV is an injected polio vaccine that boosts immunity against poliovirus, complementing the oral vaccine.",
 	},
 	{
 		id: "pcv_1",
+		cardId: "pneumo",
 		name: "PCV 13 (1st dose)",
 		description:
 			"First dose of PCV for complete protection against pneumococcal diseases.",
 	},
 	{
 		id: "pcv_2",
+		cardId: "pneumo",
 		name: "PCV 13 (2nd dose)",
 		description:
 			"Second dose of PCV for complete protection against pneumococcal diseases.",
 	},
 	{
 		id: "pcv_3",
+		cardId: "pneumo",
 		name: "PCV 13 (3rd dose)",
 		description:
 			"Third and last dose of PCV for complete protection against pneumococcal diseases.",
 	},
 	{
 		id: "mcv_1",
+		cardId: "measles",
 		name: "(MCV) MR/MMR (1st dose)",
 		description:
 			"First dose of MR vaccine ensures long-lasting protection against measles and rubella.",
 	},
 	{
 		id: "mcv_2",
+		cardId: "measles",
 		name: "(MCV) MR/MMR (2nd dose)",
 		description:
 			"Second and last dose of MR vaccine ensures long-lasting protection against measles and rubella.",

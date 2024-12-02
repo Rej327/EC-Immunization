@@ -66,6 +66,7 @@ interface AppointmentData {
 	parentId: string;
 	parentName: string;
 	babyFirstName: string;
+	cardId: string;
 	address: string;
 	babyLastName: string;
 	vaccine: string;
@@ -200,6 +201,7 @@ export const SetAppointment: React.FC<SetAppointmentProps> = ({ refresh }) => {
 				babyId: selectedBaby?.id || "",
 				vaccine: selectedVaccine.name,
 				vaccineId: selectedVaccine.id,
+				cardId: selectedVaccine.cardId,
 				address: address,
 				scheduleDate: selectedSchedule?.when || null,
 				status: "upcoming",
@@ -494,7 +496,11 @@ export const SetAppointment: React.FC<SetAppointmentProps> = ({ refresh }) => {
 	const buttonDisable = async (id: string): Promise<boolean> => {
 		try {
 			const milestonesRef = collection(db, "milestones");
-			const q = query(milestonesRef, where("parentId", "==", user?.id)); // Match by user ID
+			const q = query(
+				milestonesRef,
+				where("parentId", "==", user?.id),
+				where("babyId", "==", selectedBaby?.id)
+			); // Match by user ID
 			const querySnapshot = await getDocs(q);
 
 			for (const doc of querySnapshot.docs) {
