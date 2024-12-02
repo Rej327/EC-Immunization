@@ -9,6 +9,7 @@ import { generatePDF } from "@/helper/downloadPdf";
 import { Link } from "expo-router";
 import TermsAndConditionsModal from "@/app/TermsAndConditionsModal ";
 import PrivacyPolicyModal from "@/app/PrivacyPolicyModal";
+import { appVersion } from "@/assets/data/data";
 
 type CustomDrawerContentProps = {
 	navigation: any; // Adjust to match your type
@@ -151,7 +152,7 @@ const CustomDrawerContent: React.FC<CustomDrawerContentProps> = ({
 						/>
 						<View style={styles.footerText}>
 							<ThemedText type="link" style={styles.footerLink}>
-								Version 1.0.0
+								{appVersion.version}
 							</ThemedText>
 							<Link
 								href={

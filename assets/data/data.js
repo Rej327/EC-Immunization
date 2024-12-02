@@ -1,3 +1,7 @@
+export const appVersion = {
+	version: "V 2.1.1",
+};
+
 export const healthTipsData = [
 	{
 		category: "Nutrition",

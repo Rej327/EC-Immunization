@@ -11,6 +11,8 @@ import {
 	ActivityIndicator,
 	Image,
 	RefreshControl,
+	Pressable,
+	Touchable,
 } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import {
@@ -42,6 +44,7 @@ interface AppointmentData {
 	parentId: string;
 	babyFirstName: string;
 	babyLastName: string;
+	address: string;
 	parentName: string;
 	scheduleDate: any; // Firestore timestamp
 	vaccine: string;
@@ -61,7 +64,6 @@ export default function ScheduleByStatus() {
 	const [loading, setLoading] = useState(true);
 	const [selectedStatus, setSelectedStatus] = useState<string>("");
 	const [refreshing, setRefreshing] = useState(false);
-	const [selectedBabyId, setSelectedBabyId] = useState<string | null>(null);
 	const [showInput, setShowInput] = useState(false);
 	const [remarksData, setRemarksData] = useState("");
 	const debouncedSearchQuery = useDebounce(searchQuery, 500);
@@ -84,9 +86,9 @@ export default function ScheduleByStatus() {
 				collection(db, "appointments"),
 				where("status", "==", scheduleByStats) // Query based on the status
 			);
-	
+
 			const querySnapshot = await getDocs(appointmentsQuery);
-	
+
 			const fetchedAppointments: AppointmentData[] =
 				querySnapshot.docs.map((doc) => ({
 					id: doc.id, // Store the document ID for updating
@@ -94,12 +96,12 @@ export default function ScheduleByStatus() {
 					scheduleDate: doc.data().scheduleDate.toDate(), // Convert Firestore timestamp to JS Date
 					updatedAt: doc.data().updatedAt.toDate(), // Convert updatedAt to JS Date
 				})) as AppointmentData[];
-	
+
 			// Sort by updatedAt in descending order
 			const sortedAppointments = fetchedAppointments.sort(
 				(a, b) => b.updatedAt.getTime() - a.updatedAt.getTime()
 			);
-	
+
 			setAppointments(sortedAppointments);
 			setFilteredAppointments(sortedAppointments); // Set filteredAppointments initially
 		} catch (error) {
@@ -108,7 +110,6 @@ export default function ScheduleByStatus() {
 			setLoading(false);
 		}
 	};
-	
 
 	useEffect(() => {
 		fetchAppointments();
@@ -137,7 +138,7 @@ export default function ScheduleByStatus() {
 		setSearchQuery(text);
 	};
 
-	const handleUpdateStatus = async () => {
+	const handleUpdateStatus = async (parentId: any) => {
 		if (!selectedAppointment) return;
 
 		// Ensure that the user data is loaded
@@ -270,6 +271,7 @@ export default function ScheduleByStatus() {
 			pressCancel();
 			setSelectedAppointment(null);
 			setRemarksData(""); // Clear remarks data
+			handleRoute(parentId);
 		}
 	};
 
@@ -292,6 +294,13 @@ export default function ScheduleByStatus() {
 		});
 	};
 
+	const handleReRoute = () => {
+		const appointment = filteredAppointments.find((app) => app.parentId);
+		if (appointment) {
+			handleUpdateStatus(appointment.parentId);
+		}
+	};
+
 	if (loading) {
 		return (
 			<View style={styles.loadingContainer}>
@@ -299,10 +308,6 @@ export default function ScheduleByStatus() {
 			</View>
 		);
 	}
-
-	const disableAction = () => {
-		return selectedStatus === "upcoming" ? true : false;
-	};
 
 	// Render each appointment item
 	const renderAppointment = ({ item }: { item: AppointmentData }) => (
@@ -328,11 +333,12 @@ export default function ScheduleByStatus() {
 				Baby: {item.babyFirstName} {item.babyLastName}
 			</ThemedText>
 			<ThemedText type="default">Vaccine: {item.vaccine}</ThemedText>
+			<ThemedText type="default">Address: {item.address}</ThemedText>
 			<ThemedText type="default">
 				Schedule Date: {formatDate(item.scheduleDate)}
 			</ThemedText>
 			<ThemedText type="default" className="capitalize">
-				Status: {item.status === 'history' ? 'Vaccinated' : 'Upcoming'}
+				Status: {item.status === "history" ? "Vaccinated" : "Upcoming"}
 			</ThemedText>
 			<View>
 				<ThemedText className="absolute bottom-1 right-1">
@@ -419,43 +425,6 @@ export default function ScheduleByStatus() {
 							{selectedAppointment?.babyLastName}
 						</ThemedText>
 
-						{/* Status Selection */}
-						<TouchableOpacity
-							onPress={() => setSelectedStatus("pending")}
-							disabled={disableAction()}
-						>
-							<View
-								className="flex flex-row-reverse justify-between"
-								style={
-									selectedStatus === "pending"
-										? styles.selectedOption
-										: styles.option
-								}
-							>
-								<Ionicons
-									name={
-										selectedStatus === "pending"
-											? "checkmark-circle"
-											: "radio-button-off"
-									}
-									size={24}
-									color={
-										selectedStatus === "pending"
-											? "#456B72"
-											: "#ccc"
-									}
-								/>
-								<ThemedText
-									style={
-										selectedStatus === "pending"
-											? styles.selectedOptionText
-											: styles.optionText
-									}
-								>
-									Pending
-								</ThemedText>
-							</View>
-						</TouchableOpacity>
 						<TouchableOpacity
 							onPress={() => setSelectedStatus("upcoming")}
 						>
@@ -563,22 +532,34 @@ export default function ScheduleByStatus() {
 
 						{/* Update Button */}
 						<View className="mt-2">
-							<StyledButton
-								title="Update Status"
-								onPress={handleUpdateStatus}
-								paddingVertical={10}
-								fontSize={14}
-								borderRadius={12}
-							/>
-							<StyledButton
-								title="Cancel"
+							<TouchableOpacity
+								onPress={handleReRoute}
+								style={[
+									styles.buttonContainer,
+									selectedStatus === "upcoming" &&
+										styles.disableButtonContainer, // Apply disabled style conditionally
+								]}
+								disabled={selectedStatus === "upcoming"} // Disable interaction
+							>
+								<ThemedText
+									style={[
+										styles.buttonText,
+										selectedStatus === "upcoming" &&
+											styles.disableButtonText, // Apply disabled text style conditionally
+									]}
+								>
+									Update Status
+								</ThemedText>
+							</TouchableOpacity>
+
+							<TouchableOpacity
 								onPress={() => pressCancel()}
-								paddingVertical={10}
-								fontSize={14}
-								borderRadius={12}
-								bgColor="#DAE9EA" // Fixed duplicate #
-								textColor="#456B72"
-							/>
+								style={styles.cancelButtonContainer}
+							>
+								<ThemedText style={styles.cancelButtonText}>
+									Cancel
+								</ThemedText>
+							</TouchableOpacity>
 						</View>
 					</View>
 				</View>
@@ -663,5 +644,42 @@ const styles = StyleSheet.create({
 	},
 	optionText: {
 		fontWeight: "500",
+	},
+	buttonContainer: {
+		paddingVertical: 7,
+		alignItems: "center",
+		borderColor: "#456B72",
+		backgroundColor: "#456B72",
+		borderWidth: 1,
+		justifyContent: "center",
+		marginVertical: 2,
+		borderRadius: 12,
+	},
+	disableButtonContainer: {
+		backgroundColor: "#E0E0E0",
+		borderColor: "#B0B0B0", // Optional border color for disabled state
+	},
+	buttonText: {
+		fontSize: 14,
+		color: "white",
+		fontWeight: "bold",
+	},
+	disableButtonText: {
+		color: "#9E9E9E", // Faded color for disabled text
+	},
+	cancelButtonContainer: {
+		paddingVertical: 7,
+		alignItems: "center",
+		borderColor: "#456B72",
+		backgroundColor: "#DAE9EA",
+		borderWidth: 1,
+		justifyContent: "center",
+		marginVertical: 2,
+		borderRadius: 12,
+	},
+	cancelButtonText: {
+		fontSize: 14,
+		fontWeight: "bold",
+		color: "#456B72",
 	},
 });
