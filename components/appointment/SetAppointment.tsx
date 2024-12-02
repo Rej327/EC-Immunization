@@ -6,6 +6,7 @@ import {
 	Modal,
 	Button,
 	Pressable,
+	ActivityIndicator,
 } from "react-native";
 import { ThemedText } from "../ThemedText";
 import { barangays } from "@/assets/data/data";
@@ -25,6 +26,10 @@ import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useUser } from "@clerk/clerk-expo";
 import Toast from "react-native-toast-message";
+
+interface SetAppointmentProps {
+  refresh: () => void; 
+}
 
 interface Vaccine {
 	id: string;
@@ -53,6 +58,7 @@ interface SelectedBaby {
 
 interface AppointmentData {
 	id?: string;
+	scheduleId: string;
 	babyId: string;
 	vaccineId: string;
 	parentId: string;
@@ -66,8 +72,9 @@ interface AppointmentData {
 	createdAt: Date;
 	updatedAt: Date;
 }
-
-export const SetAppointment = () => {
+export const SetAppointment: React.FC<SetAppointmentProps> = ({
+  refresh,
+}) => {
 	const [address, setAddress] = useState("");
 	const [schedules, setSchedules] = useState<Schedule[]>([]);
 	const [loading, setLoading] = useState(false);
@@ -151,7 +158,6 @@ export const SetAppointment = () => {
 	};
 
 	const handleSubmit = async () => {
-		setLoading(true)
 		try {
 			// Find the selected schedule, ensure it's not undefined
 			const selectedSchedule = schedules.find(
@@ -184,27 +190,9 @@ export const SetAppointment = () => {
 				return;
 			}
 
-			if (selectedBaby?.address !== address) {
-				Toast.show({
-					type: "error",
-					text1: "Invalid Address",
-					text2: `You can set appointment only in ${selectedBaby?.address}`,
-				});
-				return;
-			}
-
-			// Check if the `taken` is equal to `count`
-			if (selectedVaccineDetails.taken >= selectedVaccineDetails.count) {
-				Toast.show({
-					type: "error",
-					text1: "Invalid Slot",
-					text2: "Vaccine is not available or all doses are already been taken",
-				});
-				return;
-			}
-
 			// Prepare the appointment data
 			const appointmentData: AppointmentData = {
+				scheduleId: selectedSchedule?.id || "",
 				parentId: user?.id || "",
 				parentName: `${user?.firstName} ${user?.lastName}`.trim(),
 				babyFirstName: selectedBaby?.firstName || "",
@@ -249,8 +237,9 @@ export const SetAppointment = () => {
 				text2: "An error occurred while submitting the appointment.",
 			});
 		} finally {
-			setLoading(false)
-			setModalVisible(false)
+			// await fetchSchedules(address);
+			refresh();
+			setModalVisible(false);
 		}
 	};
 
@@ -541,31 +530,6 @@ export const SetAppointment = () => {
 		}
 	}, [babies]);
 
-	// const handleSetAppointment = async () => {
-	//   if (!selectedVaccine) return;
-
-	//   try {
-	//     await addDoc(collection(db, "appointments"), {
-	// 			parentId: user?.id || "",
-	// 			parentName: user?.firstName + " " + user?.lastName,
-	// 			babyFirstName: selectedBaby.firstName,
-	// 			babyLastName: selectedBaby.lastName,
-	// 			babyId: selectedBaby.id,
-	// 			vaccine: vaccineName,
-	// 			vaccineId: vaccineId,
-	// 			scheduleDate: appointmentDate,
-	// 			status: "pending",
-	// 			createdAt: new Date(),
-	// 			updatedAt: new Date(),
-	//     });
-	//     console.log("Success", "Appointment successfully set!");
-	//     setModalVisible(false);
-	//   } catch (error) {
-	//     console.error("Error setting appointment:", error);
-	//     console.log("Error", "Failed to set appointment.");
-	//   }
-	// };
-
 	useEffect(() => {
 		const updateButtonState = async () => {
 			if (!selectedVaccine || !selectedBaby || !schedules) return;
@@ -576,7 +540,6 @@ export const SetAppointment = () => {
 			if (!selectedSchedule) return;
 
 			try {
-				// Check for existing appointment
 				const appointmentsRef = collection(db, "appointments");
 				const appointmentQuery = query(
 					appointmentsRef,
@@ -589,25 +552,50 @@ export const SetAppointment = () => {
 
 				const querySnapshot = await getDocs(appointmentQuery);
 
+				// If an appointment is found, update the button state
 				if (!querySnapshot.empty) {
 					const appointment = querySnapshot.docs[0].data();
 
-					// Update based on appointment status
-					const isVaccinated = appointment.status === "history";
-					setSetButtonLabel(
-						isVaccinated ? "Vaccinated" : "Already Set"
-					);
+					if (appointment.status === "history") {
+						setSetButtonLabel("Vaccinated");
+						setIsDisabled(true); // Disable button
+					} else {
+						setSetButtonLabel("Already Set");
+						setIsDisabled(true); // Disable button
+					}
+					return;
+				}
+
+				if (selectedBaby?.address !== address) {
+					setSetButtonLabel("Address Mismatch");
+					setIsDisabled(true); // Disable button
+					return;
+				}
+
+				// Additional condition: Check vaccine dose completion
+				const selectedVaccineDetails = selectedSchedule.vaccines.find(
+					(vaccine) => vaccine.id === selectedVaccine.id
+				);
+
+				if (
+					selectedVaccineDetails &&
+					selectedVaccineDetails.taken >= selectedVaccineDetails.count
+				) {
+					setSetButtonLabel("Not Available");
 					setIsDisabled(true); // Disable button
 					return;
 				}
 
 				// Check vaccine's received status
-				const isReceived = await buttonDisable(selectedVaccine.id);
+				const disabled = await buttonDisable(selectedVaccine.id);
 
-				setSetButtonLabel(
-					isReceived ? "Vaccinated" : "Set Appointment"
-				);
-				setIsDisabled(isReceived); // Disable if received
+				if (disabled) {
+					setSetButtonLabel("Vaccinated");
+					setIsDisabled(true); // Disable button
+				} else {
+					setSetButtonLabel("Set Appointment");
+					setIsDisabled(false); // Enable button
+				}
 			} catch (error) {
 				console.error("Error updating button state:", error);
 			}
@@ -706,9 +694,16 @@ export const SetAppointment = () => {
 			)}
 
 			{loading ? (
-				<ThemedText type="default" style={styles.loadingText}>
-					Loading schedules...
-				</ThemedText>
+				<View
+					style={{
+						flex: 1,
+						justifyContent: "center",
+						alignItems: "center",
+						marginVertical: 10,
+					}}
+				>
+					<ActivityIndicator size="large" color="#456B72" />
+				</View>
 			) : schedules.length > 0 ? (
 				renderMasonryCards(
 					schedules.flatMap((schedule) => schedule.vaccines)

@@ -1,6 +1,5 @@
 import {
 	View,
-	Text,
 	ScrollView,
 	RefreshControl,
 	TouchableOpacity,
@@ -14,21 +13,19 @@ import React, { useCallback, useEffect, useState } from "react";
 import { useUser } from "@clerk/clerk-expo";
 import { ThemedText } from "@/components/ThemedText";
 import CustomBottomSheet from "@/components/CustomBottomSheet";
-import StyledButton from "../StyledButton";
 import { db } from "@/db/firebaseConfig"; // Import Firestore config
 import {
 	collection,
 	getDocs,
 	query,
 	where,
-	addDoc,
 	deleteDoc,
 	doc,
+	getDoc,
+	updateDoc,
 } from "firebase/firestore";
 import { Ionicons } from "@expo/vector-icons";
-import Toast from "react-native-toast-message"; // Ensure you have this installed
-import DateTimePicker from "@react-native-community/datetimepicker";
-import { events, milestones as miles } from "@/assets/data/data";
+import Toast from "react-native-toast-message";
 import { noData, vaccine } from "@/assets";
 import { formatDate } from "@/helper/helper";
 import { SetAppointment } from "./SetAppointment";
@@ -50,6 +47,7 @@ interface VaccineSelection {
 
 interface AppointmentData {
 	id?: string;
+	scheduleId: string;
 	babyId: string;
 	vaccineId: string;
 	parentId: string;
@@ -57,6 +55,7 @@ interface AppointmentData {
 	babyFirstName: string;
 	babyLastName: string;
 	vaccine: string;
+	address: string;
 	scheduleDate: Date;
 	status: string;
 	createdAt: Date;
@@ -67,10 +66,7 @@ const AppointmentNewBody = () => {
 	const { user } = useUser(); // Get logged-in user from Clerk
 	const [refreshing, setRefreshing] = useState(false);
 	const [vaccineName, setVaccineName] = useState("");
-	const [vaccineId, setVaccineId] = useState("");
 	const [openBottomSheet, setOpenBottomSheet] = useState<string | null>(null);
-	const [isBottomSheetOpen, setBottomSheetOpen] = useState(false);
-	const [showDropdown, setShowDropdown] = useState(false);
 	const [selectedBaby, setSelectedBaby] = useState<SelectedBaby | null>(null);
 	const [babies, setBabies] = useState<SelectedBaby[]>([]);
 	const [milestones, setMilestones] = useState<VaccineSelection[]>([]);
@@ -79,7 +75,6 @@ const AppointmentNewBody = () => {
 	);
 	const [loading, setLoading] = useState(false); // Add loading state
 	const [componentLoad, setComponentLoad] = useState(false); // Add loading state
-	const [showDatePicker, setShowDatePicker] = useState(false);
 	const [isModalVisible, setIsModalVisible] = useState(false);
 	const [appointmentToDelete, setAppointmentToDelete] = useState(null);
 
@@ -88,14 +83,11 @@ const AppointmentNewBody = () => {
 	>(null);
 	const [appointments, setAppointments] = useState<{
 		upcoming: AppointmentData[];
-		pending: AppointmentData[];
 		history: AppointmentData[];
 	}>({
 		upcoming: [],
-		pending: [],
 		history: [],
 	});
-	const [formLoad, setFormLoad] = useState(false);
 
 	// Fetch babies for the logged-in user
 	const fetchBabies = useCallback(async () => {
@@ -185,6 +177,8 @@ const AppointmentNewBody = () => {
 						babyFirstName: data.babyFirstName,
 						babyLastName: data.babyLastName,
 						vaccine: data.vaccine,
+						scheduleId: data.scheduleId,
+						address: data.address,
 						scheduleDate: data.scheduleDate.toDate(), // Convert Firestore timestamp to JS Date
 						status: data.status,
 						createdAt: data.createdAt.toDate(), // Convert Firestore timestamp to JS Date
@@ -202,9 +196,6 @@ const AppointmentNewBody = () => {
 			const categorizedAppointments = {
 				upcoming: sortedAppointments.filter(
 					(appointment) => appointment.status === "upcoming"
-				),
-				pending: sortedAppointments.filter(
-					(appointment) => appointment.status === "pending"
 				),
 				history: sortedAppointments.filter(
 					(appointment) => appointment.status === "history"
@@ -236,27 +227,70 @@ const AppointmentNewBody = () => {
 	}, [fetchBabies]);
 
 	const handleDeleteAppointment = async (appointmentId: string) => {
-		// setComponentLoad(true);
 		try {
-			await deleteDoc(doc(db, "appointments", appointmentId)); // Delete the appointment document
+			// Fetch the appointment details to get scheduleId and vaccineId
+			const appointmentDoc = await getDoc(
+				doc(db, "appointments", appointmentId)
+			);
+			if (!appointmentDoc.exists()) {
+				throw new Error("Appointment not found.");
+			}
+
+			const appointmentData = appointmentDoc.data();
+			const { vaccineId, scheduleId } = appointmentData;
+
+			// Delete the appointment
+			await deleteDoc(doc(db, "appointments", appointmentId));
+
+			// Fetch the corresponding schedule by scheduleId
+			const scheduleDoc = await getDoc(doc(db, "schedules", scheduleId));
+			if (!scheduleDoc.exists()) {
+				throw new Error("Schedule not found.");
+			}
+
+			const scheduleData = scheduleDoc.data();
+
+			// Locate the specific vaccine in the schedule's vaccines array
+			const vaccineIndex = scheduleData.vaccines.findIndex(
+				(vaccine: { id: string }) => vaccine.id === vaccineId
+			);
+
+			if (vaccineIndex !== -1) {
+				const updatedVaccines = [...scheduleData.vaccines];
+				const currentVaccine = updatedVaccines[vaccineIndex];
+
+				// Decrement the `taken` count if it's greater than 0
+				if (currentVaccine.taken > 0) {
+					updatedVaccines[vaccineIndex] = {
+						...currentVaccine,
+						taken: currentVaccine.taken - 1,
+					};
+
+					// Update the schedule document with the decremented value
+					await updateDoc(doc(db, "schedules", scheduleId), {
+						vaccines: updatedVaccines,
+						updatedAt: new Date(),
+					});
+				}
+			}
+
+			// Show success toast
 			Toast.show({
 				type: "success",
 				text1: "Appointment Deleted",
-				text2: "The appointment has been successfully deleted.",
+				text2: "The appointment and vaccine data have been updated.",
 				position: "top",
 			});
-			// Optionally refresh the appointments here or update state
 		} catch (error) {
 			console.error("Error deleting appointment:", error);
 			Toast.show({
 				type: "error",
 				text1: "Error",
-				text2: "Failed to delete appointment.",
+				text2: "Failed to delete appointment and update vaccine data.",
 				position: "top",
 			});
 		} finally {
-			fetchAppointments();
-			// setComponentLoad(false);
+			fetchAppointments(); // Optionally refresh the appointments
 		}
 	};
 
@@ -269,6 +303,7 @@ const AppointmentNewBody = () => {
 		if (appointmentToDelete) {
 			handleDeleteAppointment(appointmentToDelete);
 		}
+		setOpenBottomSheet(null);
 		setIsModalVisible(false); // Hide modal after confirmation
 	};
 
@@ -280,14 +315,6 @@ const AppointmentNewBody = () => {
 		fetchBabies(); // Fetch babies on component mount
 		fetchAppointments();
 	}, [fetchAppointments]);
-
-	if (componentLoad) {
-		return (
-			<View style={styles.loadingComponentOverlay}>
-				<ActivityIndicator size="large" color="#456B72" />
-			</View>
-		);
-	}
 
 	if (loading) {
 		return (
@@ -311,7 +338,7 @@ const AppointmentNewBody = () => {
 				scrollEnabled={!openBottomSheet}
 			>
 				{/* Button to open bottom sheet */}
-				<SetAppointment />
+				<SetAppointment refresh={onRefresh} />
 				{/* STATUS HEADER */}
 				<View className="flex flex-row gap-2 justify-between mb-4">
 					<View className="border-b-[1px] border-[#d6d6d6] shadow-xl w-[25%] mb-2"></View>
@@ -319,48 +346,6 @@ const AppointmentNewBody = () => {
 						Appointment Status
 					</ThemedText>
 					<View className="border-b-[1px] border-[#d6d6d6] shadow-xl w-[25%] mb-2"></View>
-				</View>
-
-				{/* PENDING SECTION */}
-				<View>
-					<View style={styles.header}>
-						<ThemedText type="cardHeader">Pending</ThemedText>
-						<TouchableOpacity
-							onPress={() => openBottomSheetHandler("pending")}
-						>
-							<ThemedText type="link">View all</ThemedText>
-						</TouchableOpacity>
-					</View>
-					{appointments.pending.length === 0 ? (
-						<View style={styles.card}>
-							<Image
-								source={noData}
-								className="w-12 mx-auto h-16 mb-2 opacity-40"
-							/>
-							<ThemedText type="default" style={styles.emptyText}>
-								No pending schedule
-							</ThemedText>
-						</View>
-					) : (
-						appointments.pending
-							.slice(0, 2)
-							.map((appointment, index) => (
-								<View key={index} style={styles.card}>
-									<ThemedText type="cardHeader">
-										{appointment.babyFirstName}{" "}
-										{appointment.babyLastName}
-									</ThemedText>
-									<ThemedText type="default">
-										Vaccine: {appointment.vaccine}
-									</ThemedText>
-									<ThemedText type="date" style={styles.date}>
-										When:{" "}
-										{formatDate(appointment.scheduleDate)}
-										{/* Format the date as needed */}
-									</ThemedText>
-								</View>
-							))
-					)}
 				</View>
 
 				{/* UPCOMING SECTION */}
@@ -395,7 +380,10 @@ const AppointmentNewBody = () => {
 									<ThemedText type="default">
 										Vaccine: {appointment.vaccine}
 									</ThemedText>
-									<ThemedText type="date" style={styles.date}>
+									<ThemedText type="default">
+										Address: {appointment.address}
+									</ThemedText>
+									<ThemedText type="default">
 										When:{" "}
 										{formatDate(appointment.scheduleDate)}
 										{/* Format the date as needed */}
@@ -421,7 +409,7 @@ const AppointmentNewBody = () => {
 								source={noData}
 								className="w-12 mx-auto h-16 mb-2 opacity-40"
 							/>
-							<ThemedText type="default" className="text-center">
+							<ThemedText type="default" style={styles.emptyText}>
 								No history
 							</ThemedText>
 						</View>
@@ -437,7 +425,10 @@ const AppointmentNewBody = () => {
 									<ThemedText type="default">
 										Vaccine: {appointment.vaccine}
 									</ThemedText>
-									<ThemedText type="date" style={styles.date}>
+									<ThemedText type="default">
+										Address: {appointment.address}
+									</ThemedText>
+									<ThemedText type="default">
 										Vaccinated on:{" "}
 										{formatDate(appointment.scheduleDate)}
 										{/* Format the date as needed */}
@@ -450,61 +441,6 @@ const AppointmentNewBody = () => {
 
 			{/* Overlay to prevent interaction with outer components */}
 			{openBottomSheet && <View style={styles.overlay} />}
-
-			{/* CUSTOM BOTTOM SHEET FOR PENDING */}
-			<CustomBottomSheet
-				isOpen={openBottomSheet === "pending"}
-				onClose={closeBottomSheetHandler}
-				title="Pending Appointments"
-			>
-				{appointments.pending.length === 0 ? (
-					<View>
-						<Image
-							source={noData}
-							className="w-12 mx-auto mt-2 h-16 mb-2 opacity-40"
-						/>
-						<ThemedText type="default" style={styles.emptyText}>
-							No pending schedule
-						</ThemedText>
-					</View>
-				) : (
-					appointments.pending.map((appointment, index) => (
-						<View
-							key={index}
-							style={getViewAllStyle(
-								index,
-								appointments.pending.length
-							)}
-						>
-							<ThemedText type="cardHeader">
-								{appointment.babyFirstName}{" "}
-								{appointment.babyLastName}
-							</ThemedText>
-							<ThemedText type="default">
-								Vaccine: {appointment.vaccine}
-							</ThemedText>
-							<ThemedText type="date" style={styles.date}>
-								When:{" "}
-								{appointment.scheduleDate.toLocaleDateString()}
-							</ThemedText>
-
-							{/* Add delete button */}
-							<TouchableOpacity
-								onPress={() =>
-									handleDeletePress(appointment.id)
-								} // Trigger delete confirmation
-								style={styles.deleteButton}
-							>
-								<Ionicons
-									name="trash"
-									color={"#fff"}
-									size={14}
-								/>
-							</TouchableOpacity>
-						</View>
-					))
-				)}
-			</CustomBottomSheet>
 
 			{/* CUSTOM BOTTOM SHEET FOR UPCOMING */}
 			<CustomBottomSheet
@@ -538,10 +474,27 @@ const AppointmentNewBody = () => {
 							<ThemedText type="default">
 								Vaccine: {appointment.vaccine}
 							</ThemedText>
-							<ThemedText type="date" style={styles.date}>
-								When: {formatDate(appointment.scheduleDate)}
-								{/* Format the date as needed */}
+							<ThemedText type="default">
+								Address: {appointment.address}
 							</ThemedText>
+							<ThemedText type="default">
+								When:{" "}
+								{appointment.scheduleDate.toLocaleDateString()}
+							</ThemedText>
+
+							{/* Add delete button */}
+							<TouchableOpacity
+								onPress={() =>
+									handleDeletePress(appointment.id)
+								} // Trigger delete confirmation
+								style={styles.deleteButton}
+							>
+								<Ionicons
+									name="trash"
+									color={"#fff"}
+									size={14}
+								/>
+							</TouchableOpacity>
 						</View>
 					))
 				)}
@@ -578,6 +531,9 @@ const AppointmentNewBody = () => {
 							</ThemedText>
 							<ThemedText type="default">
 								Vaccine: {appointment.vaccine}
+							</ThemedText>
+							<ThemedText type="default">
+								Address: {appointment.address}
 							</ThemedText>
 							<ThemedText type="date">
 								Vaccinated on:{" "}
