@@ -30,6 +30,7 @@ export default function Logout() {
 			await AsyncStorage.removeItem("milestones");
 			await AsyncStorage.removeItem("appointments");
 			await AsyncStorage.removeItem("notifications");
+			await AsyncStorage.removeItem("schedules");
 
 			await AsyncStorage.removeItem("userPassword");
 			await AsyncStorage.removeItem("selectedBabyId");

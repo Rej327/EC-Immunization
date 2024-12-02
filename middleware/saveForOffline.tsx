@@ -8,7 +8,9 @@ import {
 	Milestone,
 	MilestoneData,
 	Notification,
+	Schedules,
 	UserData,
+	VaccineSchedule,
 } from "@/types/types";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { format, formatDistanceToNow } from "date-fns";
@@ -105,6 +107,7 @@ export const saveForOffline = async (userId: any) => {
 				babyFirstName: data.babyFirstName,
 				babyLastName: data.babyLastName,
 				vaccine: data.vaccine,
+				address: data.address,
 				status: data.status,
 				scheduleDate: data.scheduleDate.toDate(),
 				createdAt: data.createdAt.toDate(),
@@ -164,7 +167,7 @@ export const saveForOffline = async (userId: any) => {
 
 		const notificationsRef = query(
 			collection(db, "notifications"),
-			where("receiverId", "in", [userId, 'all'])
+			where("receiverId", "in", [userId, "all"])
 		);
 		const notificationsSnapshot = await getDocs(notificationsRef);
 
@@ -242,6 +245,49 @@ export const saveForOffline = async (userId: any) => {
 				}))
 			)
 		);
+
+		// 7. Fetch schedules where completed is false
+		const schedulesRef = query(
+			collection(db, "schedules"),
+			where("completed", "==", false)
+		);
+		const schedulesSnapshot = await getDocs(schedulesRef);
+
+		const schedules: Schedules[] = schedulesSnapshot.docs.map((doc) => {
+			const data = doc.data();
+
+			const createdAt = data.createdAt?.toDate
+				? data.createdAt.toDate()
+				: new Date(data.createdAt);
+			const updatedAt = data.updatedAt?.toDate
+				? data.updatedAt.toDate()
+				: new Date(data.updatedAt);
+
+			// Ensure we get vaccines from the `card` field, fallback to empty array if not present
+			const vaccines: VaccineSchedule[] = (data.vaccines || []).map(
+				(vaccines: any) => ({
+					count: vaccines.count,
+					description: vaccines.description,
+					id: vaccines.id,
+					name: vaccines.name,
+					taken: vaccines.taken,
+				})
+			);
+
+			// Return the schedule object that matches the Schedules interface
+			return {
+				id: doc.id,
+				address: data.address,
+				completed: data.completed,
+				when: data.when.toDate(), // Convert Firestore timestamp to Date
+				createdAt: createdAt,
+				updatedAt: updatedAt,
+				vaccines: vaccines, // Ensure the vaccines field is properly populated
+			} as Schedules;
+		});
+
+		// Save schedules to AsyncStorage
+		await AsyncStorage.setItem("schedules", JSON.stringify(schedules));
 
 		console.log("Feeds fetched and saved to AsyncStorage successfully!");
 	} catch (error) {

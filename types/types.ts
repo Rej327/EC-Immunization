@@ -34,6 +34,7 @@ export interface Appointment {
 	parentId: string; // ID of the parent
 	parentName: string; // Name of the parent
 	scheduleDate: Date; // Scheduled date for the appointment
+	address: string;
 	status: string; // Status of the appointment (e.g., "pending", "history")
 	vaccine: string; // Vaccine name
 	createdAt: Date; // Creation timestamp
@@ -41,13 +42,12 @@ export interface Appointment {
 }
 
 export interface AppointmentsByStatus {
-	pending: Appointment[];
 	upcoming: Appointment[];
 	history: Appointment[];
 }
 export interface Card {
 	id: string;
-	vaccineName: string,
+	vaccineName: string;
 	date: string[];
 	doses: string;
 	remarks: string[];
@@ -91,4 +91,22 @@ export interface Feed {
 	date: Date | null;
 	offlineCreatedAt: string;
 	createdAt: Date;
+}
+
+export interface VaccineSchedule {
+	count: number; // Total doses required
+	description: string; // Description of the vaccine
+	id: string; // Unique identifier for the vaccine
+	name: string; // Name of the vaccine
+	taken: number; // Number of doses taken
+}
+
+// Main structure for the schedule
+export interface Schedules {
+	address: string; // Location or address
+	completed: boolean; // Whether the schedule is completed
+	createdAt: Date; // Timestamp when the schedule was created
+	updatedAt: Date; // Timestamp when the schedule was last updated
+	when: Date;
+	vaccines: VaccineSchedule[]; // List of vaccines in the schedule
 }

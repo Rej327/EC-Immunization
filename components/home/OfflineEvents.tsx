@@ -20,28 +20,6 @@ export default function OfflineEvents() {
 		fetchPosts();
 	}, []);
 
-	const formatCreatedAt = (date: Date) => {
-		if (!date) return "Unknown Date"; // Fallback if date is not valid
-		const now = new Date();
-		const secondsDiff = Math.floor((now.getTime() - date.getTime()) / 1000);
-
-		// If less than a week ago, show relative time
-		if (secondsDiff < 604800) {
-			return formatDistanceToNow(date, { addSuffix: true });
-		}
-
-		// If older than a week, show the actual date
-		return format(date, "PPPP");
-	};
-
-	const formatDate = (date: Date | null) => {
-		return date?.toLocaleDateString("en-US", {
-			month: "short",
-			day: "2-digit",
-			year: "numeric",
-		});
-	};
-
 	const getImageForType = (type: string) => {
 		switch (type) {
 			case "announcement":

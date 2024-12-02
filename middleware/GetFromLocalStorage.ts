@@ -6,6 +6,7 @@ import {
 	Feed,
 	Milestone,
 	Notification,
+	Schedules,
 	UserData,
 } from "@/types/types";
 
@@ -35,15 +36,12 @@ export const getAppointmentsData = async (): Promise<AppointmentsByStatus> => {
 			: [];
 
 		const appointmentsByStatus: AppointmentsByStatus = {
-			pending: [],
 			upcoming: [],
 			history: [],
 		};
 
 		appointments.forEach((appointment) => {
-			if (appointment.status === "pending") {
-				appointmentsByStatus.pending.push(appointment);
-			} else if (appointment.status === "history") {
+			if (appointment.status === "history") {
 				appointmentsByStatus.history.push(appointment);
 			} else if (appointment.status === "upcoming") {
 				appointmentsByStatus.upcoming.push(appointment);
@@ -53,7 +51,7 @@ export const getAppointmentsData = async (): Promise<AppointmentsByStatus> => {
 		return appointmentsByStatus;
 	} catch (error) {
 		console.error("Error fetching appointments from AsyncStorage:", error);
-		return { pending: [], upcoming: [], history: [] };
+		return { upcoming: [], history: [] };
 	}
 };
 
@@ -104,6 +102,18 @@ export const getFeedData = async (): Promise<Feed[]> => {
 		return storedFeeds ? JSON.parse(storedFeeds) : [];
 	} catch (error) {
 		console.error("Error fetching feed data from AsyncStorage: ", error);
+		return [];
+	}
+};
+
+// 5. Get Schedules
+export const getScheduleData = async (): Promise<Schedules[]> => {
+	try {
+		// Check if feeds are stored in AsyncStorage
+		const storedFeeds = await AsyncStorage.getItem("schedules");
+		return storedFeeds ? JSON.parse(storedFeeds) : [];
+	} catch (error) {
+		console.error("Error fetching schedule data from AsyncStorage: ", error);
 		return [];
 	}
 };

@@ -31,9 +31,8 @@ export default function EventsShort() {
 	const route = useRouter();
 
 	useEffect(() => {
+		setLoading(true);
 		const fetchPosts = () => {
-			setLoading(true);
-
 			try {
 				const q = query(collection(db, "feeds"));
 				const unsubscribe = onSnapshot(
@@ -108,13 +107,15 @@ export default function EventsShort() {
 	const extractBrgy = (subject: string) => {
 		const prefix = "Babies Vaccination in "; // The string we want to find
 		const indexOfPrefix = subject.indexOf(prefix);
-	
+
 		if (indexOfPrefix !== -1) {
 			// Extract everything after the "Babies Vaccination in" part
-			const extractedText = subject.slice(indexOfPrefix + prefix.length).trim();
+			const extractedText = subject
+				.slice(indexOfPrefix + prefix.length)
+				.trim();
 			return extractedText; // Return the extracted part
 		}
-	
+
 		return ""; // If the prefix is not found, return an empty string
 	};
 
@@ -136,6 +137,25 @@ export default function EventsShort() {
 			}
 		}
 	};
+
+	if (loading) {
+		return (
+			<View
+				style={{
+					flex: 1,
+					justifyContent: "center",
+					alignItems: "center",
+					marginTop: 30,
+				}}
+			>
+				<ActivityIndicator
+					size="large"
+					color="#456B72"
+					className="mt-4"
+				/>
+			</View>
+		);
+	}
 
 	const renderItem = (item: Post) => {
 		const typeImage = getImageForType(item.type);
@@ -179,33 +199,15 @@ export default function EventsShort() {
 
 	return (
 		<View>
-			{loading ? (
-				<View
-					style={{
-						flex: 1,
-						justifyContent: "center",
-						alignItems: "center",
-					}}
-				>
-					<ActivityIndicator
-						size="large"
-						color="#456B72"
-						className="mt-4"
-					/>
-				</View>
+			{posts.length > 0 ? (
+				<>{posts.slice(0, 3).map((item) => renderItem(item))}</>
 			) : (
-				<>
-					{posts.length > 0 ? (
-						<>{posts.slice(0, 3).map((item) => renderItem(item))}</>
-					) : (
-						<View style={styles.emptyContainer}>
-							<Image source={noData} className="w-16 h-20 mb-2" />
-							<ThemedText type="default" style={styles.emptyText}>
-								No Data Available
-							</ThemedText>
-						</View>
-					)}
-				</>
+				<View style={styles.emptyContainer}>
+					<Image source={noData} className="w-16 h-20 mb-2" />
+					<ThemedText type="default" style={styles.emptyText}>
+						No Data Available
+					</ThemedText>
+				</View>
 			)}
 		</View>
 	);

@@ -6,9 +6,22 @@ import { format, formatDistanceToNow } from "date-fns";
 import { Ionicons } from "@expo/vector-icons";
 import { Feed } from "@/types/types";
 import { getFeedData } from "@/middleware/GetFromLocalStorage";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useRouter } from "expo-router";
+import { TouchableOpacity } from "react-native-gesture-handler";
+
+type Post = {
+	id: string;
+	type: "announcement" | "notice" | "tips";
+	subject: string;
+	description: string;
+	date: Date | null;
+	createdAt: Date;
+};
 
 export default function OfflineEventsShort() {
 	const [posts, setPosts] = useState<Feed[]>([]);
+	const route = useRouter();
 
 	useEffect(() => {
 		// Fetch the feed data from AsyncStorage
@@ -20,27 +33,39 @@ export default function OfflineEventsShort() {
 
 		fetchPosts();
 	}, []);
+	// Extract last sentence after 'in' from subject
+	const extractBrgy = (subject: string) => {
+		const prefix = "Babies Vaccination in "; // The string we want to find
+		const indexOfPrefix = subject.indexOf(prefix);
 
-	const formatCreatedAt = (date: Date) => {
-		if (!date) return "Unknown Date"; // Fallback if date is not valid
-		const now = new Date();
-		const secondsDiff = Math.floor((now.getTime() - date.getTime()) / 1000);
-
-		// If less than a week ago, show relative time
-		if (secondsDiff < 604800) {
-			return formatDistanceToNow(date, { addSuffix: true });
+		if (indexOfPrefix !== -1) {
+			// Extract everything after the "Babies Vaccination in" part
+			const extractedText = subject
+				.slice(indexOfPrefix + prefix.length)
+				.trim();
+			return extractedText; // Return the extracted part
 		}
 
-		// If older than a week, show the actual date
-		return format(date, "PPPP");
+		return ""; // If the prefix is not found, return an empty string
 	};
 
-	const formatDate = (date: Date | null) => {
-		return date?.toLocaleDateString("en-US", {
-			month: "short",
-			day: "2-digit",
-			year: "numeric",
-		});
+	// Handle action when a post is pressed
+	const handleAction = async (item: Post) => {
+		if (
+			item.type === "announcement" &&
+			item.subject === "Vaccination Schedule"
+		) {
+			const selectedBrgy = extractBrgy(item.description);
+
+			if (selectedBrgy) {
+				// Save the extracted sentence into AsyncStorage
+				await AsyncStorage.setItem("selectedBrgy", selectedBrgy);
+				console.log("Last Sentence", selectedBrgy);
+
+				// Navigate to the appropriate route
+				route.push("/offline/(category)/appointment");
+			}
+		}
 	};
 
 	const getImageForType = (type: string) => {
@@ -60,7 +85,7 @@ export default function OfflineEventsShort() {
 		const typeImage = getImageForType(item.type);
 
 		return (
-			<View key={item.id} style={styles.postContainer}>
+			<TouchableOpacity onPress={() => handleAction(item)} key={item.id} style={styles.postContainer}>
 				{typeImage && <Image source={typeImage} style={styles.img} />}
 				<View style={styles.textContainer}>
 					<ThemedText type="default" style={styles.subject}>
@@ -86,7 +111,7 @@ export default function OfflineEventsShort() {
 						</ThemedText>
 					</View>
 				</View>
-			</View>
+			</TouchableOpacity>
 		);
 	};
 

@@ -7,6 +7,7 @@ import {
 	Button,
 	Pressable,
 	ActivityIndicator,
+	Image,
 } from "react-native";
 import { ThemedText } from "../ThemedText";
 import { barangays } from "@/assets/data/data";
@@ -26,9 +27,10 @@ import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useUser } from "@clerk/clerk-expo";
 import Toast from "react-native-toast-message";
+import { noData } from "@/assets";
 
 interface SetAppointmentProps {
-  refresh: () => void; 
+	refresh: () => void;
 }
 
 interface Vaccine {
@@ -72,9 +74,7 @@ interface AppointmentData {
 	createdAt: Date;
 	updatedAt: Date;
 }
-export const SetAppointment: React.FC<SetAppointmentProps> = ({
-  refresh,
-}) => {
+export const SetAppointment: React.FC<SetAppointmentProps> = ({ refresh }) => {
 	const [address, setAddress] = useState("");
 	const [schedules, setSchedules] = useState<Schedule[]>([]);
 	const [loading, setLoading] = useState(false);
@@ -285,9 +285,9 @@ export const SetAppointment: React.FC<SetAppointmentProps> = ({
 					</View>
 
 					<View style={styles.column}>
-						{displayedColumn2.map((vaccine: any) => (
+						{displayedColumn2.map((vaccine: any, i) => (
 							<TouchableOpacity
-								key={vaccine.id}
+								key={i}
 								style={styles.card}
 								onPress={() => toggleModal(vaccine)}
 							>
@@ -699,7 +699,7 @@ export const SetAppointment: React.FC<SetAppointmentProps> = ({
 						flex: 1,
 						justifyContent: "center",
 						alignItems: "center",
-						marginVertical: 10,
+						marginTop: 10,
 					}}
 				>
 					<ActivityIndicator size="large" color="#456B72" />
@@ -709,9 +709,15 @@ export const SetAppointment: React.FC<SetAppointmentProps> = ({
 					schedules.flatMap((schedule) => schedule.vaccines)
 				)
 			) : (
-				<ThemedText type="default" style={styles.emptyText}>
-					No vaccine schedules found.
-				</ThemedText>
+				<View style={styles.card}>
+					<Image
+						source={noData}
+						className="w-12 mx-auto h-16 mb-2 opacity-40"
+					/>
+					<ThemedText type="default" style={styles.emptyText}>
+						No vaccination schedule found
+					</ThemedText>
+				</View>
 			)}
 		</View>
 	);
@@ -766,8 +772,7 @@ const styles = StyleSheet.create({
 	},
 	emptyText: {
 		textAlign: "center",
-		marginTop: 20,
-		fontSize: 16,
+		fontSize: 13,
 		color: "#999",
 	},
 	dateContainer: {
