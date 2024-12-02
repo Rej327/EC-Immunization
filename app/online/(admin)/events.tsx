@@ -242,7 +242,7 @@ export default function Events() {
 
 	return (
 		<View style={styles.container}>
-		<View className="flex flex-row gap-2 justify-between mb-2">
+			<View className="flex flex-row gap-2 justify-between mb-2">
 				<View className="border-b-[1px] border-[#d6d6d6] shadow-xl w-[40%] mb-2"></View>
 				<ThemedText
 					type="cardHeader"
@@ -256,7 +256,9 @@ export default function Events() {
 			<FlatList
 				data={posts}
 				renderItem={renderItem}
-				keyExtractor={(item) => item.id || `${item.createdAt.getTime()}`}
+				keyExtractor={(item) =>
+					item.id || `${item.createdAt.getTime()}`
+				}
 				refreshControl={
 					<RefreshControl
 						refreshing={refreshing}
@@ -265,10 +267,7 @@ export default function Events() {
 				}
 				ListEmptyComponent={() => (
 					<View style={styles.emptyContainer}>
-						<Image
-									source={noData}
-									className="w-16 h-20 mb-2"
-								/>
+						<Image source={noData} className="w-16 h-20 mb-2" />
 						<ThemedText type="default" style={styles.emptyText}>
 							No Data Available
 						</ThemedText>
@@ -278,110 +277,118 @@ export default function Events() {
 
 			<Modal
 				visible={modalVisible}
-				animationType="slide"
+				animationType="fade"
+				transparent={true}
 				onRequestClose={closeModal}
 			>
-				<ScrollView style={styles.modalContainer}>
-					<ThemedText type="subtitle">Modify Data</ThemedText>
-					<ThemedText style={styles.label}>Subject</ThemedText>
-					<TextInput
-						style={styles.inputField}
-						value={subject}
-						onChangeText={setSubject}
-						placeholder="Subject"
-						placeholderTextColor="#888"
-						multiline
-					/>
-					<ThemedText style={styles.label}>Description</ThemedText>
-					<TextInput
-						style={styles.inputField}
-						value={description}
-						onChangeText={setDescription}
-						placeholder="Description"
-						placeholderTextColor="#888"
-						multiline
-					/>
-
-					<ThemedText style={styles.label}>
-						Date (optional)
-					</ThemedText>
-					<TouchableOpacity
-						onPress={() => setShowDatePicker(true)}
-						style={styles.dateButton}
-					>
-						<ThemedText style={styles.dateText}>
-							{/* {date ? date.toLocaleDateString() : "Select Date"} */}
-							{date ? formatDate(date) : "Select Date"}
+				<View style={styles.modalContainer}>
+					<View style={styles.modalContent}>
+						<ThemedText type="subtitle">Modify Data</ThemedText>
+						<ThemedText style={styles.label}>Subject</ThemedText>
+						<TextInput
+							style={styles.inputField}
+							value={subject}
+							onChangeText={setSubject}
+							placeholder="Subject"
+							placeholderTextColor="#888"
+							multiline
+						/>
+						<ThemedText style={styles.label}>
+							Description
 						</ThemedText>
-					</TouchableOpacity>
-					{showDatePicker && (
-						<DateTimePicker
-							value={date || new Date()}
-							mode="date"
-							display="default"
-							onChange={handleDateChange}
+						<TextInput
+							style={styles.inputField}
+							value={description}
+							onChangeText={setDescription}
+							placeholder="Description"
+							placeholderTextColor="#888"
+							multiline
 						/>
-					)}
 
-					{/* Add Picker for type */}
-					<Picker
-						selectedValue={type}
-						onValueChange={(itemValue) =>
-							setType(
-								itemValue as "announcement" | "notice" | "tips"
-							)
-						}
-						style={styles.inputField}
-					>
-						<Picker.Item
-							label="Announcement"
-							value="announcement"
-						/>
-						<Picker.Item label="Notice" value="notice" />
-						<Picker.Item label="Tips" value="tips" />
-					</Picker>
-
-					<View style={styles.buttonContainer}>
+						<ThemedText style={styles.label}>
+							Date (optional)
+						</ThemedText>
 						<TouchableOpacity
-							style={styles.updateButton}
-							onPress={handleUpdate}
+							onPress={() => setShowDatePicker(true)}
+							style={styles.dateButton}
 						>
-							{loading ? (
-								<ActivityIndicator color="#fff" />
-							) : (
-								<ThemedText
-									type="default"
-									style={styles.buttonText}
-								>
-									Update Post
-								</ThemedText>
-							)}
-						</TouchableOpacity>
-						<TouchableOpacity
-							style={styles.deleteButton}
-							onPress={handleDelete}
-						>
-							{loadingDelete ? (
-								<ActivityIndicator color="#fff" />
-							) : (
-								<ThemedText
-									type="default"
-									style={styles.buttonText}
-								>
-									Delete Post
-								</ThemedText>
-							)}
-						</TouchableOpacity>
-						<TouchableOpacity
-							style={styles.closeButton}
-							onPress={closeModal}
-						>
-							<ThemedText style={styles.buttonText}>
-								Close
+							<ThemedText style={styles.dateText}>
+								{/* {date ? date.toLocaleDateString() : "Select Date"} */}
+								{date ? formatDate(date) : "Select Date"}
 							</ThemedText>
 						</TouchableOpacity>
+						{showDatePicker && (
+							<DateTimePicker
+								value={date || new Date()}
+								mode="date"
+								display="default"
+								onChange={handleDateChange}
+							/>
+						)}
+
+						{/* Add Picker for type */}
+						<Picker
+							selectedValue={type}
+							onValueChange={(itemValue) =>
+								setType(
+									itemValue as
+										| "announcement"
+										| "notice"
+										| "tips"
+								)
+							}
+							style={styles.inputField}
+						>
+							<Picker.Item
+								label="Announcement"
+								value="announcement"
+							/>
+							<Picker.Item label="Notice" value="notice" />
+							<Picker.Item label="Tips" value="tips" />
+						</Picker>
+
+						<View style={styles.buttonContainer}>
+							<TouchableOpacity
+								style={styles.updateButton}
+								onPress={handleUpdate}
+							>
+								{loading ? (
+									<ActivityIndicator color="#fff" />
+								) : (
+									<ThemedText
+										type="default"
+										style={styles.buttonText}
+									>
+										Update Post
+									</ThemedText>
+								)}
+							</TouchableOpacity>
+							<TouchableOpacity
+								style={styles.deleteButton}
+								onPress={handleDelete}
+							>
+								{loadingDelete ? (
+									<ActivityIndicator color="#fff" />
+								) : (
+									<ThemedText
+										type="default"
+										style={styles.buttonText}
+									>
+										Delete Post
+									</ThemedText>
+								)}
+							</TouchableOpacity>
+							<TouchableOpacity
+								style={styles.closeButton}
+								onPress={closeModal}
+							>
+								<ThemedText style={styles.buttonText}>
+									Close
+								</ThemedText>
+							</TouchableOpacity>
+						</View>
 					</View>
-				</ScrollView>
+				</View>
 			</Modal>
 		</View>
 	);
@@ -391,10 +398,10 @@ const styles = StyleSheet.create({
 	container: {
 		flex: 1,
 		paddingTop: 10,
+		paddingHorizontal: 16,
 	},
 	postContainer: {
 		flexDirection: "row",
-		marginHorizontal: 16,
 		marginBottom: 10,
 		padding: 12,
 		backgroundColor: "#fff",
@@ -424,9 +431,16 @@ const styles = StyleSheet.create({
 		fontSize: 12,
 	},
 	modalContainer: {
+		display: 'flex',
+		justifyContent: "center",
+		alignItems: "center",
+		backgroundColor: "rgba(0, 0, 0, 0.5)",
+	},
+	modalContent: {
+		backgroundColor: "white",
 		padding: 20,
-		// justifyContent: "center",
-		marginVertical: "auto",
+		borderRadius: 8,
+		width: "90%",
 	},
 	input: {
 		width: 300,
@@ -492,5 +506,4 @@ const styles = StyleSheet.create({
 		color: "#888",
 		fontSize: 16,
 	},
-	
 });

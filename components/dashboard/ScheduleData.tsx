@@ -464,6 +464,10 @@ const styles = StyleSheet.create({
 		padding: 12,
 		backgroundColor: "white",
 		borderRadius: 8,
+		flexDirection: "row",
+		borderWidth: 1,
+		borderColor: "#ddd",
+		alignItems: "center",
 	},
 	img: {
 		width: 50,
