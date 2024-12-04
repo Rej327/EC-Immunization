@@ -1,5 +1,5 @@
 export const appVersion = {
-	version: "V 2.1.1",
+	version: "V 2.1.2",
 };
 
 export const healthTipsData = [

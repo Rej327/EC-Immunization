@@ -139,7 +139,7 @@ export const OfflineSetAppointment = () => {
 									type="default"
 									style={styles.vaccineCount}
 								>
-									{vaccine.taken}/{vaccine.count}
+									?/{vaccine.count}
 								</ThemedText>
 							</TouchableOpacity>
 						))}
@@ -162,7 +162,7 @@ export const OfflineSetAppointment = () => {
 									type="default"
 									style={styles.vaccineCount}
 								>
-									{vaccine.taken}/{vaccine.count}
+									?/{vaccine.count}
 								</ThemedText>
 							</TouchableOpacity>
 						))}

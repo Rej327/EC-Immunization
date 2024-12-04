@@ -19,7 +19,7 @@ export default function Success() {
 			}, 1000);
 
 			const timeout = setTimeout(() => {
-				router.push("/online/(auth)/profile");
+				router.push("/online/(auth)/home");
 			}, 5000);
 
 			// Cleanup on unmount
@@ -37,7 +37,7 @@ export default function Success() {
 				Registration Successful!
 			</ThemedText>
 			<ThemedText type="default" style={styles.message}>
-				Redirecting to Profile Screen in {countdown} seconds...
+				Redirecting to Home Screen in {countdown} seconds...
 			</ThemedText>
 		</View>
 	);
