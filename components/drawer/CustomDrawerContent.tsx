@@ -20,9 +20,9 @@ const CustomDrawerContent: React.FC<CustomDrawerContentProps> = ({
 }) => {
 	const [isModalVisible, setIsModalVisible] = useState(false);
 	const [isPrivacyModalVisible, setIsPrivacyModalVisible] = useState(false);
-	
+
 	const { user } = useUser(); // Get current user data
-	const adminUserId = "user_2mW7YxivRkryvJ3m0kEYqWDLRPb"; // Admin user ID
+	const adminUserId = "user_2pjV2DPELrcWut0yUZMDPX1cTf4"; // Admin user ID
 
 	const downloadCard = () => {
 		generatePDF();

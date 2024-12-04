@@ -8,7 +8,7 @@ import PushNotificationFeature from "../PushNotificationFeature";
 
 const InitialLayout = () => {
 	const { isLoaded, isSignedIn } = useAuth(); // Accessing the user object
-	const {user} = useUser()
+	const { user } = useUser();
 	const router = useRouter();
 
 	useEffect(() => {
@@ -17,7 +17,7 @@ const InitialLayout = () => {
 
 			if (isSignedIn) {
 				// Check if the signed-in user is the admin
-				if (user?.id === "user_2mW7YxivRkryvJ3m0kEYqWDLRPb") {
+				if (user?.id === "user_2pjV2DPELrcWut0yUZMDPX1cTf4") {
 					// Redirect to admin dashboard
 					router.replace("/online/(admin)/dashboard");
 				} else {
