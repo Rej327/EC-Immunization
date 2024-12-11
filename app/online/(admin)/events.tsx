@@ -226,9 +226,11 @@ export default function Events() {
 					<ThemedText type="default" style={styles.description}>
 						{item.description}
 					</ThemedText>
-					<ThemedText type="default" style={styles.date}>
-						When: {formatDate(item.date)}
-					</ThemedText>
+					{item.date ? (
+						<ThemedText type="default" style={styles.date}>
+							When: {formatDate(item.date)}
+						</ThemedText>
+					) : null}
 					<View className="flex flex-row w-fit justify-end items-center mt-2 gap-1">
 						<Ionicons name="calendar" color="#888" />
 						<ThemedText type="date" style={styles.date}>
@@ -431,9 +433,10 @@ const styles = StyleSheet.create({
 		fontSize: 12,
 	},
 	modalContainer: {
-		display: 'flex',
+		display: "flex",
 		justifyContent: "center",
 		alignItems: "center",
+		height: '100%',
 		backgroundColor: "rgba(0, 0, 0, 0.5)",
 	},
 	modalContent: {
