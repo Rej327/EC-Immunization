@@ -47,22 +47,64 @@ const Register = () => {
 			.toLowerCase();
 	};
 
+	const validateInputs = () => {
+		if (!firstName.trim()) {
+			return "First name is required.";
+		}
+		if (!lastName.trim()) {
+			return "Last name is required.";
+		}
+		if (!username.trim()) {
+			return "Username is required.";
+		}
+		if (username.includes(" ")) {
+			return "Username cannot contain spaces.";
+		}
+		if (username.length < 3) {
+			return "Username must be at least 3 characters long.";
+		}
+		if (!emailAddress.trim()) {
+			return "Email address is required.";
+		}
+		const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+		if (!emailRegex.test(emailAddress)) {
+			return "Invalid email address format.";
+		}
+		if (!password.trim()) {
+			return "Password is required.";
+		}
+		if (password.length < 8) {
+			return "Password must be at least 8 characters long.";
+		}
+		if (!isTermsChecked) {
+			return "You must agree to the terms and conditions and privacy policy.";
+		}
+		return null;
+	};
+
 	const onSignUpPress = async () => {
-		if (!isLoaded || !isTermsChecked || isInfoChecked) {
+		const errorMessage = validateInputs();
+		if (errorMessage) {
 			Toast.show({
 				type: "error",
-				text1: "Error",
-				text2: "Please agree to all terms and conditions.",
+				text1: "Validation Error",
+				text2: errorMessage,
 			});
 			return;
 		}
+
+		if (!isLoaded) {
+			Toast.show({
+				type: "error",
+				text1: "Error",
+				text2: "Sign-up service is not loaded. Please try again later.",
+			});
+			return;
+		}
+
 		setLoading(true);
-
 		try {
-			// Sanitize the username before sending it to Clerk
 			const sanitizedUsername = sanitizeUsername(username);
-
-			// Create the user on Clerk with sanitized username
 			await signUp.create({
 				firstName,
 				lastName,
@@ -70,20 +112,36 @@ const Register = () => {
 				emailAddress,
 				password,
 			});
-
-			// Send verification Email
 			await signUp.prepareEmailAddressVerification({
 				strategy: "email_code",
 			});
-
-			// Change the UI to verify the email address
 			setPendingVerification(true);
-		} catch (err) {
-			console.log("Err", err);
+		} catch (err: any) {
+			console.log(err);
+
+			// Handle duplicate email error
+			if (err.errors) {
+				const duplicateEmailError = err.errors.find(
+					(error: any) =>
+						error.code === "email_address_already_exists" ||
+						error.message.includes("already exists")
+				);
+				if (duplicateEmailError) {
+					Toast.show({
+						type: "error",
+						text1: "Sign-up Error",
+						text2: "This email address is already registered.",
+					});
+					return;
+				}
+			}
+
 			Toast.show({
 				type: "error",
-				text1: "Error",
-				text2: "Please fill out all fields.",
+				text1: "Sign-up Error",
+				text2:
+					err.errors?.[0]?.message ||
+					"An error occurred during sign-up.",
 			});
 		} finally {
 			setLoading(false);
