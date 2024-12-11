@@ -28,6 +28,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useUser } from "@clerk/clerk-expo";
 import Toast from "react-native-toast-message";
 import { noData } from "@/assets";
+import { Link } from "expo-router";
 
 interface SetAppointmentProps {
 	refresh: () => void;
@@ -642,86 +643,117 @@ export const SetAppointment: React.FC<SetAppointmentProps> = ({ refresh }) => {
 				<View style={styles.headerLine} />
 			</View>
 
-			<Picker
-				selectedValue={address}
-				style={styles.input}
-				onValueChange={(value) => handleSetAddress(value)}
-			>
-				<Picker.Item
-					style={styles.input}
-					label="Select Barangay"
-					value=""
-				/>
-				{barangays.map((barangay) => (
-					<Picker.Item
-						key={barangay}
-						label={`📍 ${barangay}`}
-						value={barangay}
-					/>
-				))}
-			</Picker>
+			{babies.length > 0 ? (
+				<View>
+					<Picker
+						selectedValue={address}
+						style={styles.input}
+						onValueChange={(value) => handleSetAddress(value)}
+					>
+						<Picker.Item
+							style={styles.input}
+							label="Select Barangay"
+							value=""
+						/>
+						{barangays.map((barangay) => (
+							<Picker.Item
+								key={barangay}
+								label={`📍 ${barangay}`}
+								value={barangay}
+							/>
+						))}
+					</Picker>
 
-			{/* SHOW DATE */}
-			{schedules.length > 0 && (
-				<View style={styles.dateContainer}>
-					{schedules.map((schedule) => {
-						return schedule.when ? (
-							<View className="flex flex-row justify-between">
-								<ThemedText
-									key={schedule.id}
-									style={styles.whenText}
-								>
-									WHEN: {formatDate(schedule.when)}
-								</ThemedText>
-								<TouchableOpacity
-									onPress={toggleExpand}
-									style={styles.toggleButton}
-								>
-									<ThemedText
-										type="default"
-										style={styles.toggleButtonText}
-									>
-										{isExpanded ? "Show Less" : "Show More"}{" "}
-									</ThemedText>
-									<Ionicons
-										name={`${
-											isExpanded
-												? "chevron-up-outline"
-												: "chevron-down-outline"
-										}`}
-										size={20}
-										color={"#456B72"}
-									/>
-								</TouchableOpacity>
-							</View>
-						) : null;
-					})}
-				</View>
-			)}
+					{/* SHOW DATE */}
+					{schedules.length > 0 && (
+						<View style={styles.dateContainer}>
+							{schedules.map((schedule) => {
+								return schedule.when ? (
+									<View className="flex flex-row justify-between">
+										<ThemedText
+											key={schedule.id}
+											style={styles.whenText}
+										>
+											WHEN: {formatDate(schedule.when)}
+										</ThemedText>
+										<TouchableOpacity
+											onPress={toggleExpand}
+											style={styles.toggleButton}
+										>
+											<ThemedText
+												type="default"
+												style={styles.toggleButtonText}
+											>
+												{isExpanded
+													? "Show Less"
+													: "Show More"}{" "}
+											</ThemedText>
+											<Ionicons
+												name={`${
+													isExpanded
+														? "chevron-up-outline"
+														: "chevron-down-outline"
+												}`}
+												size={20}
+												color={"#456B72"}
+											/>
+										</TouchableOpacity>
+									</View>
+								) : null;
+							})}
+						</View>
+					)}
 
-			{loading ? (
-				<View
-					style={{
-						flex: 1,
-						justifyContent: "center",
-						alignItems: "center",
-						marginTop: 10,
-					}}
-				>
-					<ActivityIndicator size="large" color="#456B72" />
+					{loading ? (
+						<View
+							style={{
+								flex: 1,
+								justifyContent: "center",
+								alignItems: "center",
+								marginTop: 10,
+							}}
+						>
+							<ActivityIndicator size="large" color="#456B72" />
+						</View>
+					) : schedules.length > 0 ? (
+						renderMasonryCards(
+							schedules.flatMap((schedule) => schedule.vaccines)
+						)
+					) : (
+						<View style={styles.card}>
+							<Image
+								source={noData}
+								className="w-12 mx-auto h-16 mb-2 opacity-40"
+							/>
+							<ThemedText type="default" style={styles.emptyText}>
+								No vaccination schedule found
+							</ThemedText>
+						</View>
+					)}
 				</View>
-			) : schedules.length > 0 ? (
-				renderMasonryCards(
-					schedules.flatMap((schedule) => schedule.vaccines)
-				)
 			) : (
-				<View style={styles.card}>
-					<Image
-						source={noData}
-						className="w-12 mx-auto h-16 mb-2 opacity-40"
-					/>
-					<ThemedText type="default" style={styles.emptyText}>
-						No vaccination schedule found
+				<View className="mx-2 mb-2 flex justify-center items-center">
+					<Image source={noData} className="w-14 h-20 mb-2" />
+					<ThemedText
+						type="default"
+						className="text-base text-[#888] text-[14px]"
+					>
+						No children found
+					</ThemedText>
+
+					<ThemedText
+						type="default"
+						className="text-base text-[#888] text-[14px]"
+					>
+						<ThemedText
+							type="link"
+							className="text-base underline text-[14px]"
+						>
+							<Link href={"/online/(auth)/profile"}>
+								Register or set{" "}
+							</Link>
+						</ThemedText>
+						first your children in your account.
 					</ThemedText>
 				</View>
 			)}

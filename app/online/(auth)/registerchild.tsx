@@ -211,7 +211,7 @@ export default function RegisterChildren() {
 	// Handle adding a baby (only to Firestore)
 	const handleAddBaby = async () => {
 		// Check if all fields are filled
-		if (!birthday) {
+		if (!birthday|| !weight || !height) {
 			// Show an error toast if any field is empty
 			Toast.show({
 				type: "error",
@@ -269,7 +269,7 @@ export default function RegisterChildren() {
 	const handleNext = () => {
 		// Step 0 validation
 		if (currentStep === 0) {
-			if (!firstName || !lastName || !gender) {
+			if (!firstName.trim() || !lastName.trim() || !gender.trim()) {
 				Toast.show({
 					type: "error",
 					text1: "Missing Information",
@@ -282,7 +282,12 @@ export default function RegisterChildren() {
 
 		// Step 1 validation
 		if (currentStep === 1) {
-			if (!birthday || !birthPlace || !address || !addressInfo) {
+			if (
+				!birthday ||
+				!birthPlace.trim() ||
+				!address.trim() ||
+				!addressInfo.trim()
+			) {
 				Toast.show({
 					type: "error",
 					text1: "Missing Information",
@@ -295,11 +300,46 @@ export default function RegisterChildren() {
 
 		// Step 2 validation
 		if (currentStep === 2) {
-			if (!motherName || !fatherName || !contact) {
+			if (!motherName.trim() || !fatherName.trim() || !contact.trim()) {
 				Toast.show({
 					type: "error",
 					text1: "Missing Information",
 					text2: "Please fill out all fields.",
+					position: "top",
+				});
+				return;
+			}
+
+			// Additional validation for the contact field
+			if (!/^\d{11}$/.test(contact)) {
+				Toast.show({
+					type: "error",
+					text1: "Invalid Contact",
+					text2: "Contact must be exactly 11 digits.",
+					position: "top",
+				});
+				return;
+			}
+		}
+
+		// Step 3 validation
+		if (currentStep === 3) {
+			if (!height.trim() || !weight.trim()) {
+				Toast.show({
+					type: "error",
+					text1: "Missing Information",
+					text2: "Please fill out all fields.",
+					position: "top",
+				});
+				return;
+			}
+
+			// Validation for height and weight to be numbers only and not accept letters
+			if (isNaN(Number(height)) || isNaN(Number(weight))) {
+				Toast.show({
+					type: "error",
+					text1: "Invalid Input",
+					text2: "Height and weight must be numbers only.",
 					position: "top",
 				});
 				return;
