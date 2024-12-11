@@ -14,54 +14,55 @@ export default function ScheduleList() {
 	const [hasNewPending, setHasNewPending] = useState(false);
 
 	// Function to send push notification when there are new pending appointments
-	const sendPushNotification = async (count: number) => {
-		// Check if a notification has already been sent for this count
-		const notifiedCount = await AsyncStorage.getItem(
-			"notifiedPendingCount"
-		);
+	// const sendPushNotification = async (count: number) => {
+	// 	// Check if a notification has already been sent for this count
+	// 	const notifiedCount = await AsyncStorage.getItem(
+	// 		"notifiedPendingCount"
+	// 	);
 
-		if (count > 0 && notifiedCount !== count.toString()) {
-			await Notifications.scheduleNotificationAsync({
-				content: {
-					title: "New Pending Appointment!",
-					body: `You have ${count} new pending appointments.`,
-					data: { type: "pending", count: count },
-				},
-				trigger: {
-					seconds: 1, // Trigger immediately after being called
-				},
-			});
+	// 	if (count > 0 && notifiedCount !== count.toString()) {
+	// 		await Notifications.scheduleNotificationAsync({
+	// 			content: {
+	// 				title: "New Pending Appointment!",
+	// 				body: `You have ${count} new pending appointments.`,
+	// 				data: { type: "pending", count: count },
+	// 			},
+	// 			trigger: {
+	// 				seconds: 1, // Trigger immediately after being called
+	// 			},
+	// 		});
 
-			// Save the count to AsyncStorage to prevent re-sending the same notification
-			await AsyncStorage.setItem(
-				"notifiedPendingCount",
-				count.toString()
-			);
-		}
-	};
+	// 		// Save the count to AsyncStorage to prevent re-sending the same notification
+	// 		await AsyncStorage.setItem(
+	// 			"notifiedPendingCount",
+	// 			count.toString()
+	// 		);
+	// 	}
+	// };
 
-	// Real-time listener for pending appointments
-	useEffect(() => {
-		const q = query(
-			collection(db, "appointments"),
-			where("status", "==", "pending")
-		);
+	// // Real-time listener for pending appointments
+	// useEffect(() => {
+	// 	const q = query(
+	// 		collection(db, "appointments"),
+	// 		where("status", "==", "pending")
+	// 	);
 
-		// Listen to real-time updates from the database
-		const unsubscribe = onSnapshot(q, (snapshot) => {
-			const pendingAppointments = snapshot.docs.length;
-			setPendingCount(pendingAppointments);
+	// 	// Listen to real-time updates from the database
+	// 	const unsubscribe = onSnapshot(q, (snapshot) => {
+	// 		const pendingAppointments = snapshot.docs.length;
+	// 		setPendingCount(pendingAppointments);
 
-			// Set the red dot and send a notification if there are pending appointments
-			setHasNewPending(pendingAppointments > 0);
-			sendPushNotification(pendingAppointments); // Trigger notification when data updates
-		});
+	// 		// Set the red dot and send a notification if there are pending appointments
+	// 		setHasNewPending(pendingAppointments > 0);
+	// 		sendPushNotification(pendingAppointments); // Trigger notification when data updates
+	// 	});
 
-		// Cleanup the listener when the component unmounts
-		return () => unsubscribe();
-	}, []);
+	// 	// Cleanup the listener when the component unmounts
+	// 	return () => unsubscribe();
+	// }, []);
 
 	// Navigate to the appropriate route and reset red dot for pending
+	
 	const handleRoute = (status: string) => {
 		if (status === "pending") {
 			// Clear the red dot when user views the pending appointments

@@ -6,7 +6,8 @@ import {
 	TouchableOpacity,
 	ScrollView,
 	Modal, // Import Modal
-	Button, // Import Button (optional for closing)
+	Button,
+	Image, // Import Button (optional for closing)
 } from "react-native";
 import React, { useEffect, useState } from "react";
 import { db } from "@/db/firebaseConfig"; // Your Firestore config
@@ -24,6 +25,7 @@ import { Ionicons } from "@expo/vector-icons";
 import StyledButton from "@/components/StyledButton";
 import Toast from "react-native-toast-message";
 import { formatDate } from "@/helper/helper";
+import { noData } from "@/assets";
 
 // Define BabyData and Milestone interfaces
 interface BabyData {
@@ -292,14 +294,20 @@ export default function ParentById() {
 					</TouchableOpacity>
 				))
 			) : (
-				<ThemedText>No baby data found for this parent.</ThemedText>
+				<View style={styles.emptyContainer}>
+					<Image source={noData} className="w-16 h-20 mb-2" />
+					<ThemedText type="default" style={styles.emptyText}>
+						No baby data found for this parent.
+					</ThemedText>
+				</View>
 			)}
 
 			{/* Render milestones if a baby is selected */}
 			{selectedBaby && milestones.length > 0 && (
 				<View style={styles.milestoneContainer}>
 					<ThemedText type="header">
-						Milestones for {selectedBaby.firstName} {selectedBaby.lastName}
+						Milestones for {selectedBaby.firstName}{" "}
+						{selectedBaby.lastName}
 					</ThemedText>
 					{milestones.map((milestone, index) => (
 						<TouchableOpacity
@@ -437,5 +445,14 @@ const styles = StyleSheet.create({
 		backgroundColor: "#fff",
 		borderRadius: 10,
 		// alignItems: "center",
+	},
+	emptyContainer: {
+		alignItems: "center",
+		justifyContent: "center",
+		marginTop: 20,
+	},
+	emptyText: {
+		color: "#888",
+		fontSize: 16,
 	},
 });

@@ -17,7 +17,14 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import { Picker } from "@react-native-picker/picker";
 import { Ionicons } from "@expo/vector-icons";
 import Toast from "react-native-toast-message";
-import { addDoc, collection, getDocs, Timestamp } from "firebase/firestore";
+import {
+	addDoc,
+	collection,
+	getDocs,
+	query,
+	Timestamp,
+	where,
+} from "firebase/firestore";
 import { db } from "@/db/firebaseConfig";
 import ScheduleData from "@/components/dashboard/ScheduleData";
 
@@ -99,6 +106,25 @@ const setSchedule = () => {
 		}
 
 		try {
+			const existingSchedulesQuery = query(
+				collection(db, "schedules"),
+				where("address", "==", address),
+				where("completed", "==", false)
+			);
+
+			const existingSchedulesSnapshot = await getDocs(
+				existingSchedulesQuery
+			);
+
+			if (!existingSchedulesSnapshot.empty) {
+				Toast.show({
+					type: "error",
+					text1: "Duplicate Schedule",
+					text2: "A schedule for this address is already active.",
+				});
+				return;
+			}
+
 			const selectedVaccines = vaccines.map((vaccine) => ({
 				id: vaccine.id,
 				name: vaccine.name,
