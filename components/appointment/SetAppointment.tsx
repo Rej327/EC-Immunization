@@ -86,8 +86,8 @@ export const SetAppointment: React.FC<SetAppointmentProps> = ({ refresh }) => {
 	const [babies, setBabies] = useState<SelectedBaby[]>([]);
 	const [showDropdown, setShowDropdown] = useState(false);
 	const [selectedBaby, setSelectedBaby] = useState<SelectedBaby | null>(null);
-	const [isDisabled, setIsDisabled] = useState<boolean>(false);
-	const [buttonLabel, setSetButtonLabel] = useState<string>("");
+	const [isDisabled, setIsDisabled] = useState<boolean>(true);
+	const [buttonLabel, setSetButtonLabel] = useState<string>("Not Available");
 
 	const { user } = useUser();
 	// Fetch babies for the logged-in user
