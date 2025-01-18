@@ -29,7 +29,6 @@ import {
 import { ThemedText } from "@/components/ThemedText";
 import CategoryCard from "@/components/CategoryCard";
 import CustomBottomSheet from "@/components/CustomBottomSheet";
-import { events, milestones } from "@/assets/data/data";
 import {
 	addDoc,
 	collection,

@@ -6,6 +6,8 @@ import { Collapsible } from "@/components/Collapsible";
 import { ThemedText } from "@/components/ThemedText";
 import { healthTipsData } from "@/assets/data/data";
 import { healthPdfDownload } from "@/helper/healthPdfDownload";
+import { Ionicons } from "@expo/vector-icons";
+import ApprovedText from "@/app/ApprovedText";
 
 // Define a type for health tips data
 interface HealthTip {
@@ -36,7 +38,7 @@ export default function Health() {
 
 	const handleDownloadPdf = () => {
 		healthPdfDownload(data, "HealthTips");
-};
+	};
 
 	return (
 		<CustomBody
@@ -73,6 +75,7 @@ export default function Health() {
 								</Collapsible>
 							))}
 						</View>
+						<ApprovedText />
 					</ScrollView>
 				</>
 			)}

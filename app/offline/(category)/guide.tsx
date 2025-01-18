@@ -19,6 +19,8 @@ import {
 import { Link } from "expo-router";
 import { FlatList } from "react-native-gesture-handler";
 import { guidePdfDownload } from "@/helper/guidePdfDownload";
+import { Ionicons } from "@expo/vector-icons";
+import ApprovedText from "@/app/ApprovedText";
 
 // Define a type for health tips data
 interface HealthTip {
@@ -91,7 +93,7 @@ export default function Guide() {
 
 	const handleDownloadPdf = () => {
 		guidePdfDownload(vaccinationGuide, "Baby_Vaccination_Guide");
-};
+	};
 
 	return (
 		<CustomBody
@@ -110,7 +112,7 @@ export default function Guide() {
 				<>
 					<ScrollView
 						showsVerticalScrollIndicator={false}
-						className="bg-[#f5f4f7] h-auto rounded-t-2xl px-4"
+						className="bg-[#f5f4f7] h-auto rounded-t-2xl mx-4"
 					>
 						<FlatList
 							data={vaccinationTips}
@@ -146,6 +148,7 @@ export default function Guide() {
 							</View>
 						</View>
 					</ScrollView>
+					<ApprovedText />
 
 					{/* Modal for vaccination details */}
 					<Modal

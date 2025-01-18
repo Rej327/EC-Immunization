@@ -1,5 +1,5 @@
 export const appVersion = {
-	version: "V 2.2.2",
+	version: "V 2.2.3",
 };
 
 export const healthTipsData = [
@@ -169,7 +169,7 @@ export const vaccinationGuide = [
 					"Third and final OPV dose for full immunity against poliovirus.",
 			},
 			{
-				name: "Inactivated Polio Vaccine (IPV)",
+				name: "Inactivated Polio Vaccine (1st dose)",
 				details: "Administer at 3½ months.",
 				description:
 					"IPV is an injected polio vaccine that boosts immunity against poliovirus, complementing the oral vaccine.",
@@ -186,16 +186,16 @@ export const vaccinationGuide = [
 		ageRange: "9 Months",
 		vaccines: [
 			{
-				name: "Measles-Rubella (1st dose)",
+				name: "Measles, Mumps, and Rubella vaccine (1st dose)",
 				details: "Administer at 9 months.",
 				description:
-					"First dose of MR vaccine ensures long-lasting protection against measles and rubella.",
+					"First dose of the MMR vaccine provides effective and long-lasting protection against measles, mumps, and rubella.",
 			},
 			{
-				name: "Japanese Encephalitis (1st dose)",
+				name: "Inactivated Polio Vaccine (2nd dose)",
 				details: "Administer at 9 months.",
 				description:
-					"JE vaccine prevents Japanese Encephalitis, a viral brain infection transmitted by mosquitoes.",
+					"IPV is an injected polio vaccine that boosts immunity against poliovirus, complementing the oral vaccine.",
 			},
 		],
 	},
@@ -203,41 +203,12 @@ export const vaccinationGuide = [
 		ageRange: "12 Months",
 		vaccines: [
 			{
-				name: "Measles-Rubella (2nd dose)",
-				details: "Administer at 12 months.",
+				name: "Measles, Mumps, and Rubella vaccine (2nd dose)",
+				details: "Administer at 9 months.",
 				description:
-					"Second dose of MR vaccine ensures long-lasting protection against measles and rubella.",
+					"Second dose of the MMR vaccine provides effective and long-lasting protection against measles, mumps, and rubella.",
 			},
 		],
-	},
-];
-
-//mockdata
-export const milestones = [
-	{
-		header: "Lorem, ipsum.",
-		description:
-			"Lorem ipsum dolor sit amet consectetur adipisicing elit. Perspiciatis, commodi.",
-		date: "01/25/2024",
-	},
-	{
-		header: "Another Milestone",
-		description: "Details about another milestone.",
-		date: "02/01/2024",
-	},
-];
-
-export const events = [
-	{
-		header: "Lorem, ipsum.",
-		description:
-			"Lorem ipsum dolor sit amet consectetur adipisicing elit. Perspiciatis, commodi.",
-		date: "01/25/2024",
-	},
-	{
-		header: "Another Events",
-		description: "Details about another Events.",
-		date: "02/01/2024",
 	},
 ];
 
@@ -365,12 +336,21 @@ export const vaccineSchedule = [
 	},
 	{
 		id: "polio",
-		targetId: "ipv",
-		vaccine: "Inactivated Polio Vaccine (IPV)",
+		targetId: "ipv_1",
+		vaccine: "Inactivated Polio Vaccine (1st dose)",
 		ageInMonths: 3.5,
 		received: false,
 		description:
-			"IPV is an injected polio vaccine that boosts immunity against poliovirus, complementing the oral vaccine.",
+			"First dose of the inactivated polio vaccine boosts immunity against poliovirus and complements the oral polio vaccine.",
+	},
+	{
+		id: "polio",
+		targetId: "ipv_2",
+		vaccine: "Inactivated Polio Vaccine (2nd dose)",
+		ageInMonths: 9,
+		received: false,
+		description:
+			"Second dose of the inactivated polio vaccine boosts immunity against poliovirus and complements the oral polio vaccine.",
 	},
 	{
 		id: "pneumo",
@@ -402,20 +382,20 @@ export const vaccineSchedule = [
 	{
 		id: "measles",
 		targetId: "mcv_1",
-		vaccine: "Measles-Containing Vaccine (MCV) MR/MMR (1st dose)",
+		vaccine: "Measles, Mumps, and Rubella vaccine (1st dose)",
 		ageInMonths: 9,
 		received: false,
 		description:
-			"First dose of MR vaccine ensures long-lasting protection against measles and rubella.",
+			"First dose of the MMR vaccine provides effective and long-lasting protection against measles, mumps, and rubella.",
 	},
 	{
 		id: "measles",
 		targetId: "mcv_2",
-		vaccine: "Measles-Containing Vaccine (MCV) MR/MMR (2nd dose)",
+		vaccine: "Measles, Mumps, and Rubella vaccine (2nd dose)",
 		ageInMonths: 12,
 		received: false,
 		description:
-			"Second and last dose of MR vaccine ensures long-lasting protection against measles and rubella.",
+			"Second dose of the MMR vaccine provides effective and long-lasting protection against measles, mumps, and rubella.",
 	},
 ];
 
@@ -477,11 +457,18 @@ export const vaccines = [
 			"Oral Polio Vaccine (OPV) protects against poliovirus, which can lead to paralysis.",
 	},
 	{
-		id: "ipv",
+		id: "ipv_1",
 		cardId: "polio",
-		name: "Inactivated Polio Vaccine (IPV)",
+		name: "Inactivated Polio Vaccine (1st dose)",
 		description:
-			"IPV is an injected polio vaccine that boosts immunity against poliovirus, complementing the oral vaccine.",
+			"First dose of the inactivated polio vaccine boosts immunity against poliovirus and complements the oral polio vaccine.",
+	},
+	{
+		id: "ipv_2",
+		cardId: "polio",
+		name: "Inactivated Polio Vaccine (2nd dose)",
+		description:
+			"Second dose of the inactivated polio vaccine further enhances immunity against poliovirus and complements the oral polio vaccine.",
 	},
 	{
 		id: "pcv_1",
@@ -507,14 +494,14 @@ export const vaccines = [
 	{
 		id: "mcv_1",
 		cardId: "measles",
-		name: "(MCV) MR/MMR (1st dose)",
+		name: "MMR (1st dose)",
 		description:
 			"First dose of MR vaccine ensures long-lasting protection against measles and rubella.",
 	},
 	{
 		id: "mcv_2",
 		cardId: "measles",
-		name: "(MCV) MR/MMR (2nd dose)",
+		name: "MMR (2nd dose)",
 		description:
 			"Second and last dose of MR vaccine ensures long-lasting protection against measles and rubella.",
 	},

@@ -99,7 +99,7 @@ export default function RegisterChildren() {
 				id: "polio",
 				vaccineName: "Inactivated Polio Vaccine (IPV)",
 				date: [],
-				doses: "3 (3½ buwan )",
+				doses: "3 (3½, 9 buwan )",
 				remarks: [],
 			},
 			{
@@ -111,7 +111,7 @@ export default function RegisterChildren() {
 			},
 			{
 				id: "measles",
-				vaccineName: "Measles-Containing Vaccine (MCV) MR/MMR",
+				vaccineName: "Measles, Mumps, and Rubella Vaccine (MMR)",
 				date: [],
 				doses: "2 (9 buwan & 1 taon )",
 				remarks: [],
