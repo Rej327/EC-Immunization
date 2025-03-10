@@ -37,6 +37,7 @@ import {
 } from "@/middleware/GetFromLocalStorage";
 import { Milestone, MilestoneData } from "@/types/types";
 import { reminderOfflineDownload } from "@/helper/reminderpdfOffline";
+import { categoryLabel } from "@/assets/data/data";
 
 // type MilestoneList = {
 // 	ageInMonths: number;
@@ -151,7 +152,7 @@ export default function Reminder() {
 	return (
 		<CustomBody
 			backRoute="/offline/(auth)/home"
-			title="Reminders"
+			title={`${categoryLabel.english.reminders} (${categoryLabel.tagalog.reminders})`}
 			headerImage={reminder}
 			headerImageStyle="absolute w-64 left-[14%] h-64 mx-auto"
 			fileName=""

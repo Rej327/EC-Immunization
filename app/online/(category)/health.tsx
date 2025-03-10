@@ -4,7 +4,7 @@ import CustomBody from "@/components/body/CustomBody";
 import { healthTips } from "@/assets"; // Assuming healthTips is your JSON array
 import { Collapsible } from "@/components/Collapsible";
 import { ThemedText } from "@/components/ThemedText";
-import { healthTipsData } from "@/assets/data/data";
+import { categoryLabel, healthTipsData } from "@/assets/data/data";
 import { healthPdfDownload } from "@/helper/healthPdfDownload";
 import { Ionicons } from "@expo/vector-icons";
 import ApprovedText from "@/app/ApprovedText";
@@ -43,7 +43,7 @@ export default function Health() {
 	return (
 		<CustomBody
 			backRoute="/online/(auth)/home"
-			title="Health"
+			title={`${categoryLabel.english.healthTips} (${categoryLabel.tagalog.healthTips})`}
 			headerImage={healthTips}
 			headerImageStyle="absolute w-72 h-72 mx-auto left-[15%]"
 			fileName=""

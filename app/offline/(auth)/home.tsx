@@ -28,7 +28,7 @@ import {
 import { ThemedText } from "@/components/ThemedText";
 import CategoryCard from "@/components/CategoryCard";
 import CustomBottomSheet from "@/components/CustomBottomSheet";
-import { events, milestones } from "@/assets/data/data";
+import { categoryLabel } from "@/assets/data/data";
 import { doc, getDoc, setDoc, Timestamp } from "firebase/firestore";
 import { db } from "@/db/firebaseConfig";
 import { Baby, Milestone, MilestoneData } from "@/types/types";
@@ -245,6 +245,10 @@ const Home = () => {
 		setOpenBottomSheet(type);
 	};
 
+	const categoryTitle = (title: string) => {
+		return <Text className="uppercase">{title}</Text>;
+	};
+
 	const ReminderModal = () => (
 		<Modal
 			animationType="fade"
@@ -305,7 +309,12 @@ const Home = () => {
 						<CategoryCard
 							link="/offline/(category)/health"
 							icon={healthIcon}
-							title="HEALTH TIPS"
+							title={categoryTitle(
+								`${categoryLabel.english.healthTips}`
+							)}
+							subTitle={categoryTitle(
+								`${categoryLabel.tagalog.healthTips}`
+							)}
 							backgroundColor="#5ad5fa66"
 							shapeIcon={hearthIcon}
 							shapePosition={{ top: 0, left: 0 }}
@@ -313,7 +322,12 @@ const Home = () => {
 						<CategoryCard
 							link="/offline/(category)/guide"
 							icon={guideIcon}
-							title="GUIDE"
+							title={categoryTitle(
+								`${categoryLabel.english.guide}`
+							)}
+							subTitle={categoryTitle(
+								`${categoryLabel.tagalog.guide}`
+							)}
 							backgroundColor="#5a92fa66"
 							shapeIcon={nonagonIcon}
 							shapePosition={{ bottom: 0, left: 0 }}
@@ -321,7 +335,12 @@ const Home = () => {
 						<CategoryCard
 							link="/offline/(category)/reminder"
 							icon={reminderIcon}
-							title="REMINDERS"
+							title={categoryTitle(
+								`${categoryLabel.english.reminders}`
+							)}
+							subTitle={categoryTitle(
+								`${categoryLabel.tagalog.reminders}`
+							)}
 							backgroundColor="#ecff8253"
 							shapeIcon={starIcon}
 							shapePosition={{ top: 2, right: 0 }}
@@ -329,7 +348,12 @@ const Home = () => {
 						<CategoryCard
 							link="/offline/(category)/appointment"
 							icon={appointmentIcon}
-							title="APPOINTMENT"
+							title={categoryTitle(
+								`${categoryLabel.english.appointment}`
+							)}
+							subTitle={categoryTitle(
+								`${categoryLabel.tagalog.appointment}`
+							)}
 							backgroundColor="#82ffc555"
 							shapeIcon={circleIcon}
 							shapePosition={{ bottom: 10, right: 10 }}

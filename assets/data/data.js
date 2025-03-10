@@ -611,3 +611,18 @@ export const privacyAndPolicy = [
 			"For questions, contact us at immuneec@gmail.com or call (+63)-920-382-9102.",
 	},
 ];
+
+export const categoryLabel = {
+	english: {
+		healthTips: "Health",
+		guide: "Guide",
+		appointment: "Appointment",
+		reminders: "Reminders",
+	},
+	tagalog: {
+		healthTips: "Kalusugan",
+		guide: "Gabay",
+		appointment: "Pagsusuri",
+		reminders: "Paalala",
+	},
+};

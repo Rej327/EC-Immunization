@@ -51,6 +51,7 @@ import { formatVaccineList, isTodayOrTomorrowOrPast } from "@/helper/helper";
 import * as Notifications from "expo-notifications";
 import Events from "@/components/home/Events";
 import EventsShort from "@/components/home/EventsShort";
+import { categoryLabel } from "@/assets/data/data";
 
 interface UserData {
 	id: string;
@@ -384,6 +385,10 @@ const Home = () => {
 		);
 	}
 
+	const categoryTitle = (title: string) => {
+		return <Text className="uppercase">{title}</Text>;
+	};
+
 	return (
 		<View style={{ flex: 1, backgroundColor: "#f5f4f7" }}>
 			<ScrollView
@@ -413,7 +418,8 @@ const Home = () => {
 						<CategoryCard
 							link="/online/(category)/health"
 							icon={healthIcon}
-							title="HEALTH TIPS"
+							title={categoryTitle(`${categoryLabel.english.healthTips}`)}
+							subTitle={categoryTitle(`${categoryLabel.tagalog.healthTips}`)}
 							backgroundColor="#5ad5fa66"
 							shapeIcon={hearthIcon}
 							shapePosition={{ top: 0, left: 0 }}
@@ -421,7 +427,8 @@ const Home = () => {
 						<CategoryCard
 							link="/online/(category)/guide"
 							icon={guideIcon}
-							title="GUIDE"
+							title={categoryTitle(`${categoryLabel.english.guide}`)}
+							subTitle={categoryTitle(`${categoryLabel.tagalog.guide}`)}
 							backgroundColor="#5a92fa66"
 							shapeIcon={nonagonIcon}
 							shapePosition={{ bottom: 0, left: 0 }}
@@ -429,7 +436,8 @@ const Home = () => {
 						<CategoryCard
 							link="/online/(category)/reminder"
 							icon={reminderIcon}
-							title="REMINDERS"
+							title={categoryTitle(`${categoryLabel.english.reminders}`)}
+							subTitle={categoryTitle(`${categoryLabel.tagalog.reminders}`)}
 							backgroundColor="#ecff8253"
 							shapeIcon={starIcon}
 							shapePosition={{ top: 2, right: 0 }}
@@ -437,7 +445,8 @@ const Home = () => {
 						<CategoryCard
 							link="/online/(category)/appointment"
 							icon={appointmentIcon}
-							title="APPOINTMENT"
+							title={categoryTitle(`${categoryLabel.english.appointment}`)}
+							subTitle={categoryTitle(`${categoryLabel.tagalog.appointment}`)}
 							backgroundColor="#82ffc555"
 							shapeIcon={circleIcon}
 							shapePosition={{ bottom: 10, right: 10 }}

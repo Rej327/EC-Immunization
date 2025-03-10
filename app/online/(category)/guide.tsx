@@ -15,6 +15,7 @@ import {
 	healthTipsData,
 	vaccinationTips,
 	vaccinationGuide,
+	categoryLabel,
 } from "@/assets/data/data";
 import { Link } from "expo-router";
 import { FlatList } from "react-native-gesture-handler";
@@ -98,7 +99,7 @@ export default function Guide() {
 	return (
 		<CustomBody
 			backRoute="/online/(auth)/home"
-			title="Guide"
+			title={`${categoryLabel.english.guide} (${categoryLabel.tagalog.guide})`}
 			headerImage={guide}
 			headerImageStyle="absolute w-80 h-60 mx-auto left-[10%]"
 			fileName=""

@@ -4,8 +4,10 @@ import {
 	View,
 	StyleSheet,
 	ImageSourcePropType,
+	Text,
 } from "react-native";
 import { ThemedText } from "./ThemedText";
+import { CategoryTextTitle } from "./CategoryTextTitle";
 import { Link } from "expo-router";
 
 const { width, height } = Dimensions.get("window");
@@ -14,7 +16,8 @@ const cardHeightSize = height * 0.16;
 
 interface CategoryCardProps {
 	icon: ImageSourcePropType; // Type for the icon prop
-	title: string; // Type for the title prop
+	title: any; // Type for the title prop
+	subTitle: any;
 	backgroundColor: string; // Type for the background color
 	shapeIcon?: ImageSourcePropType; // Optional: Type for the shape icon
 	shapePosition?: {
@@ -33,6 +36,7 @@ const CategoryCard = ({
 	shapeIcon,
 	shapePosition,
 	link,
+	subTitle,
 }: CategoryCardProps) => {
 	return (
 		<Link href={link}>
@@ -49,7 +53,15 @@ const CategoryCard = ({
 					)}
 					<View style={styles.innerContainer}>
 						<Image source={icon} style={styles.icon} />
-						<ThemedText type="cardTitle">{title}</ThemedText>
+						<CategoryTextTitle type="cardTitle">
+							{title}
+						</CategoryTextTitle>
+						<CategoryTextTitle
+							type="cardTitle"
+							className="text-[13px]"
+						>
+							({subTitle})
+						</CategoryTextTitle>
 					</View>
 				</View>
 			</View>

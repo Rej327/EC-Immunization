@@ -5,6 +5,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { ThemedText } from "@/components/ThemedText";
 import OfflineAppointmentBody from "@/components/appointment/OfflineAppointmentBody";
 import OfflineAppointmentNewBody from "@/components/appointment/OfflineAppointmentNewBody";
+import { categoryLabel } from "@/assets/data/data";
 
 const Appointment = () => {
 	const router = useRouter();
@@ -20,7 +21,8 @@ const Appointment = () => {
 				<TouchableOpacity onPress={handleBackPress}>
 					<View className="flex flex-row items-center gap-2">
 						<Ionicons name="arrow-back" size={24} color="#456B72" />
-						<ThemedText type="navigation" className="text-[#456B72]">Appointment</ThemedText>
+						<ThemedText type="navigation" className="text-[#456B72]">{categoryLabel.english.appointment} (
+													{categoryLabel.tagalog.appointment})</ThemedText>
 					</View>
 				</TouchableOpacity>
 
