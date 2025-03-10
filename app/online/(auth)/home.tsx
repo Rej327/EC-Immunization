@@ -10,6 +10,8 @@ import {
 	Modal,
 	Pressable,
 	ActivityIndicator,
+	Button,
+	Linking,
 } from "react-native";
 import React, { useCallback, useEffect, useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -45,13 +47,13 @@ import { saveForOffline } from "@/middleware/saveForOffline";
 import { clearLocalStorage } from "@/middleware/clearLocalStorage";
 import CheckLocalData from "@/app/CheckLocalData";
 import StyledButton from "@/components/StyledButton";
-import { useRouter } from "expo-router";
+import { Redirect, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { formatVaccineList, isTodayOrTomorrowOrPast } from "@/helper/helper";
 import * as Notifications from "expo-notifications";
 import Events from "@/components/home/Events";
 import EventsShort from "@/components/home/EventsShort";
-import { categoryLabel } from "@/assets/data/data";
+import { appVersion, categoryLabel } from "@/assets/data/data";
 
 interface UserData {
 	id: string;
@@ -81,6 +83,7 @@ type MilestoneList = {
 
 const Home = () => {
 	const [storedUserData, setStoredUserData] = useState<UserData | null>(null);
+	const [updateModalVisible, setUpdateModalVisible] = useState(Boolean);
 	const [refreshing, setRefreshing] = useState(false);
 	const [openBottomSheet, setOpenBottomSheet] = useState<string | null>(null);
 	const [babies, setBabies] = useState<BabyData[]>([]);
@@ -299,6 +302,47 @@ const Home = () => {
 	};
 
 	useEffect(() => {
+		const handleQuery = async () => {
+			try {
+				const versionQuery = query(collection(db, "app_version"));
+				const querySnapshot = await getDocs(versionQuery);
+	
+				// Ensure appVersion is extracted correctly and converted to a string
+				const currentVersion = appVersion?.version ? String(appVersion.version).trim() : "";
+	
+				// Get versions from Firestore and ensure they are formatted correctly
+				const versions = querySnapshot.docs.map((doc) => String(doc.data().version).trim());
+	
+				console.log("App Version:", currentVersion);
+				console.log("Available Versions in Firestore:", versions);
+	
+				// If Firestore versions include the current app version, hide the update modal
+				if (versions.includes(currentVersion)) {
+					console.log("App version is up to date.");
+					setUpdateModalVisible(false);
+				} else {
+					console.log("No matching version found. Prompting update.");
+					setUpdateModalVisible(true);
+				}
+			} catch (error) {
+				console.error("Error fetching version:", error);
+			}
+		};
+	
+		handleQuery();
+	}, [appVersion]); // Ensure it updates when appVersion changes
+	
+
+	// useEffect(() => {
+	// 	const versionQuery = query(
+	// 		collection(db, "app_version"),
+	// 		where("version", "==", appVersion)
+	// 	);
+
+	// 	console.log("Version: ", versionQuery);
+	// }, []);
+
+	useEffect(() => {
 		fetchDataAndAlert();
 		checkOrFetchBabies();
 	}, [milestones, route]);
@@ -371,6 +415,56 @@ const Home = () => {
 		</Modal>
 	);
 
+	const UpdateModal = () => (
+		<Modal
+			animationType="fade"
+			transparent={true}
+			visible={updateModalVisible}
+			onRequestClose={() => setUpdateModalVisible(false)}
+		>
+			<View style={styles.modalOverlay}>
+				<View style={styles.modalContainer}>
+					<TouchableOpacity
+						onPress={() => setUpdateModalVisible(false)}
+						className="absolute top-2 right-2"
+					>
+						<Ionicons
+							name="close-outline"
+							size={24}
+							color="#456B72"
+						/>
+					</TouchableOpacity>
+					<Ionicons
+						name="cloud-download-outline"
+						size={50}
+						color="#456B72"
+						className="text-center"
+					/>
+					<ThemedText type="cardHeader" className="my-3 text-center">
+						A new version of the app is available! Update now to
+						access the latest features and improvements.
+					</ThemedText>
+
+					<TouchableOpacity
+						style={styles.babyButton}
+						onPress={() =>
+							Linking.openURL(
+								"https://drive.google.com/drive/folders/1F2v20pxSYV8LMZ9jGPhawYWSr00CRMwD?usp=sharing"
+							)
+						}
+					>
+						<ThemedText
+							type="default"
+							className="text-white font-bold"
+						>
+							Update
+						</ThemedText>
+					</TouchableOpacity>
+				</View>
+			</View>
+		</Modal>
+	);
+
 	if (loading) {
 		return (
 			<View
@@ -403,6 +497,7 @@ const Home = () => {
 				scrollEnabled={!openBottomSheet} // Disable scrolling when bottom sheet is open
 			>
 				{showModal && <ReminderModal />}
+				{updateModalVisible && <UpdateModal />}
 				{/* HERO IMAGE */}
 				<View style={styles.imageContainer}>
 					<Image
@@ -418,8 +513,12 @@ const Home = () => {
 						<CategoryCard
 							link="/online/(category)/health"
 							icon={healthIcon}
-							title={categoryTitle(`${categoryLabel.english.healthTips}`)}
-							subTitle={categoryTitle(`${categoryLabel.tagalog.healthTips}`)}
+							title={categoryTitle(
+								`${categoryLabel.english.healthTips}`
+							)}
+							subTitle={categoryTitle(
+								`${categoryLabel.tagalog.healthTips}`
+							)}
 							backgroundColor="#5ad5fa66"
 							shapeIcon={hearthIcon}
 							shapePosition={{ top: 0, left: 0 }}
@@ -427,8 +526,12 @@ const Home = () => {
 						<CategoryCard
 							link="/online/(category)/guide"
 							icon={guideIcon}
-							title={categoryTitle(`${categoryLabel.english.guide}`)}
-							subTitle={categoryTitle(`${categoryLabel.tagalog.guide}`)}
+							title={categoryTitle(
+								`${categoryLabel.english.guide}`
+							)}
+							subTitle={categoryTitle(
+								`${categoryLabel.tagalog.guide}`
+							)}
 							backgroundColor="#5a92fa66"
 							shapeIcon={nonagonIcon}
 							shapePosition={{ bottom: 0, left: 0 }}
@@ -436,8 +539,12 @@ const Home = () => {
 						<CategoryCard
 							link="/online/(category)/reminder"
 							icon={reminderIcon}
-							title={categoryTitle(`${categoryLabel.english.reminders}`)}
-							subTitle={categoryTitle(`${categoryLabel.tagalog.reminders}`)}
+							title={categoryTitle(
+								`${categoryLabel.english.reminders}`
+							)}
+							subTitle={categoryTitle(
+								`${categoryLabel.tagalog.reminders}`
+							)}
 							backgroundColor="#ecff8253"
 							shapeIcon={starIcon}
 							shapePosition={{ top: 2, right: 0 }}
@@ -445,8 +552,12 @@ const Home = () => {
 						<CategoryCard
 							link="/online/(category)/appointment"
 							icon={appointmentIcon}
-							title={categoryTitle(`${categoryLabel.english.appointment}`)}
-							subTitle={categoryTitle(`${categoryLabel.tagalog.appointment}`)}
+							title={categoryTitle(
+								`${categoryLabel.english.appointment}`
+							)}
+							subTitle={categoryTitle(
+								`${categoryLabel.tagalog.appointment}`
+							)}
 							backgroundColor="#82ffc555"
 							shapeIcon={circleIcon}
 							shapePosition={{ bottom: 10, right: 10 }}
@@ -545,6 +656,32 @@ const Home = () => {
 
 export default Home;
 
+const stylesUpdate = StyleSheet.create({
+	container: {
+		flex: 1,
+		justifyContent: "center",
+		alignItems: "center",
+	},
+	modalBackground: {
+		flex: 1,
+		justifyContent: "center",
+		alignItems: "center",
+		backgroundColor: "rgba(0, 0, 0, 0.5)", // Semi-transparent background
+	},
+	modalContainer: {
+		width: 300,
+		padding: 20,
+		backgroundColor: "white",
+		borderRadius: 10,
+		alignItems: "center",
+	},
+	modalText: {
+		marginBottom: 15,
+		fontSize: 16,
+		textAlign: "center",
+	},
+});
+
 const styles = StyleSheet.create({
 	imageContainer: {
 		flex: 1,
@@ -601,6 +738,7 @@ const styles = StyleSheet.create({
 		backgroundColor: "rgba(0, 0, 0, 0.5)", // Semi-transparent overlay
 	},
 	modalContainer: {
+		position: "relative",
 		width: 300,
 		padding: 20,
 		backgroundColor: "white",
