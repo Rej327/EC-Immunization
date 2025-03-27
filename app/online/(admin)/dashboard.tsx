@@ -9,6 +9,7 @@ import {
 	TextInput,
 	Image,
 	ScrollView,
+	Linking,
 } from "react-native";
 import React, { useEffect, useState } from "react";
 import { db } from "@/db/firebaseConfig"; // Your Firestore config
@@ -22,6 +23,7 @@ import ScheduleList from "@/components/dashboard/ScheduleList";
 import Toast from "react-native-toast-message";
 import { useDebounce } from "@/helper/helper";
 import ScheduleListNew from "@/components/dashboard/ScheduleListNew";
+import { appVersion } from "@/assets/data/data";
 
 export default function dashboard() {
 	const [parents, setParents] = useState<any[]>([]); // State to store parents data
@@ -34,8 +36,40 @@ export default function dashboard() {
 	const [babyCount, setBabyCount] = useState(0); // State to store the count of babies
 	const [parentCount, setParentCount] = useState(0); // State to store the count of parents
 	const debouncedSearchQuery = useDebounce(searchQuery, 500);
+		const [updateModalVisible, setUpdateModalVisible] = useState(Boolean);
 
 	const route = useRouter();
+
+		useEffect(() => {
+			const handleQuery = async () => {
+				try {
+					const versionQuery = query(collection(db, "app_version"));
+					const querySnapshot = await getDocs(versionQuery);
+		
+					// Ensure appVersion is extracted correctly and converted to a string
+					const currentVersion = appVersion?.version ? String(appVersion.version).trim() : "";
+		
+					// Get versions from Firestore and ensure they are formatted correctly
+					const versions = querySnapshot.docs.map((doc) => String(doc.data().version).trim());
+		
+					console.log("App Version:", currentVersion);
+					console.log("Available Versions in Firestore:", versions);
+		
+					// If Firestore versions include the current app version, hide the update modal
+					if (versions.includes(currentVersion)) {
+						console.log("App version is up to date.");
+						setUpdateModalVisible(false);
+					} else {
+						console.log("No matching version found. Prompting update.");
+						setUpdateModalVisible(true);
+					}
+				} catch (error) {
+					console.error("Error fetching version:", error);
+				}
+			};
+		
+			handleQuery();
+		}, [appVersion]);
 
 	useEffect(() => {
 		const fetchParents = async () => {
@@ -136,6 +170,10 @@ export default function dashboard() {
 		});
 	};
 
+	const handleChildrenRoute = () => {
+		route.push({ pathname: "/online/(dashboard)/childrens" });
+	};
+
 	// Filter parents based on search query
 	const filteredParents =
 		debouncedSearchQuery.trim().length > 0
@@ -150,6 +188,56 @@ export default function dashboard() {
 	const handleSearchChange = (text: any) => {
 		setSearchQuery(text);
 	};
+
+		const UpdateModal = () => (
+			<Modal
+				animationType="fade"
+				transparent={true}
+				visible={updateModalVisible}
+				onRequestClose={() => setUpdateModalVisible(false)}
+			>
+				<View style={styles.modalOverlay}>
+					<View style={styles.modalUpdateContainer}>
+						<TouchableOpacity
+							onPress={() => setUpdateModalVisible(false)}
+							className="absolute top-2 right-2"
+						>
+							<Ionicons
+								name="close-outline"
+								size={24}
+								color="#456B72"
+							/>
+						</TouchableOpacity>
+						<Ionicons
+							name="cloud-download-outline"
+							size={50}
+							color="#456B72"
+							className="text-center"
+						/>
+						<ThemedText type="cardHeader" className="my-3 text-center">
+							A new version of the app is available! Update now to
+							access the latest features and improvements.
+						</ThemedText>
+	
+						<TouchableOpacity
+							style={styles.updateButton}
+							onPress={() =>
+								Linking.openURL(
+									"https://drive.google.com/drive/folders/1F2v20pxSYV8LMZ9jGPhawYWSr00CRMwD?usp=sharing"
+								)
+							}
+						>
+							<ThemedText
+								type="default"
+								className="text-white font-bold"
+							>
+								Update
+							</ThemedText>
+						</TouchableOpacity>
+					</View>
+				</View>
+			</Modal>
+		);
 
 	// If loading, show a loading indicator
 	if (loading) {
@@ -167,6 +255,7 @@ export default function dashboard() {
 			stickyHeaderIndices={[0]}
 		>
 			{/* Search Input (sticky at the top) */}
+			{updateModalVisible && <UpdateModal />}
 			<View style={styles.searchInputContainer}>
 				{/* Sticky container */}
 				<TextInput
@@ -196,23 +285,31 @@ export default function dashboard() {
 						</ThemedText>
 					</View>
 				</View>
-				<View style={styles.countCard} className="relative">
-					<ThemedText
-						className="absolute top-1 left-[5%] text-sm font-bold"
-						type="default"
-					>
-						Childrens
-					</ThemedText>
-					<View style={styles.countLabelImageContainer}>
-						<Image source={countBaby} style={styles.countImage} />
+				<TouchableOpacity
+					onPress={handleChildrenRoute}
+					style={styles.countCard}
+				>
+					<View className="relative">
 						<ThemedText
-							className="ml-[17%] text-2xl font-semibold -mt-1"
-							type="cardTitle"
+							className="absolute top-1 left-[5%] text-sm font-bold"
+							type="default"
 						>
-							{babyCount}
+							Childrens
 						</ThemedText>
+						<View style={styles.countLabelImageContainer}>
+							<Image
+								source={countBaby}
+								style={styles.countImage}
+							/>
+							<ThemedText
+								className="ml-[17%] text-2xl font-semibold -mt-1"
+								type="cardTitle"
+							>
+								{babyCount}
+							</ThemedText>
+						</View>
 					</View>
-				</View>
+				</TouchableOpacity>
 			</View>
 
 			{/* Schedule section */}
@@ -428,6 +525,28 @@ const styles = StyleSheet.create({
 	loadingContainer: {
 		flex: 1,
 		justifyContent: "center",
+		alignItems: "center",
+	},
+	modalOverlay: {
+		flex: 1,
+		justifyContent: "center",
+		alignItems: "center",
+		backgroundColor: "rgba(0, 0, 0, 0.5)", // Semi-transparent overlay
+	},
+	modalUpdateContainer: {
+		position: "relative",
+		width: 300,
+		padding: 20,
+		backgroundColor: "white",
+		borderRadius: 10,
+		alignItems: "center",
+	},
+	updateButton: {
+		backgroundColor: "#456B72",
+		padding: 10,
+		borderRadius: 5,
+		marginVertical: 5,
+		width: "100%",
 		alignItems: "center",
 	},
 });
