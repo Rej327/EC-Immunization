@@ -30,7 +30,7 @@ export default function Childrens() {
 
 	useEffect(() => {
 		const fetchData = async () => {
-      setLoading(true)
+			setLoading(true);
 			try {
 				const babiesRef = collection(db, "babies");
 				let q: Query<DocumentData> = babiesRef;
@@ -48,10 +48,10 @@ export default function Childrens() {
 				);
 				setChildrenData(data);
 			} catch (error) {
-				setLoading(true)
+				setLoading(true);
 			} finally {
-        setLoading(false)
-      }
+				setLoading(false);
+			}
 		};
 		fetchData();
 	}, [selectedBarangay]);
@@ -75,7 +75,7 @@ export default function Childrens() {
 			<View style={styles.sortContainer}>
 				<View style={styles.sortContent}>
 					<ThemedText type="default" className="font-bold">
-						Filter by Barangay:{" "}
+						Select Barangay:{" "}
 					</ThemedText>
 					<Picker
 						selectedValue={selectedBarangay}
@@ -96,12 +96,11 @@ export default function Childrens() {
 				</View>
 			</View>
 			<View style={styles.childContainer}>
-      {loading ? (
-				<View style={styles.loadingContainer}>
-					<ActivityIndicator size="large" color="#456B72" />
-				</View>
-			) : (
-				childrenData.length > 0 ? (
+				{loading ? (
+					<View style={styles.loadingContainer}>
+						<ActivityIndicator size="large" color="#456B72" />
+					</View>
+				) : childrenData.length > 0 ? (
 					childrenData.map((child, index) => (
 						<View key={index} style={styles.childBody}>
 							<ThemedText type="default">
@@ -116,14 +115,13 @@ export default function Childrens() {
 						</View>
 					))
 				) : (
-          <View style={styles.emptyContainer}>
-          <Image source={noData} className="w-16 h-20 mb-2" />
-          <ThemedText type="default" style={styles.emptyText}>
-            No Data Available
-          </ThemedText>
-        </View>
-				)
-			)}
+					<View style={styles.emptyContainer}>
+						<Image source={noData} className="w-16 h-20 mb-2" />
+						<ThemedText type="default" style={styles.emptyText}>
+							No Data Available
+						</ThemedText>
+					</View>
+				)}
 			</View>
 		</ScrollView>
 	);
@@ -161,7 +159,7 @@ const styles = StyleSheet.create({
 		borderColor: "#d6d6d6",
 		marginBottom: 10,
 	},
-  loadingContainer: {
+	loadingContainer: {
 		flex: 1,
 		justifyContent: "center",
 		alignItems: "center",
